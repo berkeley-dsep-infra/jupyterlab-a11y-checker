@@ -4,14 +4,27 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { INotebookTracker, Notebook, NotebookPanel} from '@jupyterlab/notebook';
+import { INotebookTracker, Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { IDisposable } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-// import ColorThief from 'colorthief';
+import { PageConfig } from '@jupyterlab/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
+
 import Tesseract from 'tesseract.js';
+import axios from 'axios';
+import { createSpinner, stopSpinner } from './components/Spinner';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+
+NProgress.configure({
+  parent: '#progress-container',
+  showSpinner: false,            
+  speed: 300,                 
+  minimum: 0.1                 
+});
 
 function calculateContrast(foregroundHex: string, backgroundHex: string): number {
 
@@ -144,7 +157,6 @@ function getImageTransparency(imgString: string, notebookPath: string): Promise<
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous'; // Needed for CORS-compliant images
-
     //distunguish between local or hosted url
     try {
       new URL(imgString);
@@ -205,6 +217,8 @@ async function checkHtmlNoAccessIssues(htmlString: string, myPath: string, cellC
       if (!img.hasAttribute("alt") || img.getAttribute("alt") === "") {
         accessibilityTests.push("Alt");
       }
+
+      // console.log(img); // prints out urls from html with no alt text
     }
 
     const transparencyPromises = Array.from(images).map((img: HTMLImageElement) => getImageTransparency(img.src, myPath));
@@ -228,17 +242,18 @@ async function checkMDNoAccessIssues(mdString: string, myPath: string, cellColor
   
     let match: RegExpExecArray | null;
     const imageUrls: string[] = [];
-  
+
     while ((match = allImagesRegex.exec(mdString)) !== null) {
         const imageUrl = match[1];
         if (imageUrl) {
             imageUrls.push(imageUrl);
         }
     }
-  
+
     if (imageNoAltRegex.test(mdString)){
       accessibilityTests.push("Alt");
     }
+    
     
     const transparencyPromises = Array.from(imageUrls).map((i: string) => getImageTransparency(i, myPath));
     const transparency = await Promise.all(transparencyPromises);
@@ -247,7 +262,7 @@ async function checkMDNoAccessIssues(mdString: string, myPath: string, cellColor
     const colorContrast = await Promise.all(colorContrastPromises);
   
     accessibilityTests = [...accessibilityTests, ...transparency.map(String), ...colorContrast.map(String)];
-  
+
     resolve(accessibilityTests);
   });
 }
@@ -257,8 +272,7 @@ async function checkTextCellForImageWithAccessIssues(cell: Cell, myPath: string)
   try{
     if(cell.model.type == 'markdown'){
       cell = cell as MarkdownCell;
-      const cellText = cell.model.toJSON().source.toString();
-      
+      const cellText = cell.model.toJSON().source.toString();   
       const markdownNoAlt = await checkMDNoAccessIssues(cellText, myPath, document.body.style.getPropertyValue("--fill-color"));
       const htmlNoAlt = await checkHtmlNoAccessIssues(cellText, myPath, document.body.style.getPropertyValue("--fill-color"));
       var issues = htmlNoAlt.concat(markdownNoAlt)
@@ -299,6 +313,7 @@ async function checkAllCells(notebookContent: Notebook, altCellList: AltCellList
     if (isEnabled()){
       if(firstTime){
         //Image transparency, contrast, and alt checking
+        //console.log(cell.model.sharedModel.getSource());
         applyVisualIndicator(altCellList, cell, []);
         const mdCellIssues = await checkTextCellForImageWithAccessIssues(cell, myPath);
         const codeCellHasTransparency = await checkCodeCellForImageWithAccessIssues(cell, myPath);
@@ -390,6 +405,7 @@ function applyVisualIndicator(altCellList: AltCellList, cell: Cell, listIssues: 
   
   altCellList.removeCell(cell.model.id);
 
+
   //remove all indicators (red circles) on the given cell before adding
   //a new one to remove possible duplicates
   while(document.getElementById(indicatorId)){
@@ -401,21 +417,21 @@ function applyVisualIndicator(altCellList: AltCellList, cell: Cell, listIssues: 
   for (let i = 0; i < listIssues.length; i++) {
     //cases for all 4 types of errors
     if (listIssues[i].slice(0,7) == "heading") { //heading h1 h1
-      altCellList.addCell(cell.model.id, "Heading format: expecting " + listIssues[i].slice(11, 13) + ", got " + listIssues[i].slice(8, 10));
+      altCellList.addCell(cell.model.id, "Heading format: expecting " + listIssues[i].slice(11, 13) + ", got " + listIssues[i].slice(8, 10), "heading");
       applyIndic = true;
     } else if(listIssues[i].split(" ")[1] == "contrast"){
       var score = Number(listIssues[i].split(" ")[0]);
       if (score < 4.5) {
-        altCellList.addCell(cell.model.id, "Cell Error: Text Contrast " + listIssues[i].split(" ")[2]);
+        altCellList.addCell(cell.model.id, "Cell Error: Text Contrast " + listIssues[i].split(" ")[2], "contrast");
         applyIndic = true;
       }
     } else if (listIssues[i] == "Alt") {
-      altCellList.addCell(cell.model.id, "Cell Error: Missing Alt Tag");
+      altCellList.addCell(cell.model.id, "Cell Error: Missing Alt Tag", "alt");
       applyIndic = true;
     } else {
       var score = Number(listIssues[i].split(" ")[0]);
       if (score < 9) {
-        altCellList.addCell(cell.model.id, "Image Err: High Image Transparency (" + ((10-score)*10).toFixed(2) + "%)");
+        altCellList.addCell(cell.model.id, "Image Err: High Image Transparency (" + ((10-score)*10).toFixed(2) + "%)", "transparency");
         applyIndic = true;
       }
     }
@@ -470,6 +486,75 @@ async function addToolbarButton(labShell: ILabShell, altCellList: AltCellList, n
 
   return button;
 }
+
+async function pullModel(modelName: string, userURL: string): Promise<boolean> {
+  try {
+    console.log("Pulling ", modelName);
+    NProgress.start();
+
+    const response = await axios.post(
+      userURL + 'api/pull',
+      { name: modelName, stream: false },
+      { headers: { 'Content-Type': 'application/json' }, 
+
+        onDownloadProgress: (progressEvent) => {
+          if(progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            NProgress.set(percentCompleted / 100);
+          }
+        } 
+      }
+    );
+    NProgress.done();
+    return response.data.status === "success";
+  } catch (error) {
+    console.error(`Error pulling model ${modelName}:`, error);
+    NProgress.done();
+    return false;
+  }
+}
+
+async function fetchImageAsBase64(imageUrl: string): Promise<string> {
+  const response = await axios.get(imageUrl, { responseType: 'blob' });
+  const imageBlob = response.data;
+  
+  // Create a FileReader to read the image as base64
+  const base64String = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]); // Strip off the data URL prefix (e.g., "data:image/jpeg;base64,")
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(imageBlob);
+  });
+
+  return base64String;
+}
+
+async function sendImageToModel(imageData: string, userURL: string): Promise<string> {
+  try {
+      let encodedImage = imageData.startsWith("data:image") ? imageData.split(",")[1] : await fetchImageAsBase64(imageData);
+      const payload = {
+          model: "llava:7b",
+          prompt: "What can the user understand from looking at this image, describe it up to 240 characters.",
+          stream: false,
+          images: [encodedImage]
+      };
+      console.log("Alt-text generating....");
+      // For Hub
+      const response = await axios.post(userURL + "api/generate", payload, {
+          headers: { 'Content-Type': 'application/json' }
+      });
+
+      console.log("Response: ", response);
+      let result = response.data.response.trim() + " (This is an alt-text generated by a language model)"
+      return result;
+  } catch (error) {
+      console.error('Error fetching or sending image:', error);
+      return "Error generating alt-text for image";
+  }
+};
 
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab_accessibility:plugin',
@@ -533,7 +618,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         notebookTracker.currentWidget?.context.ready.then(() => {
           try{
             console.log("trying to add toolbar button");
-            console.log(notebookTracker.currentWidget!)
+            // console.log(notebookTracker.currentWidget!)
             addToolbarButton(labShell, altCellList, notebookPanel, () => isEnabled, toggleEnabled, notebookTracker.currentWidget!.context.path);
             console.log("able to add toolbar button");
           } catch {
@@ -552,25 +637,81 @@ class AltCellList extends Widget {
   private _listCells: HTMLElement;
   private _cellMap: Map<string, HTMLElement[]>;
   private _notebookTracker: INotebookTracker;
+  private _enableAltText: boolean;
+  private _ollamaDownloaded: boolean;
+  private _userOllamaUrl: string;
 
   constructor(notebookTracker: INotebookTracker) {
     super();
     this._cellMap = new Map<string, HTMLElement[]>();
     this._listCells = document.createElement('div');
     this._notebookTracker = notebookTracker;
+    this._enableAltText = false;
+    this._ollamaDownloaded = false;
+    this._listCells.style.maxHeight = "100vh";
+    this._listCells.style.overflowY = "auto";
+    this._userOllamaUrl = (ServerConnection.makeSettings().baseUrl || PageConfig.getBaseUrl()) + "ollama/";
 
     let title = document.createElement('h2');
     title.innerHTML = "Cells with Accessibility Issues";
     title.style.margin = '15px';
 
+    // Alt-text Toggle Button
+    let enableAltTextContainer = document.createElement('div');
+    enableAltTextContainer.id = "progress-container";
+    enableAltTextContainer.style.display = 'flex';
+    enableAltTextContainer.style.flexDirection = 'column';
+
+    let toggle = document.createElement('div');
+    toggle.style.display = 'flex';
+    toggle.style.margin = '10px';
+
+    let altTextToggle = document.createElement('input');
+    altTextToggle.type = "checkbox";
+    altTextToggle.id = "altTextToggle";
+    altTextToggle.checked = this._enableAltText;
+
+    let altTextToggleLabel = document.createElement("label");
+    altTextToggleLabel.htmlFor = "altTextToggle";
+    altTextToggleLabel.textContent = "Enable alt-text auto generation";
+
+    altTextToggle.addEventListener("change", () => {
+      this.handleAltTextToggle(altTextToggle, altTextToggleLabel);
+    });
+
     this.node.appendChild(title);
+
+    enableAltTextContainer.appendChild(toggle);
+    toggle.appendChild(altTextToggle);
+    toggle.appendChild(altTextToggleLabel);
+    this.node.appendChild(enableAltTextContainer);
+
     this.node.appendChild(this._listCells);
   }
 
+  async handleAltTextToggle(altTextToggle: HTMLInputElement, altTextToggleLabel: HTMLElement) {
+    this._enableAltText = altTextToggle.checked;
+    if (!this._ollamaDownloaded) {
+      altTextToggleLabel.textContent = "Please wait";
+      const status = await pullModel("llava:7b", this._userOllamaUrl);
+      if (status) {
+        this._ollamaDownloaded = true;
+        altTextToggleLabel.textContent = "Alt-text auto generation (Enabled)";
+      } else {
+        altTextToggle.checked = false;
+        altTextToggleLabel.textContent = "Alt-text auto generation (Failed)";
+      }
+    }
+    else {
+      altTextToggleLabel.textContent = "Alt-text auto generation " + (this._enableAltText ? "(Enabled)" : "(Disabled)");
+    }
+  }
+
   //add a button that would navigate to the cell having the issue
-  addCell(cellId: string, buttonContent: string): void {
+  addCell(cellId: string, buttonContent: string, buttonId: string): void {
     const listItemWrapper = document.createElement('div');
-    listItemWrapper.id = 'cell-' + cellId + "_" + buttonContent;
+    // listItemWrapper.id = 'cell-' + cellId + "_" + buttonContent;
+    listItemWrapper.id = 'cell-' + cellId + "_" + buttonId;
 
     const listItem = document.createElement('div');
     listItem.style.display = 'flex';
@@ -590,7 +731,7 @@ class AltCellList extends Widget {
     button.textContent = buttonContent;
     
     button.addEventListener('click', () => {
-      this.scrollToCell(cellId);
+      this.scrollToCell(cellId, buttonId, this._enableAltText);
     });
 
     //more information icon
@@ -598,6 +739,40 @@ class AltCellList extends Widget {
     infoIcon.innerHTML = '&#9432;';
     infoIcon.style.cursor = 'pointer';
     infoIcon.style.marginRight = '5px';
+
+    const spinner = document.createElement('div');
+    spinner.id = "spinner-" + cellId;
+    spinner.style.display = 'none';
+    spinner.style.height = '50px';
+
+    //alt-text
+    const altTextDiv = document.createElement('div');
+    altTextDiv.style.display = 'none'
+
+    const altTextField = document.createElement('textarea');
+    altTextField.style.display = 'flex';
+    altTextField.style.border = '1px solid black';
+    altTextField.style.margin = '5px';
+    altTextField.style.marginLeft = '10px';
+    altTextField.style.height = '100px';
+    altTextField.style.width = '100%';
+    altTextField.style.flexShrink = '1';
+    altTextField.style.overflow = 'auto';
+    altTextField.value = '';
+    altTextField.style.fontSize = '13px';
+    altTextField.style.fontFamily = "Arial";
+
+    const altTextButton = document.createElement('button');
+    altTextButton.classList.add("jp-toast-button");
+    altTextButton.classList.add("jp-mod-small");
+    altTextButton.style.height = '20px';
+    altTextButton.style.margin = '5px';
+    altTextButton.textContent = "Apply";
+    altTextButton.addEventListener('click', () => {
+      this.applyAltText(cellId, altTextField.value);
+    });
+
+
 
     //dropdown box
     const dropdown = document.createElement('div');
@@ -631,6 +806,7 @@ class AltCellList extends Widget {
     infoIcon.addEventListener('click', () => {
         dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
     });
+    
 
     var add = true;
     //check if this error already exists in the running map, if so do not add it
@@ -651,19 +827,39 @@ class AltCellList extends Widget {
     if (add) {
       listItem.appendChild(button);
       listItem.appendChild(infoIcon);
-      listItemWrapper.appendChild(listItem)
+      listItemWrapper.appendChild(listItem);
       listItemWrapper.appendChild(dropdown);
+      
+      altTextDiv.appendChild(altTextField);
+      altTextDiv.appendChild(altTextButton);
+      listItemWrapper.appendChild(altTextDiv);
+
+      listItemWrapper.appendChild(spinner);
+      
       this._listCells.appendChild(listItemWrapper);
     }
 
     // this.showOnlyVisibleCells();
   }
 
+  updateCell(cellId: string, altTextContent: string): void {
+    const listItem = this._cellMap.get(cellId);
+    if (listItem != null) {
+      // Need to change logic so that even if we change the DOM ordering it works properly
+      // Get altTextDiv
+      const altTextDiv = listItem[0].querySelectorAll('div')[2];
+      // Get altTextField
+      const altTextField = altTextDiv.querySelectorAll('textarea')[0];
+      altTextField.value = altTextContent;
+      altTextDiv.style.display = 'flex';
+    }
+  }
+
   //remove cell from sidebar and from running map
   removeCell(cellId: string): void {
     //get list of error buttons related to this cell
     const listItem = this._cellMap.get(cellId);
-    if (listItem != null){
+    if (listItem != null) {
       listItem.forEach((btn) => {
         for (let item of this._listCells.children) {
           if (btn.id == item.id) {
@@ -677,8 +873,83 @@ class AltCellList extends Widget {
     }
   }
 
+  applyAltText(cellId: string, altTextContent: string): void {
+
+    const notebookPanel = this._notebookTracker.currentWidget;
+    const notebook = notebookPanel!.content;
+
+    for (let i = 0; i < notebook.widgets.length; i++) {
+      const cell = notebook.widgets[i];
+      if (cell.model.id === cellId) {
+        if (cell.model.type == "markdown") {
+          const cellContent = cell.model.sharedModel.getSource();
+          const markdownImgRegex = /!\[([^\]]*)?\]\((.*?)\)/g;
+          const htmlImgRegex = /<img\s+([^>]*?)(?=\s*src=['"][^'"]*['"][^>]*)([^>]*?)>/g;
+
+          const updatedMDContent = cellContent.replace(markdownImgRegex, (_, altText, url) => {
+            // Set new alt text
+            console.log(`Updating alt text of image: ${url}`);
+            // New lines parsed into MD alt text doesn't render, so remove all new lines
+            altTextContent = altTextContent.replace(/[\r\n]+/g, ' ');
+            return `![${altTextContent}](${url})`; 
+          });
+          
+          // If content changed, update the cell model
+          if (updatedMDContent !== cellContent) {
+            cell.model.sharedModel.setSource(updatedMDContent);
+          }
+
+          const updatedHTMLContent = cellContent.replace(htmlImgRegex, (match, beforeSrc, afterSrc) => {
+            // Check if the img tag already has an alt attribute
+            if (match.includes('alt=')) {
+                // If alt exists, replace its value
+                return match.replace(/(alt=['"][^'"]*['"])/, `alt="${altTextContent}"`);
+            } else {
+                // If alt does not exist, add it after the src attribute
+                return `<img ${beforeSrc} alt="${altTextContent}" ${afterSrc}>`;
+            }
+          });
+          
+          // If content changed, update the cell model
+          if (updatedHTMLContent !== cellContent) {
+            cell.model.sharedModel.setSource(updatedHTMLContent);
+          }
+        }    
+        // Images generated by external libraries - Currently Working on it 
+        else {
+          const markdownCell = {
+            cell_type: 'markdown',
+            metadata: {},
+            source: "Dynamically added Cell",
+            trusted: true,
+          };
+          // Somehow crashes
+          notebook.model?.sharedModel.insertCell(0, markdownCell);
+          // notebook.model?.sharedModel.addCell(markdownCell);
+        }
+      }
+    }
+  }
+
+  async generateAltText(imageData: string, cellId: string): Promise<void> {
+    const target = document.getElementById("spinner-" + cellId);
+    if (target) {
+      target.style.display = 'block';
+      const spinner = createSpinner(target);
+      try {
+        const altText = await sendImageToModel(imageData || " ", this._userOllamaUrl);
+        this.updateCell(cellId, altText);
+      } catch (error) {
+          console.error("Error generating alt text:", error);
+      } finally {
+          stopSpinner(spinner);
+          target.style.display = 'none';
+      }
+    }
+  }
+
   //scroll to cell once clicked
-  scrollToCell(cellId: string): void {
+  scrollToCell(cellId: string, buttonId: string, altTextEnabled: boolean): void {
     const notebookPanel = this._notebookTracker.currentWidget;
     const notebook = notebookPanel!.content;
     
@@ -686,7 +957,7 @@ class AltCellList extends Widget {
       const cell = notebook.widgets[i];
       if (cell.model.id === cellId) {
         cell.node.scrollIntoView({ behavior: 'auto', block: 'center' });
-
+        
         //flash the cell in a yellow color briefly when higlighted
         const originalStyle = cell.node.style.transition;
         cell.node.style.transition = 'background-color 0.5s ease';
@@ -695,6 +966,17 @@ class AltCellList extends Widget {
           cell.node.style.backgroundColor = '';
           cell.node.style.transition = originalStyle;
         }, 800);
+
+        // If issue is alt-text
+        if (buttonId == "alt") {
+          if (!altTextEnabled) this.updateCell(cell.model.id, "");
+          else {
+            const imageSrc = cell.node.querySelector('img')?.src;
+            if (imageSrc) {
+              this.generateAltText(imageSrc, cell.model.id);
+            }
+          }
+        }
       }
     }
   }

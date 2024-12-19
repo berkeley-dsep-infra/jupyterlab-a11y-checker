@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab-a11y-checker",
-  "version": "0.1.2",
+  "version": "0.1.4-alpha-1",
   "description": "A JupyterLab extension.",
   "keywords": [
     "jupyter",
@@ -13,7 +13,7 @@
   },
   "license": "BSD-3-Clause",
   "author": {
-    "name": "Shreyas Rana",
+    "name": "Shreyas Rana, Chanbin Park",
     "email": "me@test.com"
   },
   "files": [
@@ -63,11 +63,15 @@
     "@jupyterlab/ui-components": "^4.2.1",
     "@lumino/disposable": "^2.1.2",
     "@lumino/widgets": "^2.3.1",
+    "@types/nprogress": "^0.2.3",
+    "axios": "^1.7.7",
     "colorthief": "^2.4.0",
+    "nprogress": "^0.2.0",
+    "spin.js": "^4.1.2",
     "tesseract.js": "^5.1.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0",
+    "@jupyterlab/builder": "^4.3.0",
     "@types/json-schema": "^7.0.11",
     "@types/node": "^20.12.12",
     "@types/react": "^18.0.26",
@@ -179,5 +183,6 @@
       "selector-no-vendor-prefix": null,
       "value-no-vendor-prefix": null
     }
-  }
+  },
+  "packageManager": "yarn@4.5.1"
 }

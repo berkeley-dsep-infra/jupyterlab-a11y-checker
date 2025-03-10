@@ -1,5 +1,247 @@
-/*
-    See the JupyterLab Developer Guide for useful CSS Patterns:
+.jp-A11yPanel {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    overflow: auto;
+}
 
-    https://jupyterlab.readthedocs.io/en/stable/developer/css.html
-*/
+.jp-A11yPanel-header {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: black; /* JupyterLab blue */
+    margin-bottom: 16px;
+}
+
+.jp-A11yPanel-issues {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.jp-A11yPanel-rules {
+    color: var(--jp-warn-color0);
+    font-size: 0.9em;
+    margin: 12px 0;
+    padding: 8px;
+    background-color: var(--jp-layout-color2);
+    border-radius: 4px;
+}
+
+.jp-A11yPanel-label {
+    font-weight: 600;
+    color: black;
+}
+
+.jp-A11yPanel-suggestion {
+    background-color: var(--jp-layout-color2);
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 0.9em;
+    color: black;
+    text-align: left; /* Left align text */
+    font-family: 'Consolas', 'Courier New', Courier, monospace; /* Change to a different code font */
+}
+
+.jp-Button {
+    width: 100%;
+    margin-bottom: 8px;
+    transition: background-color 0.2s ease;
+    background-color: #0072B8; /* JupyterLab blue */
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.jp-Button:hover {
+    background-color: #005f8c; /* Darker blue for hover */
+}
+
+.jp-Button:disabled {
+    background-color: var(--jp-layout-color3);
+    cursor: not-allowed;
+}
+
+
+
+#a11y-sidebar {
+    min-width: 300px;
+    max-width: 600px;
+}
+
+.jp-AccessibilityIcon {
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* Add your icon as a background image or use JupyterLab's built-in icons */
+}
+
+.jp-A11yPanel-buttonContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+}
+
+.jp-A11yPanel-infoIcon {
+    cursor: pointer;
+    color: #0072B8;
+    font-size: 18px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.jp-A11yPanel-infoIcon:hover {
+    background-color: rgba(0, 114, 184, 0.1);
+}
+
+.jp-A11yPanel-popup {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid var(--jp-border-color1);
+    border-radius: 4px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-width: 300px;
+    margin-top: 4px;
+}
+
+.jp-A11yPanel-popup-visible {
+    display: block;
+}
+
+.jp-A11yPanel-popupDetail {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-A11yPanel-popupDetail:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.jp-A11yPanel-popupDetail a {
+    color: #0072B8;
+    text-decoration: none;
+}
+
+.jp-A11yPanel-popupDetail a:hover {
+    text-decoration: underline;
+}
+
+.jp-A11yPanel-suggestionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.jp-A11yPanel-suggestionTop {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-top: 12px;
+    position: relative;
+}
+
+.jp-A11yPanel-explanationIcon {
+    cursor: pointer;
+    color: #0072B8;
+    font-size: 18px;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.jp-A11yPanel-explanationPopup {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid var(--jp-border-color1);
+    border-radius: 4px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-width: 300px;
+    margin-top: 4px;
+}
+
+.jp-A11yPanel-explanationPopup-visible {
+    display: block;
+}
+
+.jp-A11yPanel-explanationPopupDetail {
+    margin-bottom: 12px;
+}
+
+.jp-A11yPanel-controls {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.jp-Icon.jp-CheckIcon {
+    width: 16px;
+    height: 16px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+}
+
+.jp-Icon.jp-ChevronIcon {
+    width: 16px;
+    height: 16px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>');
+    transition: transform 0.2s ease;
+}
+
+.jp-A11yPanel-explanationPopup-visible ~ .jp-A11yPanel-explanationButton .jp-ChevronIcon {
+    transform: rotate(180deg);
+}
+
+.jp-A11yPanel-explanationText {
+    color: #0072B8;
+    font-size: 0.9em;
+}
+
+.jp-text-button {
+    color: black;
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 2px;
+    width: 100%;
+}
+
+.jp-text-button:hover {
+    text-decoration: underline;
+}
+
+.jp-level1 {
+    font-size: 1.2em;
+}
+.jp-level2 {
+    margin-left: 20px; /* Adds indentation */
+}
+.jp-level3 {
+    margin-left: 40px; /* Adds indentation */
+}
+.jp-level4 {
+    margin-left: 60px; /* Adds indentation */
+}

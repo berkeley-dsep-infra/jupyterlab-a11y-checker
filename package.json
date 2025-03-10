@@ -53,6 +53,9 @@
     },
     "dependencies": {
         "@jupyterlab/application": "^4.0.0",
+        "@jupyterlab/notebook": "^4.3.5",
+        "axe-core": "^4.10.3",
+        "axios": "^1.8.2",
         "yarn": "^1.22.22"
     },
     "devDependencies": {

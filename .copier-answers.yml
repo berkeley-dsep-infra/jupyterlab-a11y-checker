@@ -1,0 +1,15 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.3.8
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: ''
+author_name: Chanbin Park
+has_binder: false
+has_settings: false
+kind: frontend
+labextension_name: a11y-checker
+project_short_description: A JupyterLab extension that checks and suggests fixes for
+    a11y issues.
+python_name: a11y_checker
+repository: https://github.com/Chanbinski/a11y-checker
+test: false
+

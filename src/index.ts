@@ -136,8 +136,8 @@ class CellIssueWidget extends Widget {
                             <div>Locate</div>
                         </button>
                         <button class="jp-Button2 suggest-button" style="display: none;">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                            <div>Get AI Suggestions</div>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="#fff" d="M19 19a1 1 0 0 1 .117 1.993L19 21h-7a1 1 0 0 1-.117-1.993L12 19zm.631-14.632a2.5 2.5 0 0 1 0 3.536L8.735 18.8a1.5 1.5 0 0 1-.44.305l-3.804 1.729c-.842.383-1.708-.484-1.325-1.326l1.73-3.804a1.5 1.5 0 0 1 .304-.44L16.096 4.368a2.5 2.5 0 0 1 3.535 0m-2.12 1.414L6.677 16.614l-.589 1.297l1.296-.59L18.217 6.49a.5.5 0 1 0-.707-.707M6 1a1 1 0 0 1 .946.677l.13.378a3 3 0 0 0 1.869 1.87l.378.129a1 1 0 0 1 0 1.892l-.378.13a3 3 0 0 0-1.87 1.869l-.129.378a1 1 0 0 1-1.892 0l-.13-.378a3 3 0 0 0-1.869-1.87l-.378-.129a1 1 0 0 1 0-1.892l.378-.13a3 3 0 0 0 1.87-1.869l.129-.378A1 1 0 0 1 6 1m0 3.196A5 5 0 0 1 5.196 5q.448.355.804.804q.355-.448.804-.804A5 5 0 0 1 6 4.196"/></g></svg>                            
+                          <div>Get AI Suggestions</div>
                         </button>
                     </div>
                     <div class="suggestion-container" style="display: none;">
@@ -245,7 +245,7 @@ class A11yMainPanel extends Widget {
     private categoriesContainer: HTMLElement | null = null;
     private currentNotebook: NotebookPanel | null = null;
     private noticeContent: HTMLElement | null = null;
-    private aiToggleButton: HTMLElement | null = null;
+    private aiToggleButton: HTMLButtonElement | null = null;
     private aiEnabled: boolean = false;
 
     constructor() {
@@ -267,7 +267,7 @@ class A11yMainPanel extends Widget {
                     <div class="notice-header">
                         <div class="notice-title">
                             <svg class="icon chevron-down" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-                            Notice: Known cell navigation error
+                            <strong>Notice: Known cell navigation error </strong>
                         </div>
                         <button class="close-button">✕</button>
                     </div>
@@ -282,10 +282,12 @@ class A11yMainPanel extends Widget {
                 </div>
                 <h1 class="main-title">Accessibility Checker</h1>
                 <div class="controls-container">
-                    <button class="control-button ai-toggle">Use AI : Disabled</button>
+                    <button class="control-button ai-toggle">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" color="#fff"><path d="M15.5 11.5a3.5 3.5 0 1 1-7 0a3.5 3.5 0 0 1 7 0"/><path d="M21 13.6q.474-.132 1-.133V9.533c-2.857 0-4.714-3.103-3.268-5.566L15.268 2c-1.464 2.494-5.07 2.494-6.534 0L5.27 3.967C6.716 6.43 4.857 9.533 2 9.533v3.934c2.857 0 4.714 3.103 3.268 5.566L8.732 21A3.76 3.76 0 0 1 12 19.129"/><path d="m18.5 15l.258.697c.338.914.507 1.371.84 1.704c.334.334.791.503 1.705.841L22 18.5l-.697.258c-.914.338-1.371.507-1.704.84c-.334.334-.503.791-.841 1.705L18.5 22l-.258-.697c-.338-.914-.507-1.371-.84-1.704c-.334-.334-.791-.503-1.705-.841L15 18.5l.697-.258c.914-.338 1.371-.507 1.704-.84c.334-.334.503-.791.841-1.705z"/></g></svg>                        
+                      Use AI : Disabled
+                    </button>
                     <button class="control-button analyze">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M19.8 18.4L14 10.67V6.5l1.35-1.69c.26-.33.03-.81-.39-.81H9.04c-.42 0-.65.48-.39.81L10 6.5v4.17L4.2 18.4c-.49.66-.02 1.6.8 1.6h14c.82 0 1.29-.94.8-1.6z"/></svg>
-                        Analyze Notebook
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.456 3.75v5.09a3 3 0 0 1-.557 1.742l-1.736 2.436M9.456 3.75h-1.65m1.65 0h5.088m0 0v5.09a3 3 0 0 0 .557 1.742l1.736 2.436M14.544 3.75h1.65m-9.031 9.268l-2.378 3.337a2.465 2.465 0 0 0 2.007 3.895h10.416a2.465 2.465 0 0 0 2.007-3.895l-2.378-3.337m-9.674 0h9.674"/></svg>                        Analyze Notebook
                     </button>
                 </div>
                 <div class="categories-container"></div>
@@ -326,7 +328,13 @@ class A11yMainPanel extends Widget {
             if (!this.aiEnabled && !isModelPulled) {
                 // First time enabling - need to pull model
                 if (this.aiToggleButton) {
-                    this.aiToggleButton.textContent = 'Use AI : Please wait...';
+                    this.aiToggleButton.innerHTML = `
+                        <svg class="icon loading" viewBox="0 0 24 24">
+                            <path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8z"/>
+                        </svg>
+                        Please wait...
+                    `;
+                    this.aiToggleButton.disabled = true;
                 }
                 
                 try {
@@ -338,20 +346,22 @@ class A11yMainPanel extends Widget {
                     // Only switch to enabled when model is successfully pulled
                     this.aiEnabled = true;
                     if (this.aiToggleButton) {
-                        this.aiToggleButton.textContent = 'Use AI : Enabled';
+                        this.aiToggleButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" color="#fff"><path d="M15.5 11.5a3.5 3.5 0 1 1-7 0a3.5 3.5 0 0 1 7 0"/><path d="M21 13.6q.474-.132 1-.133V9.533c-2.857 0-4.714-3.103-3.268-5.566L15.268 2c-1.464 2.494-5.07 2.494-6.534 0L5.27 3.967C6.716 6.43 4.857 9.533 2 9.533v3.934c2.857 0 4.714 3.103 3.268 5.566L8.732 21A3.76 3.76 0 0 1 12 19.129"/><path d="m18.5 15l.258.697c.338.914.507 1.371.84 1.704c.334.334.791.503 1.705.841L22 18.5l-.697.258c-.914.338-1.371.507-1.704.84c-.334.334-.503.791-.841 1.705L18.5 22l-.258-.697c-.338-.914-.507-1.371-.84-1.704c-.334-.334-.791-.503-1.705-.841L15 18.5l.697-.258c.914-.338 1.371-.507 1.704-.84c.334-.334.503-.791.841-1.705z"/></g></svg> Use AI : Enabled`;
+                        this.aiToggleButton.disabled = false;
                     }
                 } catch (error) {
                     console.error('Failed to pull model:', error);
                     // Keep disabled on failure
                     if (this.aiToggleButton) {
-                        this.aiToggleButton.textContent = 'Use AI : Failed to load model';
+                        this.aiToggleButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" color="#fff"><path d="M15.5 11.5a3.5 3.5 0 1 1-7 0a3.5 3.5 0 0 1 7 0"/><path d="M21 13.6q.474-.132 1-.133V9.533c-2.857 0-4.714-3.103-3.268-5.566L15.268 2c-1.464 2.494-5.07 2.494-6.534 0L5.27 3.967C6.716 6.43 4.857 9.533 2 9.533v3.934c2.857 0 4.714 3.103 3.268 5.566L8.732 21A3.76 3.76 0 0 1 12 19.129"/><path d="m18.5 15l.258.697c.338.914.507 1.371.84 1.704c.334.334.791.503 1.705.841L22 18.5l-.697.258c-.914.338-1.371.507-1.704.84c-.334.334-.503.791-.841 1.705L18.5 22l-.258-.697c-.338-.914-.507-1.371-.84-1.704c-.334-.334-.791-.503-1.705-.841L15 18.5l.697-.258c.914-.338 1.371-.507 1.704-.84c.334-.334.503-.791.841-1.705z"/></g></svg> Use AI : Failed to load model`;
+                        this.aiToggleButton.disabled = false;
                     }
                 }
             } else {
                 // Model already pulled or we're just toggling between states
                 this.aiEnabled = !this.aiEnabled;
                 if (this.aiToggleButton) {
-                    this.aiToggleButton.textContent = `Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
+                    this.aiToggleButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" color="#fff"><path d="M15.5 11.5a3.5 3.5 0 1 1-7 0a3.5 3.5 0 0 1 7 0"/><path d="M21 13.6q.474-.132 1-.133V9.533c-2.857 0-4.714-3.103-3.268-5.566L15.268 2c-1.464 2.494-5.07 2.494-6.534 0L5.27 3.967C6.716 6.43 4.857 9.533 2 9.533v3.934c2.857 0 4.714 3.103 3.268 5.566L8.732 21A3.76 3.76 0 0 1 12 19.129"/><path d="m18.5 15l.258.697c.338.914.507 1.371.84 1.704c.334.334.791.503 1.705.841L22 18.5l-.697.258c-.914.338-1.371.507-1.704.84c-.334.334-.503.791-.841 1.705L18.5 22l-.258-.697c-.338-.914-.507-1.371-.84-1.704c-.334-.334-.791-.503-1.705-.841L15 18.5l.697-.258c.914-.338 1.371-.507 1.704-.84c.334-.334.503-.791.841-1.705z"/></g></svg> Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
                 }
             }
             
@@ -377,32 +387,52 @@ class A11yMainPanel extends Widget {
     private async analyzeCurrentNotebook() {
         if (!this.currentNotebook || !this.categoriesContainer) return;
         
-        this.categoriesContainer.innerHTML = '';
-        console.log('Analyzing current notebook');
-        const issues = await analyzeCellsAccessibility(this.currentNotebook);
+        const analyzeButton = this.node.querySelector('.analyze') as HTMLButtonElement;
+        const originalContent = analyzeButton.innerHTML;
+        try {
+          // Update button to show loading state
+          analyzeButton.innerHTML = `
+            <svg class="icon loading" viewBox="0 0 24 24">
+                <path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8z"/>
+            </svg>
+            Please wait...
+          `;
+          analyzeButton.disabled = true; // Disable button while analyzing
+        
+          this.categoriesContainer.innerHTML = '';
+          console.log('Analyzing current notebook');
 
-        if (issues.length === 0) {
-            this.categoriesContainer.innerHTML = '<div class="no-issues">No issues found</div>';
-            return;
+          const issues = await analyzeCellsAccessibility(this.currentNotebook);
+
+          if (issues.length === 0) {
+              this.categoriesContainer.innerHTML = '<div class="no-issues">No issues found</div>';
+              return;
+          }
+          
+          // Group issues by category
+          const categorySet = new Set<string>();
+          for (const issue of issues) {
+              categorySet.add(issueToCategory.get(issue.axeResults.id) || 'Other');
+          }
+          
+          // Create category widgets for each category
+          categorySet.forEach(categoryTitle => {
+              const categoryIssues = issues.filter(issue => 
+                  (issueToCategory.get(issue.axeResults.id) || 'Other') === categoryTitle
+              );
+              const categoryWidget = new CellCategoryWidget(this.currentNotebook!, categoryTitle, categoryIssues);
+              this.categoriesContainer?.appendChild(categoryWidget.node);
+          });
+          
+          // Update suggest buttons visibility based on AI state
+          this.updateSuggestButtonsVisibility();
+        } catch (error) {
+            console.error('Error analyzing notebook:', error);
+            analyzeButton.innerHTML = originalContent;
+        } finally {
+            analyzeButton.innerHTML = originalContent;
+            analyzeButton.disabled = false;
         }
-        
-        // Group issues by category
-        const categorySet = new Set<string>();
-        for (const issue of issues) {
-            categorySet.add(issueToCategory.get(issue.axeResults.id) || 'Other');
-        }
-        
-        // Create category widgets for each category
-        categorySet.forEach(categoryTitle => {
-            const categoryIssues = issues.filter(issue => 
-                (issueToCategory.get(issue.axeResults.id) || 'Other') === categoryTitle
-            );
-            const categoryWidget = new CellCategoryWidget(this.currentNotebook!, categoryTitle, categoryIssues);
-            this.categoriesContainer?.appendChild(categoryWidget.node);
-        });
-        
-        // Update suggest buttons visibility based on AI state
-        this.updateSuggestButtonsVisibility();
     }
 }
 

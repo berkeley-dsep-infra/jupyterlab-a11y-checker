@@ -14,26 +14,27 @@
     background-color: #2c5282;
     color: white;
     overflow: hidden;
+    padding: 8px 12px;
 }
 
-.notice-section .notice-header {
-    padding: 6px 10px;
+.notice-header {
+    padding: 6px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.notice-section .notice-title {
+.notice-title {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.notice-section .triangle {
+.triangle {
     font-size: 12px;
 }
 
-.notice-section .close-button {
+.close-button {
     background: none;
     border: none;
     color: white;
@@ -42,8 +43,8 @@
     padding: 4px;
 }
 
-.notice-section .notice-content {
-    padding: 8px 16px;
+.notice-content {
+    padding: 8px 20px;
 }
 
 /* Main Title */
@@ -51,7 +52,7 @@
     font-size: 24px;
     font-weight: bold;
     text-align: center;
-    margin: 24px 0;
+    margin: 24px 4px;
 }
 
 /* Controls Section */
@@ -245,4 +246,21 @@
 
 .chevron-up {
     transform: rotate(180deg);
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.locate-button:hover {
+    background-color: #2a4365;
+}
+
+.suggest-button:hover {
+    background-color: #2a4365;
 }

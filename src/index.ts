@@ -221,7 +221,7 @@ class CellIssueWidget extends Widget {
             
             if (suggestion !== 'Error') {
                 suggestionElement.textContent = suggestion;
-                applyButton.style.display = 'block';
+                applyButton.style.display = 'flex';
             } else {
                 suggestionElement.textContent = 'Error getting suggestions. Please try again.';
             }

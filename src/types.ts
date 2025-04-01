@@ -3,6 +3,7 @@ import axe from 'axe-core';
 export interface CellAccessibilityIssue {
     cellIndex: number;
     cellType: string;
-    axeResults: axe.Result;
+    axeViolation: axe.Result;
+    node: axe.NodeResult;
     contentRaw: string;
 } 

@@ -47,11 +47,14 @@ async function analyzeCellsAccessibility(panel: NotebookPanel): Promise<CellAcce
 
                     if (violations.length > 0) {
                         violations.forEach(violation => {
-                            issues.push({
-                                cellIndex: i,
-                                cellType: cellType,
-                                axeResults: violation,
-                                contentRaw: rawMarkdown,
+                            violation.nodes.forEach(node => {
+                                issues.push({
+                                    cellIndex: i,
+                                    cellType: cellType,
+                                    axeViolation: violation,
+                                    node: node,
+                                    contentRaw: rawMarkdown,
+                                });
                             });
                         });
                     }
@@ -101,24 +104,25 @@ class CellIssueWidget extends Widget {
     private suggestion: string = '';
     private _userOllamaUrl: string;
     private currentNotebook: NotebookPanel;
+    private issue: CellAccessibilityIssue;
 
     constructor(issue: CellAccessibilityIssue, notebook: NotebookPanel) {
         super();
         this.cellIndex = issue.cellIndex;
         this.currentNotebook = notebook;
+        this.issue = issue;
         this._userOllamaUrl = (ServerConnection.makeSettings().baseUrl || PageConfig.getBaseUrl()) + "ollama/";
         
         this.addClass('issue-widget');
         
-        
         let issueSpecificUI = '';
-        if (issue.axeResults.id === 'image-alt') {
+        if (issue.axeViolation.id === 'image-alt') {
             issueSpecificUI = `
                 <div class="image-alt-ui-container">
-                    <div class="image-alt-textfield"></div>
-                    <button class="jp-Button2 apply-button" style="display: none;">
+                    <input type="text" class="jp-a11y-input" placeholder="Enter alt text for the image">
+                    <button class="jp-Button2 apply-alt-button">
                         <svg class="icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        <div>Apply</div>
+                        <div>Apply Alt Text</div>
                     </button>
                 </div>
             `;
@@ -128,11 +132,11 @@ class CellIssueWidget extends Widget {
         this.node.innerHTML = `
             <div class="container">
                 <button class="issue-header-button">
-                    <h3 class="issue-header">Issue: ${issue.axeResults.id} <svg class="icon chevron-down" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></h3>
+                    <h3 class="issue-header">Issue: ${issue.axeViolation.id} <svg class="icon chevron-down" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></h3>
                 </button>
                 <div class="collapsible-content" style="display: none;">
                     <p class="description">
-                        ${issue.axeResults.help} <a href="${issue.axeResults.helpUrl}" target="_blank">(more)</a>.
+                        ${issue.axeViolation.help} <a href="${issue.axeViolation.helpUrl}" target="_blank">(more)</a>.
                     </p>
                     <div class="button-container">
                         <button class="jp-Button2 locate-button">
@@ -162,6 +166,7 @@ class CellIssueWidget extends Widget {
         const locateButton = this.node.querySelector('.locate-button');
         const suggestButton = this.node.querySelector('.suggest-button');
         const applyButton = this.node.querySelector('.apply-button');
+        const applyAltButton = this.node.querySelector('.apply-alt-button');
         const collapsibleContent = this.node.querySelector('.collapsible-content') as HTMLElement;
 
         // Toggle collapsible content when header is clicked
@@ -191,8 +196,13 @@ class CellIssueWidget extends Widget {
         }
 
         locateButton?.addEventListener('click', () => this.navigateToCell(this.cellIndex));
-        suggestButton?.addEventListener('click', () => this.getAISuggestions(issue));
+        suggestButton?.addEventListener('click', () => this.getAISuggestions(this.issue));
         applyButton?.addEventListener('click', () => this.applySuggestion());
+
+        // Add event listener for apply-alt-button
+        if (this.issue.axeViolation.id === 'image-alt' && applyAltButton) {
+            applyAltButton.addEventListener('click', () => this.applyAltText());
+        }
     }
 
     private navigateToCell(index: number): void {
@@ -248,6 +258,35 @@ class CellIssueWidget extends Widget {
         const cell = this.currentNotebook.content.widgets[this.cellIndex];
         if (cell?.model) {
             cell.model.sharedModel.setSource(this.suggestion);
+        }
+    }
+
+    private async applyAltText(): Promise<void> {
+        if (!this.currentNotebook) return;
+
+        const altTextInput = this.node.querySelector('.jp-a11y-input') as HTMLInputElement;
+        if (!altTextInput || !altTextInput.value.trim()) return;
+
+        const cell = this.currentNotebook.content.widgets[this.cellIndex];
+        if (!cell?.model) return;
+
+        const contentRaw = this.issue.contentRaw;
+        const nodeHtml = this.issue.node.html;
+        
+        // Find the exact image tag in the content
+        const imageTagRegex = new RegExp(nodeHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        const match = contentRaw.match(imageTagRegex);
+        
+        if (match) {
+            const originalImageTag = match[0];
+            // Add alt attribute to the image tag
+            const newImageTag = originalImageTag.replace(/<img/, `<img alt="${altTextInput.value}"`);
+            
+            // Replace only the specific image tag
+            const newContent = contentRaw.replace(imageTagRegex, newImageTag);
+            
+            // Update the cell content
+            cell.model.sharedModel.setSource(newContent);
         }
     }
 }
@@ -423,13 +462,13 @@ class A11yMainPanel extends Widget {
           // Group issues by category
           const categorySet = new Set<string>();
           for (const issue of issues) {
-              categorySet.add(issueToCategory.get(issue.axeResults.id) || 'Other');
+              categorySet.add(issueToCategory.get(issue.axeViolation.id) || 'Other');
           }
           
           // Create category widgets for each category
           categorySet.forEach(categoryTitle => {
               const categoryIssues = issues.filter(issue => 
-                  (issueToCategory.get(issue.axeResults.id) || 'Other') === categoryTitle
+                  (issueToCategory.get(issue.axeViolation.id) || 'Other') === categoryTitle
               );
               const categoryWidget = new CellCategoryWidget(this.currentNotebook!, categoryTitle, categoryIssues);
               this.categoriesContainer?.appendChild(categoryWidget.node);

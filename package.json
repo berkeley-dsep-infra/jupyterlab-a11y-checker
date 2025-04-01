@@ -56,11 +56,13 @@
         "@jupyterlab/notebook": "^4.3.5",
         "axe-core": "^4.10.3",
         "axios": "^1.8.2",
+        "marked": "^15.0.7",
         "yarn": "^1.22.22"
     },
     "devDependencies": {
-        "@jupyterlab/builder": "^4.3.4",
+        "@jupyterlab/builder": "^3.3.2",
         "@types/json-schema": "^7.0.11",
+        "@types/marked": "^5.0.2",
         "@types/react": "^18.0.26",
         "@types/react-addons-linked-state-mixin": "^0.14.22",
         "@typescript-eslint/eslint-plugin": "^6.1.0",

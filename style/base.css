@@ -226,6 +226,16 @@
     white-space: pre-wrap;
 }
 
+.issue-widget .image-alt-ui-container {
+    margin-bottom: 12px;
+    margin-left: 30px;
+    padding: 12px;
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    color: white;
+    font-family: monospace;
+}
+
 /* Collapsible Content */
 .collapsible-content {
     padding-left: 16px;

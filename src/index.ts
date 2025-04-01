@@ -9,6 +9,7 @@ import { CellAccessibilityIssue } from './types';
 import { formatPrompt, getFixSuggestions, pullOllamaModel } from './aiBasedFunctions';
 import { issueToCategory } from './issueCategories';
 import { LabIcon } from '@jupyterlab/ui-components';
+import { marked } from 'marked';
 
 // Track if model has been pulled
 let isModelPulled = false;
@@ -35,35 +36,24 @@ async function analyzeCellsAccessibility(panel: NotebookPanel): Promise<CellAcce
 
             const cellType = cell.model.type;
             if (cellType === 'markdown') {
-                const markdownOutput = cell.node.querySelector('.jp-MarkdownOutput')
-                if (markdownOutput) {
-                    // First check rendered markdown
-                    tempDiv.innerHTML = markdownOutput.innerHTML;
-                    if (tempDiv.innerHTML.trim()) {
-                        const renderedResults = await axe.run(tempDiv, axeConfig);
-                        const renderedViolations = renderedResults.violations;
+                const rawMarkdown = cell.model.sharedModel.getSource();
+                if (rawMarkdown.trim()) {
+                    // Parse markdown to HTML using marked
+                    tempDiv.innerHTML = await marked.parse(rawMarkdown);
+                    
+                    // Run axe analysis on our clean HTML
+                    const results = await axe.run(tempDiv, axeConfig);
+                    const violations = results.violations;
 
-                        // Then check raw markdown
-                        tempDiv.innerHTML = cell.model.sharedModel.getSource();
-                        const rawResults = await axe.run(tempDiv, axeConfig);
-                        const rawViolations = rawResults.violations;
-
-                        // Combine violations and filter duplicates based on issue ID
-                        const allViolations = [...renderedViolations, ...rawViolations];
-                        const uniqueViolations = allViolations.filter((violation, index, self) =>
-                            index === self.findIndex(v => v.id === violation.id)
-                        );
-
-                        if (uniqueViolations.length > 0) {
-                            uniqueViolations.forEach(violation => {
-                                issues.push({
-                                    cellIndex: i,
-                                    cellType: cellType,
-                                    axeResults: violation,
-                                    contentRaw: cell.model.sharedModel.getSource(),
-                                });
+                    if (violations.length > 0) {
+                        violations.forEach(violation => {
+                            issues.push({
+                                cellIndex: i,
+                                cellType: cellType,
+                                axeResults: violation,
+                                contentRaw: rawMarkdown,
                             });
-                        }
+                        });
                     }
                 }
             } else if (cellType === 'code') {
@@ -120,7 +110,21 @@ class CellIssueWidget extends Widget {
         
         this.addClass('issue-widget');
         
-        // Create the widget's HTML structure using template string
+        
+        let issueSpecificUI = '';
+        if (issue.axeResults.id === 'image-alt') {
+            issueSpecificUI = `
+                <div class="image-alt-ui-container">
+                    <div class="image-alt-textfield"></div>
+                    <button class="jp-Button2 apply-button" style="display: none;">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <div>Apply</div>
+                    </button>
+                </div>
+            `;
+        }
+
+        // Modify the HTML template to include the issue-specific UI
         this.node.innerHTML = `
             <div class="container">
                 <button class="issue-header-button">
@@ -147,6 +151,8 @@ class CellIssueWidget extends Widget {
                             <div>Apply</div>
                         </button>
                     </div>
+                    <div class="issue-specific-ui-container"></div>
+                    ${issueSpecificUI}
                 </div>
             </div>
         `;

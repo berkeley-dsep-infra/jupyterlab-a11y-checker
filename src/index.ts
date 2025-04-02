@@ -132,7 +132,7 @@ class CellIssueWidget extends Widget {
                 </button>
                 <div class="collapsible-content" style="display: none;">
                     <p class="description">
-                        ${issue.axeResults.help} <a href="${issue.axeResults.helpUrl}" target="_blank">(more)</a>.
+                        ${issue.axeResults.help} <a href="${issue.axeResults.helpUrl}" target="_blank">(more info about the issue)</a>.
                     </p>
                     <div class="button-container">
                         <button class="jp-Button2 locate-button">
@@ -144,18 +144,31 @@ class CellIssueWidget extends Widget {
                           <div>Get AI Suggestions</div>
                         </button>
                     </div>
+
+                    <div class="input-container" style="display: none;">
+                        <div class="manual-input"></div>
+                         <button class="jp-Button2 suggest-button" style="display: none;">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="#fff" d="M19 19a1 1 0 0 1 .117 1.993L19 21h-7a1 1 0 0 1-.117-1.993L12 19zm.631-14.632a2.5 2.5 0 0 1 0 3.536L8.735 18.8a1.5 1.5 0 0 1-.44.305l-3.804 1.729c-.842.383-1.708-.484-1.325-1.326l1.73-3.804a1.5 1.5 0 0 1 .304-.44L16.096 4.368a2.5 2.5 0 0 1 3.535 0m-2.12 1.414L6.677 16.614l-.589 1.297l1.296-.59L18.217 6.49a.5.5 0 1 0-.707-.707M6 1a1 1 0 0 1 .946.677l.13.378a3 3 0 0 0 1.869 1.87l.378.129a1 1 0 0 1 0 1.892l-.378.13a3 3 0 0 0-1.87 1.869l-.129.378a1 1 0 0 1-1.892 0l-.13-.378a3 3 0 0 0-1.869-1.87l-.378-.129a1 1 0 0 1 0-1.892l.378-.13a3 3 0 0 0 1.87-1.869l.129-.378A1 1 0 0 1 6 1m0 3.196A5 5 0 0 1 5.196 5q.448.355.804.804q.355-.448.804-.804A5 5 0 0 1 6 4.196"/></g></svg>                            
+                          <div>Get AI Suggestions</div>
+                        </button>
+                        <button class="jp-Button2 apply-button" style="display: none;">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            <div>Apply</div>
+                        </button>
+                </div>
+
                     <div class="suggestion-container" style="display: none;">
                         <div class="suggestion"></div>
                         <button class="jp-Button2 apply-button" style="display: none;">
                             <svg class="icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                             <div>Apply</div>
                         </button>
-                    </div>
+            </div>
                     <div class="issue-specific-ui-container"></div>
                     ${issueSpecificUI}
                 </div>
             </div>
-        `;
+            `;
 
         // Add event listeners using query selectors
         const headerButton = this.node.querySelector('.issue-header-button');
@@ -200,13 +213,13 @@ class CellIssueWidget extends Widget {
         
         const cells = this.currentNotebook.content.widgets;
         const targetCell = cells[index];
-        
+
         if (!targetCell) return;
-        
+
         targetCell.node.scrollIntoView({ behavior: 'smooth', block: 'center' });
         targetCell.node.style.transition = 'background-color 0.5s ease';
         targetCell.node.style.backgroundColor = '#DB3939';
-        
+
         setTimeout(() => {
             targetCell.node.style.backgroundColor = '';
         }, 1000);
@@ -244,7 +257,7 @@ class CellIssueWidget extends Widget {
 
     private async applySuggestion(): Promise<void> {
         if (!this.currentNotebook || !this.suggestion) return;
-        
+
         const cell = this.currentNotebook.content.widgets[this.cellIndex];
         if (cell?.model) {
             cell.model.sharedModel.setSource(this.suggestion);
@@ -263,7 +276,7 @@ class A11yMainPanel extends Widget {
         super();
         this.addClass('a11y-panel');
         this.id = 'a11y-sidebar';
-
+        
         const accessibilityIcon = new LabIcon({
             name: 'a11y:accessibility',
             svgstr: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#154F92" d="M256 48c114.953 0 208 93.029 208 208 0 114.953-93.029 208-208 208-114.953 0-208-93.029-208-208 0-114.953 93.029-208 208-208m0-40C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 56C149.961 64 64 149.961 64 256s85.961 192 192 192 192-85.961 192-192S362.039 64 256 64zm0 44c19.882 0 36 16.118 36 36s-16.118 36-36 36-36-16.118-36-36 16.118-36 36-36zm117.741 98.023c-28.712 6.779-55.511 12.748-82.14 15.807.851 101.023 12.306 123.052 25.037 155.621 3.617 9.26-.957 19.698-10.217 23.315-9.261 3.617-19.699-.957-23.316-10.217-8.705-22.308-17.086-40.636-22.261-78.549h-9.686c-5.167 37.851-13.534 56.208-22.262 78.549-3.615 9.255-14.05 13.836-23.315 10.217-9.26-3.617-13.834-14.056-10.217-23.315 12.713-32.541 24.185-54.541 25.037-155.621-26.629-3.058-53.428-9.027-82.141-15.807-8.6-2.031-13.926-10.648-11.895-19.249s10.647-13.926 19.249-11.895c96.686 22.829 124.283 22.783 220.775 0 8.599-2.03 17.218 3.294 19.249 11.895 2.029 8.601-3.297 17.219-11.897 19.249z"/></svg>'
@@ -411,9 +424,9 @@ class A11yMainPanel extends Widget {
           analyzeButton.disabled = true; // Disable button while analyzing
         
           this.categoriesContainer.innerHTML = '';
-          console.log('Analyzing current notebook');
+        console.log('Analyzing current notebook');
 
-          const issues = await analyzeCellsAccessibility(this.currentNotebook);
+        const issues = await analyzeCellsAccessibility(this.currentNotebook);
 
           if (issues.length === 0) {
               this.categoriesContainer.innerHTML = '<div class="no-issues">No issues found</div>';

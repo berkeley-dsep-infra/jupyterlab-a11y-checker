@@ -272,6 +272,9 @@ class CellIssueWidget extends Widget {
 
         const contentRaw = this.issue.contentRaw;
         const nodeHtml = this.issue.node.html;
+
+        console.log(contentRaw);
+        console.log(nodeHtml);
         
         // Find the exact image tag in the content
         const imageTagRegex = new RegExp(nodeHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));

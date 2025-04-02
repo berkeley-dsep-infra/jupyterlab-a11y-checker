@@ -132,7 +132,7 @@ class CellIssueWidget extends Widget {
                 </button>
                 <div class="collapsible-content" style="display: none;">
                     <p class="description">
-                        ${issue.axeResults.help} <a href="${issue.axeResults.helpUrl}" target="_blank">(more info about the issue)</a>.
+                        ${issue.axeResults.help} <a href="${issue.axeResults.helpUrl}" target="_blank">(learn more about the issue)</a>.
                     </p>
                     <div class="button-container">
                         <button class="jp-Button2 locate-button">

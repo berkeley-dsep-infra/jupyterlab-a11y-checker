@@ -204,7 +204,11 @@ class CellIssueWidget extends Widget {
         }
 
         locateButton?.addEventListener('click', () => this.navigateToCell(this.cellIndex));
-        suggestButton?.addEventListener('click', () => this.getAISuggestions(this.issue));
+        if (issue.axeViolation.id === 'image-alt') {
+            suggestButton?.addEventListener('click', () => this.fillInAISuggestion());
+        } else {
+            suggestButton?.addEventListener('click', () => this.getAISuggestions(this.issue));
+        }
         applyButton?.addEventListener('click', () => this.applySuggestion());
 
         // Add event listener for apply-alt-button
@@ -257,6 +261,67 @@ class CellIssueWidget extends Widget {
         } catch (error) {
             console.error(error);
             suggestionElement.textContent = 'Error getting suggestions. Please try again.';
+        }
+    }
+
+    private async fillInAISuggestion(): Promise<void> {
+        const altTextInput = this.node.querySelector('.jp-a11y-input') as HTMLInputElement;
+        if (!altTextInput) return;
+        
+        // Save the original placeholder text
+        const originalPlaceholder = altTextInput.placeholder;
+        
+        // Create loading overlay (so we can see the loading state)
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.style.position = 'absolute';
+        loadingOverlay.style.left = '8px';  // Matching input text padding
+        loadingOverlay.style.top = '8px'; 
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.alignItems = 'center';
+        loadingOverlay.style.gap = '8px';
+        loadingOverlay.style.color = '#666';
+        loadingOverlay.innerHTML = `
+            <svg class="icon loading" viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8z"/>
+            </svg>
+            Getting AI suggestions...
+        `;
+
+        // Add relative positioning to input container and append loading overlay
+        const inputContainer = altTextInput.parentElement;
+        if (inputContainer) {
+            inputContainer.style.position = 'relative';
+            inputContainer.appendChild(loadingOverlay);
+        }
+        
+        // Show loading state in the input
+        altTextInput.disabled = true;
+        altTextInput.style.color = 'transparent';  // Hide input text while loading
+        altTextInput.placeholder = '';  // Clear placeholder while showing loading overlay
+        
+        try {
+            const suggestion = await getFixSuggestions(formatPrompt(this.issue), this._userOllamaUrl, "mistral");
+            if (suggestion !== 'Error') {
+                // Extract alt text from the suggestion, handling both single and double quotes
+                const altMatch = suggestion.match(/alt=['"]([^'"]*)['"]/);
+                if (altMatch && altMatch[1]) {
+                    altTextInput.value = altMatch[1];
+                } else {
+                    altTextInput.value = suggestion;  // Fallback to full suggestion if no alt text found
+                }
+            } else {
+                altTextInput.placeholder = "Error getting suggestions. Please try again.";
+            }
+        } catch (error) {
+            console.error(error);
+            altTextInput.placeholder = "Error getting suggestions. Please try again.";
+        } finally {
+            altTextInput.disabled = false;
+            altTextInput.style.color = '';  // Restore text color
+            loadingOverlay.remove();  // Remove loading overlay
+            if (altTextInput.value) {
+                altTextInput.placeholder = originalPlaceholder;
+            }
         }
     }
 

@@ -6,8 +6,8 @@ export function formatPrompt(issue: CellAccessibilityIssue): string {
 
     const cellIssue = issue;
     prompt += `Content: \n${cellIssue.contentRaw}\n\n`;
-    prompt += `Issue: ${cellIssue.axeResults.id}\n\n`;
-    prompt += `Description: ${cellIssue.axeResults.description}\n\n`;
+    prompt += `Issue: ${cellIssue.axeViolation.id}\n\n`;
+    prompt += `Description: ${cellIssue.axeViolation.description}\n\n`;
 
     prompt += `Respond in JSON format with the following fields:
     - exampleCellContent: A suggested fix for the cell, without any explanation.

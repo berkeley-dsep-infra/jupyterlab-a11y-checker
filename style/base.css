@@ -230,10 +230,26 @@
     margin-bottom: 12px;
     margin-left: 30px;
     padding: 12px;
-    background-color: #1a1a1a;
     border-radius: 4px;
-    color: white;
-    font-family: monospace;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.jp-a11y-input {
+    width: 70%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    color: #000;
+}
+
+.jp-a11y-input:focus {
+    outline: none;
+    border-color: #2c5282;
+    box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.2);
 }
 
 /* Collapsible Content */
@@ -271,6 +287,19 @@
     background-color: #2a4365;
 }
 
+.suggest-button, .apply-alt-button {
+    background-color: #2C5B8E;
+    color: white;
+    font-family: Inter, sans-serif;
+    width: fit-content;
+    white-space: nowrap;
+}
+
 .suggest-button:hover {
     background-color: #2a4365;
 }
+
+.apply-alt-button:hover {
+    background-color: #2a4365;
+}
+

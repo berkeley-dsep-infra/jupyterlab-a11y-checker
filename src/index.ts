@@ -10,6 +10,7 @@ import { formatPrompt, getFixSuggestions, pullOllamaModel } from './aiBasedFunct
 import { issueToCategory } from './issueCategories';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { marked } from 'marked';
+import { detectImageIssues } from './detectionFunctions';
 
 // Track if model has been pulled
 let isModelPulled = false;
@@ -58,6 +59,9 @@ async function analyzeCellsAccessibility(panel: NotebookPanel): Promise<CellAcce
                             });
                         });
                     }
+
+                    // Add custom image issue detection
+                    issues.push(...detectImageIssues(rawMarkdown, i, cellType));
                 }
             } else if (cellType === 'code') {
                 const codeInput = cell.node.querySelector('.jp-InputArea-editor')
@@ -162,7 +166,7 @@ class CellIssueWidget extends Widget {
                             <svg class="icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                             <div>Apply</div>
                         </button>
-            </div>
+                    </div>
                     <div class="issue-specific-ui-container"></div>
                     ${issueSpecificUI}
                 </div>
@@ -219,11 +223,14 @@ class CellIssueWidget extends Widget {
         const cells = this.currentNotebook.content.widgets;
         const targetCell = cells[index];
 
+
         if (!targetCell) return;
+
 
         targetCell.node.scrollIntoView({ behavior: 'smooth', block: 'center' });
         targetCell.node.style.transition = 'background-color 0.5s ease';
         targetCell.node.style.backgroundColor = '#DB3939';
+
 
         setTimeout(() => {
             targetCell.node.style.backgroundColor = '';
@@ -263,6 +270,7 @@ class CellIssueWidget extends Widget {
     private async applySuggestion(): Promise<void> {
         if (!this.currentNotebook || !this.suggestion) return;
 
+
         const cell = this.currentNotebook.content.widgets[this.cellIndex];
         if (cell?.model) {
             cell.model.sharedModel.setSource(this.suggestion);
@@ -280,24 +288,84 @@ class CellIssueWidget extends Widget {
 
         const contentRaw = this.issue.contentRaw;
         const nodeHtml = this.issue.node.html;
+        const newAltText = altTextInput.value.trim();
 
-        console.log(contentRaw);
-        console.log(nodeHtml);
-        
-        // Find the exact image tag in the content
-        const imageTagRegex = new RegExp(nodeHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-        const match = contentRaw.match(imageTagRegex);
-        
-        if (match) {
-            const originalImageTag = match[0];
-            // Add alt attribute to the image tag
-            const newImageTag = originalImageTag.replace(/<img/, `<img alt="${altTextInput.value}"`);
+        // Helper function to escape special regex characters
+        const escapeRegExp = (string: string) => {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+
+        // Helper function to handle HTML image tags
+        const handleHtmlImage = (content: string, imgTag: string): string => {
+            // Check if alt attribute exists but is empty
+            if (imgTag.includes('alt=""') || imgTag.includes("alt=''")) {
+                // Replace empty alt with new alt text
+                return content.replace(
+                    new RegExp(escapeRegExp(imgTag), 'g'),
+                    imgTag.replace(/alt=["']\s*["']/, `alt="${newAltText}"`)
+                );
+            } else {
+                // First find the original tag in content (preserving original spacing)
+                const originalTagRegex = /<img\s+[^>]*?src=["'][^"']*?["'][^>]*?>/;
+                const originalTag = content.match(originalTagRegex)?.[0];
+                
+                if (originalTag) {
+                    return content.replace(
+                        originalTag,
+                        originalTag.replace(/>$/, ` alt="${newAltText}">`)
+                    );
+                }
+                return content;
+            }
+        };
+
+        // Helper function to handle markdown images
+        const handleMarkdownImage = (content: string, mdImage: string): string => {
+            return content.replace(
+                new RegExp(escapeRegExp(mdImage), 'g'),
+                mdImage.replace(/!\[\]/, `![${newAltText}]`)
+            );
+        };
+
+        let newContent = contentRaw;
+
+        // Check if it's an HTML image tag
+        if (nodeHtml.startsWith('<img')) {
+            newContent = handleHtmlImage(contentRaw, nodeHtml);
+        }
+        // Check if it's a markdown image
+        else if (nodeHtml.startsWith('![')) {
+            newContent = handleMarkdownImage(contentRaw, nodeHtml);
+        }
+
+        // Update the cell content
+        cell.model.sharedModel.setSource(newContent);
+
+        // Show success animation with green background
+        cell.node.style.transition = 'background-color 0.5s ease';
+        cell.node.style.backgroundColor = '#28A745';  // Bootstrap success green color
+
+        setTimeout(() => {
+            cell.node.style.backgroundColor = '';
+        }, 1000);
+
+        // Remove the issue using the reusable method
+        this.removeIssue();
+    }
+
+    private removeIssue(): void {
+        // Find this issue widget
+        const issueWidget = this.node.closest('.issue-widget');
+        if (issueWidget) {
+            // Find the parent category
+            const category = issueWidget.closest('.category');
+            // Remove this issue
+            issueWidget.remove();
             
-            // Replace only the specific image tag
-            const newContent = contentRaw.replace(imageTagRegex, newImageTag);
-            
-            // Update the cell content
-            cell.model.sharedModel.setSource(newContent);
+            // If category exists and has no more issues, remove it
+            if (category && !category.querySelector('.issue-widget')) {
+                category.remove();
+            }
         }
     }
 }
@@ -313,6 +381,7 @@ class A11yMainPanel extends Widget {
         super();
         this.addClass('a11y-panel');
         this.id = 'a11y-sidebar';
+        
         
         const accessibilityIcon = new LabIcon({
             name: 'a11y:accessibility',

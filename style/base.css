@@ -287,6 +287,19 @@
     background-color: #2a4365;
 }
 
+.suggest-button, .apply-alt-button {
+    background-color: #2C5B8E;
+    color: white;
+    font-family: Inter, sans-serif;
+    width: fit-content;
+    white-space: nowrap;
+}
+
 .suggest-button:hover {
     background-color: #2a4365;
 }
+
+.apply-alt-button:hover {
+    background-color: #2a4365;
+}
+

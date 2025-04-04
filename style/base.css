@@ -80,6 +80,17 @@
     width: 60%;
 }
 
+.control-button svg {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+}
+
+.control-button div {
+    text-align: left;
+    flex: 1;
+}
+
 .control-button:hover {
     background-color: #2a4365;
 }
@@ -260,6 +271,9 @@
     display: flex;
     gap: 8px;
     justify-content: flex-end;
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Collapsible Content */
@@ -297,12 +311,38 @@
     background-color: #2a4365;
 }
 
-.suggest-button, .apply-alt-button {
+.suggest-button, .locate-button {
     background-color: #2C5B8E;
     color: white;
     font-family: Inter, sans-serif;
-    width: fit-content;
-    white-space: nowrap;
+    flex: 0 0 auto;
+    min-width: 140px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.apply-alt-button {
+    background-color: #2C5B8E;
+    color: white;
+    font-family: Inter, sans-serif;
+    flex: 0 0 auto;
+    min-width: 90px;
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 25%;
+}
+
+.suggest-button div, .apply-alt-button div, .locate-button div {
+    text-align: left;
+    flex: 1;
+}
+
+.suggest-button svg, .apply-alt-button svg, .locate-button svg {
+    flex-shrink: 0;
+}
+
+.suggest-button {
+    max-width: 60%;
 }
 
 .suggest-button:hover {

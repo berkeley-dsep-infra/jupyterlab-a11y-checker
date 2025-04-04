@@ -3,7 +3,7 @@ import { Widget } from '@lumino/widgets';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { CellAccessibilityIssue } from '../utils/types';
-import { formatPrompt, getFixSuggestions } from '../services/AIService';
+import { formatPrompt, getFixSuggestions, getImageAltSuggestion } from '../services/AIService';
 
 export class CellIssueWidget extends Widget {
     private cellIndex: number;
@@ -109,7 +109,6 @@ export class CellIssueWidget extends Widget {
         }
 
         locateButton?.addEventListener('click', () => this.navigateToCell(this.cellIndex));
-        // suggestButton?.addEventListener('click', () => this.getAISuggestions(this.issue));
         if (issue.axeViolation.id === 'image-alt') {
             suggestButton?.addEventListener('click', () => this.fillInAISuggestion());
         } else {
@@ -159,7 +158,7 @@ export class CellIssueWidget extends Widget {
         altTextInput.placeholder = '';  // Clear placeholder while showing loading overlay
 
         try {
-            const suggestion = await getFixSuggestions(formatPrompt(this.issue), this._userOllamaUrl, "mistral");
+            const suggestion = await getImageAltSuggestion(this.issue,this._userOllamaUrl, "mistral");
             if (suggestion !== 'Error') {
                 // Extract alt text from the suggestion, handling both single and double quotes
                 const altMatch = suggestion.match(/alt=['"]([^'"]*)['"]/);

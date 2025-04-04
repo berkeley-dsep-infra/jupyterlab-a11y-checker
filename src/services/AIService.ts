@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CellAccessibilityIssue } from './types';
+import { CellAccessibilityIssue } from '../utils/types';
 
 export function formatPrompt(issue: CellAccessibilityIssue): string {
     let prompt = `The following represents a jupyter notebook cell and a accessibility issue found in it.\n\n`;

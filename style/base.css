@@ -236,20 +236,30 @@
     gap: 8px;
 }
 
-.jp-a11y-input {
-    width: 70%;
-    padding: 8px 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: white;
-    color: #000;
+.image-alt-ui-container {
+    background-color: #DCDCDC;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 12px;
+    border: 1px solid black;
 }
 
-.jp-a11y-input:focus {
+.jp-a11y-input {
+    width: calc(100% - 16px);
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: #DCDCDC;
+    color: black;
+    font-family: Inter, sans-serif;
+    box-sizing: border-box;
+    border: none;
     outline: none;
-    border-color: #2c5282;
-    box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.2);
+}
+
+.alt-text-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
 }
 
 /* Collapsible Content */

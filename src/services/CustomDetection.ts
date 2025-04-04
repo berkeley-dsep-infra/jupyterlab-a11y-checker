@@ -1,4 +1,4 @@
-import { CellAccessibilityIssue } from './types';
+import { CellAccessibilityIssue } from '../utils/types';
 
 /**
  * Detects images without alt text in markdown content

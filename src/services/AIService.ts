@@ -3,7 +3,6 @@ import { CellAccessibilityIssue } from '../utils/types';
 
 export function formatPrompt(issue: CellAccessibilityIssue): string {
     let prompt = `The following represents a jupyter notebook cell and a accessibility issue found in it.\n\n`;
-
     const cellIssue = issue;
     prompt += `Content: \n${cellIssue.contentRaw}\n\n`;
     prompt += `Issue: ${cellIssue.axeViolation.id}\n\n`;
@@ -15,6 +14,7 @@ export function formatPrompt(issue: CellAccessibilityIssue): string {
 
     return prompt;
 }
+
 
 export async function getFixSuggestions(prompt: string, userURL: string, modelName: string): Promise<string> {
     try {  
@@ -45,6 +45,33 @@ export async function getFixSuggestions(prompt: string, userURL: string, modelNa
         return 'Error';
     }
 }
+
+export async function getImageAltSuggestion(issue: CellAccessibilityIssue, userURL: string, modelName: string): Promise<string> {
+    let prompt = "Given the following code, read the image url and respond with a short description of the image, without any explanation.";
+    prompt += `Content: \n${issue.contentRaw}\n\n`;
+
+    try {  
+      let body = JSON.stringify({ 
+          model: modelName,
+          prompt: prompt,
+          stream: false
+      });
+      
+      const response = await axios.post(
+          userURL + "api/generate",
+          body,
+          {
+            headers: { 'Content-Type': 'application/json' }
+          }
+      );
+      const responseText = await response.data.response.trim();  
+      return responseText;
+  } catch (error) {
+      console.error('Error getting suggestions:', error);
+      return 'Error';
+  }
+}
+
 
 export async function pullOllamaModel(userURL: string, modelName: string): Promise<void> {
     try {

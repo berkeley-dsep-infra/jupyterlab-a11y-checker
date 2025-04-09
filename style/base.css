@@ -1,3 +1,6 @@
+/* Import Material Icons */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
 /* Main Panel Layout */
 .a11y-panel {
     background-color: white;
@@ -237,7 +240,7 @@
     white-space: pre-wrap;
 }
 
-.issue-widget .image-alt-ui-container {
+.issue-widget .textfield-fix-widget {
     margin-bottom: 12px;
     margin-left: 30px;
     padding: 12px;
@@ -247,7 +250,7 @@
     gap: 8px;
 }
 
-.image-alt-ui-container {
+.textfield-fix-widget {
     background-color: #DCDCDC;
     padding: 12px;
     border-radius: 8px;
@@ -268,7 +271,7 @@
     outline: none;
 }
 
-.alt-text-buttons {
+.textfield-buttons {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
@@ -289,13 +292,14 @@
     fill: currentColor;
 }
 
+/* Chevron icon rotation */
 .chevron-down {
     width: 28px;
     height: 28px;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease;
 }
 
-.chevron-up {
+.chevron-down.chevron-up {
     transform: rotate(180deg);
 }
 
@@ -304,15 +308,21 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .locate-button:hover {
     background-color: #2a4365;
 }
 
-.suggest-button, .locate-button {
+.suggest-button,
+.locate-button {
     background-color: #2C5B8E;
     color: white;
     font-family: Inter, sans-serif;
@@ -333,12 +343,16 @@
     max-width: 25%;
 }
 
-.suggest-button div, .apply-alt-button div, .locate-button div {
+.suggest-button div,
+.apply-alt-button div,
+.locate-button div {
     text-align: left;
     flex: 1;
 }
 
-.suggest-button svg, .apply-alt-button svg, .locate-button svg {
+.suggest-button svg,
+.apply-alt-button svg,
+.locate-button svg {
     flex-shrink: 0;
 }
 
@@ -354,3 +368,68 @@
     background-color: #2a4365;
 }
 
+/* Material Icons Styles */
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    vertical-align: middle;
+}
+
+/* Icon sizes */
+.material-icons.md-18 {
+    font-size: 18px;
+}
+
+.material-icons.md-24 {
+    font-size: 24px;
+}
+
+.material-icons.md-36 {
+    font-size: 36px;
+}
+
+.material-icons.md-48 {
+    font-size: 48px;
+}
+
+/* Icon colors */
+.material-icons.md-dark {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.material-icons.md-dark.md-inactive {
+    color: rgba(0, 0, 0, 0.26);
+}
+
+.material-icons.md-light {
+    color: rgba(255, 255, 255, 1);
+}
+
+.material-icons.md-light.md-inactive {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Loading animation for Material Icons */
+.material-icons.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

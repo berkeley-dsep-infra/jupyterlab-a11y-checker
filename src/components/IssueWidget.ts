@@ -2,35 +2,38 @@ import { Widget } from '@lumino/widgets';
 import { ICellAccessibilityIssue } from '../utils/types';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ImageAltFixWidget } from './FixWidget';
+
 export class CellIssueWidget extends Widget {
   private issue: ICellAccessibilityIssue;
   private cell: Cell<ICellModel>;
+  private aiEnabled: boolean = false; // TODO: Create a higher order component to handle this
 
-  constructor(issue: ICellAccessibilityIssue, cell: Cell<ICellModel>) {
+  constructor(
+    issue: ICellAccessibilityIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean
+  ) {
     super();
     this.issue = issue;
     this.cell = cell;
+    this.aiEnabled = aiEnabled;
 
     this.addClass('issue-widget');
-
-    // Create the basic structure
     this.node.innerHTML = `
-      <div class="container">
-          <button class="issue-header-button">
-              <h3 class="issue-header">Issue: ${issue.axeViolation.id} <span class="material-icons chevron-down">expand_more</span></h3>
-          </button>
-          <div class="collapsible-content" style="display: none;">
-              <p class="description">
-                  ${issue.axeViolation.help} <a href="${issue.axeViolation.helpUrl}" target="_blank">(learn more about the issue)</a>.
-              </p>
-              <div class="button-container">
-                  <button class="jp-Button2 locate-button">
-                      <span class="material-icons">search</span>
-                      <div>Locate</div>
-                  </button>
-              </div>
-              <div class="fix-widget-container"></div>
+      <button class="issue-header-button">
+          <h3 class="issue-header">Issue: ${issue.axeViolation.id} <span class="material-icons chevron-down">expand_more</span></h3>
+      </button>
+      <div class="collapsible-content" style="display: none;">
+          <p class="description">
+              ${issue.axeViolation.help} <a href="${issue.axeViolation.helpUrl}" target="_blank">(learn more about the issue)</a>.
+          </p>
+          <div class="button-container">
+              <button class="jp-Button2 locate-button">
+                  <span class="material-icons">search</span>
+                  <div>Locate</div>
+              </button>
           </div>
+          <div class="fix-widget-container"></div>
       </div>
     `;
 
@@ -55,31 +58,28 @@ export class CellIssueWidget extends Widget {
     });
 
     const locateButton = this.node.querySelector('.locate-button');
+    locateButton?.addEventListener('click', () => this.navigateToCell());
+
     // Show suggest button initially if AI is enabled
     const mainPanel = document.getElementById('a11y-sidebar') as HTMLElement;
     if (mainPanel) {
       const aiToggleButton = mainPanel.querySelector('.ai-toggle');
       if (aiToggleButton && aiToggleButton.textContent?.includes('Enabled')) {
-        const suggestButtonEl = this.node.querySelector(
-          '.suggest-button'
-        ) as HTMLElement;
-        if (suggestButtonEl) {
-          suggestButtonEl.style.display = 'flex';
-        }
+        this.aiEnabled = true;
+      } else {
+        this.aiEnabled = false;
       }
     }
 
-    locateButton?.addEventListener('click', () => this.navigateToCell());
-
     // Dynamically add the TextFieldFixWidget if needed
-    if (issue.axeViolation.id === 'image-alt') {
-      const fixWidgetContainer = this.node.querySelector(
-        '.fix-widget-container'
+    const fixWidgetContainer = this.node.querySelector('.fix-widget-container');
+    if (fixWidgetContainer && issue.axeViolation.id === 'image-alt') {
+      const textFieldFixWidget = new ImageAltFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
       );
-      if (fixWidgetContainer) {
-        const textFieldFixWidget = new ImageAltFixWidget(this.issue, cell);
-        fixWidgetContainer.appendChild(textFieldFixWidget.node);
-      }
+      fixWidgetContainer.appendChild(textFieldFixWidget.node);
     }
   }
 

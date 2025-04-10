@@ -1,3 +1,5 @@
+export const issueCategoryNames = ['Images', 'Color', 'Tables', 'Other'];
+
 export const issueToCategory = new Map<string, string>([
   // Images
   ['image-alt', 'Images'],

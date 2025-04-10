@@ -7,11 +7,17 @@ import { ServerConnection } from '@jupyterlab/services';
 abstract class FixWidget extends Widget {
   protected issue: ICellAccessibilityIssue;
   protected cell: Cell<ICellModel>;
+  protected aiEnabled: boolean;
 
-  constructor(issue: ICellAccessibilityIssue, cell: Cell<ICellModel>) {
+  constructor(
+    issue: ICellAccessibilityIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean
+  ) {
     super();
     this.issue = issue;
     this.cell = cell;
+    this.aiEnabled = aiEnabled;
   }
 
   // Method to remove the widget from the DOM
@@ -35,8 +41,12 @@ abstract class FixWidget extends Widget {
 }
 
 abstract class TextFieldFixWidget extends FixWidget {
-  constructor(issue: ICellAccessibilityIssue, cell: Cell<ICellModel>) {
-    super(issue, cell);
+  constructor(
+    issue: ICellAccessibilityIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean
+  ) {
+    super(issue, cell, aiEnabled);
 
     // Simplified DOM structure
     this.node.innerHTML = `
@@ -55,7 +65,7 @@ abstract class TextFieldFixWidget extends FixWidget {
         </div>
       `;
 
-    // Get references to DOM elements
+    // Apply Button
     const applyButton = this.node.querySelector(
       '.apply-button'
     ) as HTMLButtonElement;
@@ -69,9 +79,12 @@ abstract class TextFieldFixWidget extends FixWidget {
       });
     }
 
+    // Suggest Button
     const suggestButton = this.node.querySelector(
       '.suggest-button'
     ) as HTMLButtonElement;
+
+    suggestButton.style.display = aiEnabled ? 'flex' : 'none';
 
     if (suggestButton) {
       suggestButton.addEventListener('click', () =>
@@ -86,8 +99,12 @@ abstract class TextFieldFixWidget extends FixWidget {
 }
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
-  constructor(issue: ICellAccessibilityIssue, cell: Cell<ICellModel>) {
-    super(issue, cell);
+  constructor(
+    issue: ICellAccessibilityIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean
+  ) {
+    super(issue, cell, aiEnabled);
   }
 
   applyTextToCell(providedAltText: string): void {

@@ -13,7 +13,7 @@
 }
 
 /* Notice Section */
-.notice-section {
+.notice-container {
     background-color: #2c5282;
     color: white;
     overflow: hidden;
@@ -37,7 +37,7 @@
     font-size: 12px;
 }
 
-.close-button {
+.notice-delete-button {
     background: none;
     border: none;
     color: white;
@@ -98,12 +98,8 @@
     background-color: #2a4365;
 }
 
-.control-button.analyze .icon {
-    font-size: 20px;
-}
-
 /* Categories Section */
-.categories-container {
+.issues-container {
     padding: 0 16px;
 }
 
@@ -292,14 +288,18 @@
     fill: currentColor;
 }
 
-/* Chevron icon rotation */
-.chevron-down {
-    width: 28px;
-    height: 28px;
+.chevron {
     transition: transform 0.3s ease;
+    transform-origin: center center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
 }
 
-.chevron-down.chevron-up {
+.chevron.expanded {
     transform: rotate(180deg);
 }
 
@@ -432,4 +432,8 @@
     100% {
         transform: rotate(360deg);
     }
+}
+
+.hidden {
+    display: none;
 }

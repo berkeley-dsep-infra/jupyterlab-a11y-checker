@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ICellAccessibilityIssue } from '../utils/types';
+import { ICellAccessibilityIssue } from './types';
 
 export function formatPrompt(issue: ICellAccessibilityIssue): string {
   let prompt =

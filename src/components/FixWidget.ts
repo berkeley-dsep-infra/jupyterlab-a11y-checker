@@ -1,7 +1,9 @@
 import { Widget } from '@lumino/widgets';
-import { ICellAccessibilityIssue } from '../utils/types';
+
+import { ICellAccessibilityIssue } from '@utils/types';
+import { getImageAltSuggestion } from '@utils/ai-utils';
+
 import { Cell, ICellModel } from '@jupyterlab/cells';
-import { getImageAltSuggestion } from '../services/AIService';
 import { ServerConnection } from '@jupyterlab/services';
 
 abstract class FixWidget extends Widget {

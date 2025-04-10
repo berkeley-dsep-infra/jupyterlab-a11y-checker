@@ -1,14 +1,17 @@
-import { NotebookPanel } from '@jupyterlab/notebook';
 import { Widget } from '@lumino/widgets';
+import { NotebookPanel } from '@jupyterlab/notebook';
 import { ServerConnection } from '@jupyterlab/services';
-import { issueToCategory, issueCategoryNames } from '../utils/issueCategories';
 import { LabIcon } from '@jupyterlab/ui-components';
-import { CellIssueWidget } from './IssueWidget';
-import { analyzeCellsAccessibility } from '../services/AccessibilityAnalyzer';
-import { pullOllamaModel } from '../services/AIService';
-import { ICellAccessibilityIssue } from '../utils/types';
 
-export class A11yMainPanel extends Widget {
+import { CellIssueWidget } from '@components/IssueWidget';
+
+import { ICellAccessibilityIssue } from '@utils/types';
+import { issueToCategory, issueCategoryNames } from '@utils/metadata';
+
+import { analyzeCellsAccessibility } from '@utils/detection-utils';
+import { pullOllamaModel } from '@utils/ai-utils';
+
+export class MainPanelWidget extends Widget {
   private modelPulled: boolean = false;
   private aiEnabled: boolean = false;
   private currentNotebook: NotebookPanel | null = null;

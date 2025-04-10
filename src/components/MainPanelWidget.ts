@@ -1,7 +1,7 @@
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { ServerConnection } from '@jupyterlab/services';
 import { LabIcon } from '@jupyterlab/ui-components';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 import { CellIssueWidget } from './IssueWidget';
 
@@ -99,8 +99,7 @@ export class MainPanelWidget extends Widget {
         aiControlButton.innerHTML = `${progressIcon} Please wait...`;
         aiControlButton.disabled = true;
         try {
-          const SERVER_URL =
-            ServerConnection.makeSettings().baseUrl + 'ollama/';
+          const SERVER_URL = PageConfig.getBaseUrl() + 'ollama/';
           await pullOllamaModel(SERVER_URL, 'mistral');
           this.modelPulled = true;
           this.aiEnabled = true;

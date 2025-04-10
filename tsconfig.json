@@ -23,18 +23,6 @@
     "strict": true,
     "strictNullChecks": true,
     "target": "ES2018",
-    "baseUrl": "src",
-    "paths": {
-      "@services/*": [
-        "services/*"
-      ],
-      "@utils/*": [
-        "utils/*"
-      ],
-      "@components/*": [
-        "components/*"
-      ]
-    }
   },
   "include": [
     "src/**/*"

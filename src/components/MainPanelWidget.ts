@@ -3,13 +3,13 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { ServerConnection } from '@jupyterlab/services';
 import { LabIcon } from '@jupyterlab/ui-components';
 
-import { CellIssueWidget } from '@components/IssueWidget';
+import { CellIssueWidget } from './IssueWidget';
 
-import { ICellAccessibilityIssue } from '@utils/types';
-import { issueToCategory, issueCategoryNames } from '@utils/metadata';
+import { ICellIssue } from '../utils/types';
+import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
-import { analyzeCellsAccessibility } from '@utils/detection-utils';
-import { pullOllamaModel } from '@utils/ai-utils';
+import { analyzeCellsAccessibility } from '../utils/detection-utils';
+import { pullOllamaModel } from '../utils/ai-utils';
 
 export class MainPanelWidget extends Widget {
   private modelPulled: boolean = false;
@@ -142,29 +142,30 @@ export class MainPanelWidget extends Widget {
 
       try {
         // Identify issues
-        const issues: ICellAccessibilityIssue[] =
-          await analyzeCellsAccessibility(this.currentNotebook);
+        const notebookIssues: ICellIssue[] = await analyzeCellsAccessibility(
+          this.currentNotebook
+        );
 
-        if (issues.length === 0) {
+        if (notebookIssues.length === 0) {
           issuesContainer.innerHTML =
             '<div class="no-issues">No issues found</div>';
           return;
         }
 
         // Group issues by category
-        const issuesByCategory = new Map<string, ICellAccessibilityIssue[]>();
+        const issuesByCategory = new Map<string, ICellIssue[]>();
 
-        issues.forEach(issue => {
+        notebookIssues.forEach(notebookIssue => {
           const categoryName: string =
-            issueToCategory.get(issue.axeViolation.id) || 'Other';
+            issueToCategory.get(notebookIssue.violation.id) || 'Other';
           if (!issuesByCategory.has(categoryName)) {
             issuesByCategory.set(categoryName, []);
           }
-          issuesByCategory.get(categoryName)!.push(issue);
+          issuesByCategory.get(categoryName)!.push(notebookIssue);
         });
         // Create widgets for each category
         for (const categoryName of issueCategoryNames) {
-          const categoryIssues: ICellAccessibilityIssue[] =
+          const categoryIssues: ICellIssue[] =
             issuesByCategory.get(categoryName) || [];
 
           if (categoryIssues.length === 0) {

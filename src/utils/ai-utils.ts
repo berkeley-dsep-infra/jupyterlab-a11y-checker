@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { ICellAccessibilityIssue } from './types';
+import { ICellIssue } from './types';
 
-export function formatPrompt(issue: ICellAccessibilityIssue): string {
+export function formatPrompt(issue: ICellIssue): string {
   let prompt =
     'The following represents a jupyter notebook cell and a accessibility issue found in it.\n\n';
   const cellIssue = issue;
-  prompt += `Content: \n${cellIssue.contentRaw}\n\n`;
-  prompt += `Issue: ${cellIssue.axeViolation.id}\n\n`;
-  prompt += `Description: ${cellIssue.axeViolation.description}\n\n`;
+  prompt += `Content: \n${cellIssue.issueContentRaw}\n\n`;
+  prompt += `Issue: ${cellIssue.violation.id}\n\n`;
+  prompt += `Description: ${cellIssue.violation.description}\n\n`;
 
   prompt += `Respond in JSON format with the following fields:
     - exampleCellContent: A suggested fix for the cell, without any explanation.
@@ -47,13 +47,13 @@ export async function getFixSuggestions(
 }
 
 export async function getImageAltSuggestion(
-  issue: ICellAccessibilityIssue,
+  issue: ICellIssue,
   userURL: string,
   modelName: string
 ): Promise<string> {
   let prompt =
     'Given the following code, read the image url and respond with a short description of the image, without any explanation.';
-  prompt += `Content: \n${issue.contentRaw}\n\n`;
+  prompt += `Content: \n${issue.issueContentRaw}\n\n`;
 
   try {
     const body = JSON.stringify({

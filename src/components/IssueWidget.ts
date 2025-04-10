@@ -1,18 +1,15 @@
 import { Widget } from '@lumino/widgets';
-import { ICellAccessibilityIssue } from '../utils/types';
 import { Cell, ICellModel } from '@jupyterlab/cells';
+
 import { ImageAltFixWidget } from './FixWidget';
+import { ICellIssue } from '../utils/types';
 
 export class CellIssueWidget extends Widget {
-  private issue: ICellAccessibilityIssue;
+  private issue: ICellIssue;
   private cell: Cell<ICellModel>;
   private aiEnabled: boolean = false; // TODO: Create a higher order component to handle this
 
-  constructor(
-    issue: ICellAccessibilityIssue,
-    cell: Cell<ICellModel>,
-    aiEnabled: boolean
-  ) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super();
     this.issue = issue;
     this.cell = cell;
@@ -21,11 +18,11 @@ export class CellIssueWidget extends Widget {
     this.addClass('issue-widget');
     this.node.innerHTML = `
       <button class="issue-header-button">
-          <h3 class="issue-header">Issue: ${issue.axeViolation.id} <span class="material-icons chevron-down">expand_more</span></h3>
+          <h3 class="issue-header">Issue: ${issue.violation.id} <span class="chevron material-icons">expand_more</span></h3>
       </button>
       <div class="collapsible-content" style="display: none;">
           <p class="description">
-              ${issue.axeViolation.help} <a href="${issue.axeViolation.helpUrl}" target="_blank">(learn more about the issue)</a>.
+              ${issue.violation.description} <a href="${issue.violation.descriptionUrl}" target="_blank">(learn more about the issue)</a>.
           </p>
           <div class="button-container">
               <button class="jp-Button2 locate-button">
@@ -49,11 +46,8 @@ export class CellIssueWidget extends Widget {
         const isHidden = collapsibleContent.style.display === 'none';
         collapsibleContent.style.display = isHidden ? 'block' : 'none';
 
-        // Update the chevron class
-        const chevron = this.node.querySelector('.chevron-down');
-        if (chevron) {
-          chevron.classList.toggle('chevron-up', isHidden);
-        }
+        const expandIcon = this.node.querySelector('.chevron');
+        expandIcon?.classList.toggle('expanded');
       }
     });
 
@@ -73,7 +67,7 @@ export class CellIssueWidget extends Widget {
 
     // Dynamically add the TextFieldFixWidget if needed
     const fixWidgetContainer = this.node.querySelector('.fix-widget-container');
-    if (fixWidgetContainer && issue.axeViolation.id === 'image-alt') {
+    if (fixWidgetContainer && issue.violation.id === 'image-alt') {
       const textFieldFixWidget = new ImageAltFixWidget(
         this.issue,
         this.cell,

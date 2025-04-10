@@ -1,21 +1,17 @@
 import { Widget } from '@lumino/widgets';
 
-import { ICellAccessibilityIssue } from '@utils/types';
-import { getImageAltSuggestion } from '@utils/ai-utils';
+import { ICellIssue } from '../utils/types';
+import { getImageAltSuggestion } from '../utils/ai-utils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ServerConnection } from '@jupyterlab/services';
 
 abstract class FixWidget extends Widget {
-  protected issue: ICellAccessibilityIssue;
+  protected issue: ICellIssue;
   protected cell: Cell<ICellModel>;
   protected aiEnabled: boolean;
 
-  constructor(
-    issue: ICellAccessibilityIssue,
-    cell: Cell<ICellModel>,
-    aiEnabled: boolean
-  ) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super();
     this.issue = issue;
     this.cell = cell;
@@ -43,11 +39,7 @@ abstract class FixWidget extends Widget {
 }
 
 abstract class TextFieldFixWidget extends FixWidget {
-  constructor(
-    issue: ICellAccessibilityIssue,
-    cell: Cell<ICellModel>,
-    aiEnabled: boolean
-  ) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
 
     // Simplified DOM structure
@@ -101,11 +93,7 @@ abstract class TextFieldFixWidget extends FixWidget {
 }
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
-  constructor(
-    issue: ICellAccessibilityIssue,
-    cell: Cell<ICellModel>,
-    aiEnabled: boolean
-  ) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
   }
 
@@ -115,8 +103,8 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
       return;
     }
 
-    const entireCellContent = this.issue.contentRaw;
-    const target = this.issue.node.html;
+    const entireCellContent = this.cell.model.sharedModel.getSource();
+    const target = this.issue.issueContentRaw;
 
     // Handle HTML image tags
     const handleHtmlImage = (): string => {

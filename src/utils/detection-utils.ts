@@ -1,12 +1,13 @@
-import { NotebookPanel } from '@jupyterlab/notebook';
 import axe from 'axe-core';
-import { ICellAccessibilityIssue } from '@utils/types';
 import { marked } from 'marked';
+import { NotebookPanel } from '@jupyterlab/notebook';
+
+import { ICellIssue } from './types';
 
 export async function analyzeCellsAccessibility(
   panel: NotebookPanel
-): Promise<ICellAccessibilityIssue[]> {
-  const issues: ICellAccessibilityIssue[] = [];
+): Promise<ICellIssue[]> {
+  const notebookIssues: ICellIssue[] = [];
 
   const tempDiv = document.createElement('div');
   document.body.appendChild(tempDiv);
@@ -28,30 +29,36 @@ export async function analyzeCellsAccessibility(
       if (cellType === 'markdown') {
         const rawMarkdown = cell.model.sharedModel.getSource();
         if (rawMarkdown.trim()) {
-          // Parse markdown to HTML using marked
           tempDiv.innerHTML = await marked.parse(rawMarkdown);
 
-          // Run axe analysis on our clean HTML
           const results = await axe.run(tempDiv, axeConfig);
           const violations = results.violations;
 
+          // Can have multiple violations in a single cell
           if (violations.length > 0) {
             violations.forEach(violation => {
               violation.nodes.forEach(node => {
-                issues.push({
+                notebookIssues.push({
                   cellIndex: i,
                   cellType: cellType,
-                  axeViolation: violation,
-                  node: node,
-                  contentRaw: rawMarkdown
+                  violation: {
+                    id: violation.id,
+                    description: violation.description,
+                    descriptionUrl: violation.helpUrl
+                  },
+                  issueContentRaw: node.html
                 });
               });
             });
           }
 
           // Add custom image issue detection
-          issues.push(...detectImageIssues(rawMarkdown, i, cellType));
-          issues.push(...detectTableIssues(rawMarkdown, i, cellType));
+          notebookIssues.push(
+            ...detectImageIssuesInCell(rawMarkdown, i, cellType)
+          );
+          notebookIssues.push(
+            ...detectTableIssuesInCell(rawMarkdown, i, cellType)
+          );
         }
       } else if (cellType === 'code') {
         const codeInput = cell.node.querySelector('.jp-InputArea-editor');
@@ -65,151 +72,88 @@ export async function analyzeCellsAccessibility(
     tempDiv.remove();
   }
 
-  return issues;
+  return notebookIssues;
 }
 
-// ** IMAGE ISSUES */
-
-// Detects images without alt text in markdown content
-export function detectImageIssues(
+// Image
+function detectImageIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
   cellType: string
-): ICellAccessibilityIssue[] {
-  const issues: ICellAccessibilityIssue[] = [];
+): ICellIssue[] {
+  const notebookIssues: ICellIssue[] = [];
 
-  // Check for markdown images without alt text
-  const markdownImageRegex = /!\[\]\([^)]+\)/g;
+  // Check for images without alt text in markdown syntax
+  const mdSyntaxMissingAltRegex = /!\[\]\([^)]+\)/g;
+
+  // Check for images without alt tag or empty alt tag in HTML syntax
+  const htmlSyntaxMissingAltRegex = /<img[^>]*alt=""[^>]*>/g;
   let match;
-  while ((match = markdownImageRegex.exec(rawMarkdown)) !== null) {
-    issues.push(
-      createImageAltIssue(cellIndex, cellType, match[0], rawMarkdown)
-    );
+  while (
+    (match = mdSyntaxMissingAltRegex.exec(rawMarkdown)) !== null ||
+    (match = htmlSyntaxMissingAltRegex.exec(rawMarkdown)) !== null
+  ) {
+    notebookIssues.push({
+      cellIndex,
+      cellType: cellType as 'code' | 'markdown',
+      violation: {
+        id: 'image-alt',
+        description: 'Images must have alternate text',
+        descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.7/image-alt'
+      },
+      issueContentRaw: match[0]
+    });
   }
-
-  // Check for HTML images with empty alt tags
-  const emptyAltRegex = /<img[^>]*alt=""[^>]*>/g;
-  while ((match = emptyAltRegex.exec(rawMarkdown)) !== null) {
-    issues.push(
-      createImageAltIssue(cellIndex, cellType, match[0], rawMarkdown)
-    );
-  }
-
-  return issues;
+  return notebookIssues;
 }
 
-// Creates a standardized image alt issue object
-function createImageAltIssue(
-  cellIndex: number,
-  cellType: string,
-  html: string,
-  contentRaw: string
-): ICellAccessibilityIssue {
-  return {
-    cellIndex,
-    cellType,
-    axeViolation: {
-      id: 'image-alt',
-      help: 'Images must have alternate text',
-      helpUrl: 'https://dequeuniversity.com/rules/axe/4.7/image-alt',
-      description: 'Images must have alternate text',
-      tags: ['wcag2a', 'wcag2aa'],
-      nodes: []
-    },
-    node: {
-      html,
-      target: [html],
-      any: [],
-      all: [],
-      none: []
-    },
-    contentRaw
-  };
-}
-
-// ** TABLE ISSUES */
-
-// Detects tables without headers
-export function detectTableIssues(
+// Table
+function detectTableIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
   cellType: string
-): ICellAccessibilityIssue[] {
-  const issues: ICellAccessibilityIssue[] = [];
+): ICellIssue[] {
+  const notebookIssues: ICellIssue[] = [];
 
   // Check for tables without th tags
   const tableWithoutThRegex =
     /<table[^>]*>(?![\s\S]*?<th[^>]*>)[\s\S]*?<\/table>/gi;
   let match;
   while ((match = tableWithoutThRegex.exec(rawMarkdown)) !== null) {
-    issues.push(createTableThIssue(cellIndex, cellType, match[0], rawMarkdown));
+    notebookIssues.push({
+      cellIndex,
+      cellType: cellType as 'code' | 'markdown',
+      violation: {
+        id: 'td-has-header',
+        description: 'Tables must have header information.',
+        descriptionUrl: ''
+      },
+      issueContentRaw: match[0]
+    });
   }
 
   // Check for tables without caption tags
   const tableWithoutCaptionRegex =
     /<table[^>]*>(?![\s\S]*?<caption[^>]*>)[\s\S]*?<\/table>/gi;
   while ((match = tableWithoutCaptionRegex.exec(rawMarkdown)) !== null) {
-    issues.push(
-      createTableCaptionIssue(cellIndex, cellType, match[0], rawMarkdown)
-    );
+    notebookIssues.push({
+      cellIndex,
+      cellType: cellType as 'code' | 'markdown',
+      violation: {
+        id: 'table-has-caption',
+        description: 'Tables must have caption information.',
+        descriptionUrl: ''
+      },
+      issueContentRaw: match[0]
+    });
   }
-
-  return issues;
+  return notebookIssues;
 }
 
-// Creates a standardized table th issue object
-function createTableThIssue(
-  cellIndex: number,
-  cellType: string,
-  html: string,
-  contentRaw: string
-): ICellAccessibilityIssue {
-  return {
-    cellIndex,
-    cellType,
-    axeViolation: {
-      id: 'td-has-header',
-      help: 'Tables must have headers',
-      helpUrl: '',
-      description: 'Tables must have headers',
-      tags: ['wcag2a', 'wcag2aa'],
-      nodes: []
-    },
-    node: {
-      html,
-      target: [html],
-      any: [],
-      all: [],
-      none: []
-    },
-    contentRaw
-  };
-}
+// TODO: Headings
 
-function createTableCaptionIssue(
-  cellIndex: number,
-  cellType: string,
-  html: string,
-  contentRaw: string
-): ICellAccessibilityIssue {
-  return {
-    cellIndex,
-    cellType,
-    axeViolation: {
-      id: 'table-has-caption',
-      help: 'Tables must have captions',
-      helpUrl: '',
-      description: 'Tables must have captions',
-      tags: ['wcag2a', 'wcag2aa'],
-      nodes: []
-    },
-    node: {
-      html,
-      target: [html],
-      any: [],
-      all: [],
-      none: []
-    },
-    contentRaw
-  };
-}
+// TODO: Color
+
+// TODO: Links
+
+// TODO: Other

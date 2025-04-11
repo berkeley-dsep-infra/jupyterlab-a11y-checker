@@ -11,12 +11,10 @@ export interface ICellAccessibilityIssue {
 export interface ICellIssue {
   cellIndex: number;
   cellType: 'markdown' | 'code';
-  violation: IViolation;
+  violation: {
+    id: string;
+    description: string;
+    descriptionUrl?: string;
+  };
   issueContentRaw: string;
-}
-
-export interface IViolation {
-  id: string;
-  description: string;
-  descriptionUrl?: string;
 }

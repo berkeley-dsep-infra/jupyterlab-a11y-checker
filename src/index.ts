@@ -4,14 +4,14 @@ import {
 } from '@jupyterlab/application';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ILabShell } from '@jupyterlab/application';
-import { A11yMainPanel } from './components/MainPanel';
+import { MainPanelWidget } from './components/MainPanelWidget';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-a11y-fix',
   autoStart: true,
   requires: [ILabShell],
   activate: (app: JupyterFrontEnd, labShell: ILabShell) => {
-    const panel = new A11yMainPanel();
+    const panel = new MainPanelWidget();
 
     labShell.add(panel, 'right');
 

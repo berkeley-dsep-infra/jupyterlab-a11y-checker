@@ -1,17 +1,21 @@
 import { Widget } from '@lumino/widgets';
-import { ICellAccessibilityIssue } from '../utils/types';
+
+import { ICellIssue } from '../utils/types';
+import { getImageAltSuggestion } from '../utils/ai-utils';
+
 import { Cell, ICellModel } from '@jupyterlab/cells';
-import { getImageAltSuggestion } from '../services/AIService';
 import { ServerConnection } from '@jupyterlab/services';
 
 abstract class FixWidget extends Widget {
-  protected issue: ICellAccessibilityIssue;
+  protected issue: ICellIssue;
   protected cell: Cell<ICellModel>;
+  protected aiEnabled: boolean;
 
-  constructor(issue: ICellAccessibilityIssue, cell: Cell<ICellModel>) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super();
     this.issue = issue;
     this.cell = cell;
+    this.aiEnabled = aiEnabled;
   }
 
   // Method to remove the widget from the DOM
@@ -35,8 +39,8 @@ abstract class FixWidget extends Widget {
 }
 
 abstract class TextFieldFixWidget extends FixWidget {
-  constructor(issue: ICellAccessibilityIssue, cell: Cell<ICellModel>) {
-    super(issue, cell);
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+    super(issue, cell, aiEnabled);
 
     // Simplified DOM structure
     this.node.innerHTML = `
@@ -55,7 +59,7 @@ abstract class TextFieldFixWidget extends FixWidget {
         </div>
       `;
 
-    // Get references to DOM elements
+    // Apply Button
     const applyButton = this.node.querySelector(
       '.apply-button'
     ) as HTMLButtonElement;
@@ -69,9 +73,12 @@ abstract class TextFieldFixWidget extends FixWidget {
       });
     }
 
+    // Suggest Button
     const suggestButton = this.node.querySelector(
       '.suggest-button'
     ) as HTMLButtonElement;
+
+    suggestButton.style.display = aiEnabled ? 'flex' : 'none';
 
     if (suggestButton) {
       suggestButton.addEventListener('click', () =>
@@ -86,8 +93,8 @@ abstract class TextFieldFixWidget extends FixWidget {
 }
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
-  constructor(issue: ICellAccessibilityIssue, cell: Cell<ICellModel>) {
-    super(issue, cell);
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+    super(issue, cell, aiEnabled);
   }
 
   applyTextToCell(providedAltText: string): void {
@@ -96,8 +103,8 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
       return;
     }
 
-    const entireCellContent = this.issue.contentRaw;
-    const target = this.issue.node.html;
+    const entireCellContent = this.cell.model.sharedModel.getSource();
+    const target = this.issue.issueContentRaw;
 
     // Handle HTML image tags
     const handleHtmlImage = (): string => {

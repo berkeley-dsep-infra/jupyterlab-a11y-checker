@@ -125,8 +125,8 @@ function detectTableIssuesInCell(
       cellType: cellType as 'code' | 'markdown',
       violation: {
         id: 'td-has-header',
-        description: 'Tables must have header information.',
-        descriptionUrl: ''
+        description: 'Tables must have header information',
+        descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.10/td-has-header?application=RuleDescription'
       },
       issueContentRaw: match[0]
     });
@@ -141,7 +141,7 @@ function detectTableIssuesInCell(
       cellType: cellType as 'code' | 'markdown',
       violation: {
         id: 'table-has-caption',
-        description: 'Tables must have caption information.',
+        description: 'Tables must have caption information',
         descriptionUrl: ''
       },
       issueContentRaw: match[0]

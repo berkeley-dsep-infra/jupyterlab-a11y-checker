@@ -136,6 +136,7 @@ export class MainPanelWidget extends Widget {
       const issuesContainer = this.node.querySelector(
         '.issues-container'
       ) as HTMLElement;
+      issuesContainer.innerHTML = '';
       analyzeControlButton.innerHTML = `${progressIcon} Please wait...`;
       analyzeControlButton.disabled = true;
 
@@ -198,6 +199,7 @@ export class MainPanelWidget extends Widget {
           });
         }
       } catch (error) {
+        issuesContainer.innerHTML = '';
         console.error('Error analyzing notebook:', error);
       } finally {
         analyzeControlButton.innerHTML = analyzeControlButtonText;
@@ -208,5 +210,10 @@ export class MainPanelWidget extends Widget {
 
   setNotebook(notebook: NotebookPanel) {
     this.currentNotebook = notebook;
+
+    const issuesContainer = this.node.querySelector(
+      '.issues-container'
+    ) as HTMLElement;
+    issuesContainer.innerHTML = '';
   }
 }

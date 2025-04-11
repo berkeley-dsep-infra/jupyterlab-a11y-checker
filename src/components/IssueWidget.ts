@@ -1,7 +1,7 @@
 import { Widget } from '@lumino/widgets';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 
-import { ImageAltFixWidget } from './FixWidget';
+import { ImageAltFixWidget, TableCaptionFixWidget, TableHeaderFixWidget } from './FixWidget';
 import { ICellIssue } from '../utils/types';
 
 export class CellIssueWidget extends Widget {
@@ -57,7 +57,7 @@ export class CellIssueWidget extends Widget {
     // Show suggest button initially if AI is enabled
     const mainPanel = document.getElementById('a11y-sidebar') as HTMLElement;
     if (mainPanel) {
-      const aiToggleButton = mainPanel.querySelector('.ai-toggle');
+      const aiToggleButton = mainPanel.querySelector('.ai-control-button');
       if (aiToggleButton && aiToggleButton.textContent?.includes('Enabled')) {
         this.aiEnabled = true;
       } else {
@@ -67,13 +67,31 @@ export class CellIssueWidget extends Widget {
 
     // Dynamically add the TextFieldFixWidget if needed
     const fixWidgetContainer = this.node.querySelector('.fix-widget-container');
-    if (fixWidgetContainer && issue.violation.id === 'image-alt') {
+    if (!fixWidgetContainer) {
+      return;
+    }
+    
+    if (this.issue.violation.id === 'image-alt') {
       const textFieldFixWidget = new ImageAltFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(textFieldFixWidget.node);
+    } else if (this.issue.violation.id === 'table-has-caption') {
+      const tableCaptionFixWidget = new TableCaptionFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
+      );
+      fixWidgetContainer.appendChild(tableCaptionFixWidget.node);
+    } else if (this.issue.violation.id === 'td-has-header') {
+      const tableHeaderFixWidget = new TableHeaderFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
+      );
+      fixWidgetContainer.appendChild(tableHeaderFixWidget.node);
     }
   }
 

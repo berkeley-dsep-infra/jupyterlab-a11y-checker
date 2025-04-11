@@ -102,3 +102,32 @@ export async function pullOllamaModel(
     throw error;
   }
 }
+
+
+export async function getTableCaptionSuggestion(
+  issue: ICellIssue,
+  userURL: string,
+  modelName: string
+): Promise<string> {
+  let prompt =
+    `Given this HTML table, please suggest a clear and concise caption that describes the table's content. Here's the table:
+    ${issue.issueContentRaw}
+    Please provide just the caption text without any HTML tags or formatting.`;
+
+  try {
+    const body = JSON.stringify({
+      model: modelName,
+      prompt: prompt,
+      stream: false
+    });
+
+    const response = await axios.post(userURL + 'api/generate', body, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const responseText = await response.data.response.trim();
+    return responseText;
+  } catch (error) {
+    console.error('Error getting suggestions:', error);
+    return 'Error';
+  }
+}

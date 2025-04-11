@@ -126,7 +126,8 @@ function detectTableIssuesInCell(
       violation: {
         id: 'td-has-header',
         description: 'Tables must have header information',
-        descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.10/td-has-header?application=RuleDescription'
+        descriptionUrl:
+          'https://dequeuniversity.com/rules/axe/4.10/td-has-header?application=RuleDescription'
       },
       issueContentRaw: match[0]
     });

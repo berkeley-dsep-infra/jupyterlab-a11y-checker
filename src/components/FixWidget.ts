@@ -1,7 +1,10 @@
 import { Widget } from '@lumino/widgets';
 
 import { ICellIssue } from '../utils/types';
-import { getImageAltSuggestion, getTableCaptionSuggestion } from '../utils/ai-utils';
+import {
+  getImageAltSuggestion,
+  getTableCaptionSuggestion
+} from '../utils/ai-utils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ServerConnection } from '@jupyterlab/services';
@@ -38,6 +41,7 @@ abstract class FixWidget extends Widget {
   }
 }
 
+// TextFields
 abstract class TextFieldFixWidget extends FixWidget {
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
@@ -321,6 +325,12 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
   }
 }
 
+// Dropdowns
+
+// TODO: abstract classDropdownFixWidget extends FixWidget {}
+// The reason for making this class is because we might have a dropdown interface for another issue
+
+// TODO: Make this class extend DropdownFixWidget
 export class TableHeaderFixWidget extends FixWidget {
   private selectedOption: string = '';
 
@@ -349,26 +359,40 @@ export class TableHeaderFixWidget extends FixWidget {
           </div>
         </div>
         <button class="jp-Button2 apply-button">
-            <svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span class="material-icons">check</span>
             <div>Apply</div>
           </button>
         <div class="button-container">
-          ${aiEnabled ? `
+          ${
+            aiEnabled
+              ? `
             <button class="jp-Button2 suggest-button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="#fff" d="M19 19a1 1 0 0 1 .117 1.993L19 21h-7a1 1 0 0 1-.117-1.993L12 19zm.631-14.632a2.5 2.5 0 0 1 0 3.536L8.735 18.8a1.5 1.5 0 0 1-.44.305l-3.804 1.729c-.842.383-1.708-.484-1.325-1.326l1.73-3.804a1.5 1.5 0 0 1 .304-.44L16.096 4.368a2.5 2.5 0 0 1 3.535 0m-2.12 1.414L6.677 16.614l-.589 1.297l1.296-.59L18.217 6.49a.5.5 0 1 0-.707-.707M6 1a1 1 0 0 1 .946.677l.13.378a3 3 0 0 0 1.869 1.87l.378.129a1 1 0 0 1 0 1.892l-.378.13a3 3 0 0 0-1.87 1.869l-.129.378a1 1 0 0 1-1.892 0l-.13-.378a3 3 0 0 0-1.869-1.87l-.378-.129a1 1 0 0 1 0-1.892l.378-.13a3 3 0 0 0 1.87-1.869l.129-.378A1 1 0 0 1 6 1m0 3.196A5 5 0 0 1 5.196 5q.448.355.804.804q.355-.448.804-.804A5 5 0 0 1 6 4.196"/></g></svg>
+              <span class="material-icons">auto_fix_high</span>
               <div>Get AI Suggestions</div>
             </button>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
       </div>
     `;
 
     // Dropdown button click handler
-    const dropdownButton = this.node.querySelector('.dropdown-button') as HTMLButtonElement;
-    const dropdownContent = this.node.querySelector('.dropdown-content') as HTMLDivElement;
-    const dropdownText = this.node.querySelector('.dropdown-text') as HTMLSpanElement;
-    const applyButton = this.node.querySelector('.apply-button') as HTMLButtonElement;
-    const suggestButton = this.node.querySelector('.suggest-button') as HTMLButtonElement;
+    const dropdownButton = this.node.querySelector(
+      '.dropdown-button'
+    ) as HTMLButtonElement;
+    const dropdownContent = this.node.querySelector(
+      '.dropdown-content'
+    ) as HTMLDivElement;
+    const dropdownText = this.node.querySelector(
+      '.dropdown-text'
+    ) as HTMLSpanElement;
+    const applyButton = this.node.querySelector(
+      '.apply-button'
+    ) as HTMLButtonElement;
+    const suggestButton = this.node.querySelector(
+      '.suggest-button'
+    ) as HTMLButtonElement;
 
     // Toggle dropdown
     dropdownButton.addEventListener('click', () => {
@@ -377,7 +401,7 @@ export class TableHeaderFixWidget extends FixWidget {
     });
 
     // Close dropdown when clicking outside
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
       if (!this.node.contains(event.target as Node)) {
         dropdownContent.classList.add('hidden');
         dropdownButton.classList.remove('active');
@@ -390,7 +414,8 @@ export class TableHeaderFixWidget extends FixWidget {
       option.addEventListener('click', () => {
         const value = (option as HTMLDivElement).dataset.value || '';
         this.selectedOption = value;
-        dropdownText.textContent = (option as HTMLDivElement).textContent?.trim() || '';
+        dropdownText.textContent =
+          (option as HTMLDivElement).textContent?.trim() || '';
         dropdownContent.classList.add('hidden');
         dropdownButton.classList.remove('active');
         applyButton.style.display = 'flex';
@@ -417,8 +442,6 @@ export class TableHeaderFixWidget extends FixWidget {
             ServerConnection.makeSettings().baseUrl + 'ollama/',
             'mistral'
           );*/
-          
-
         } catch (error) {
           console.error('Error getting suggestions:', error);
         }
@@ -431,7 +454,7 @@ export class TableHeaderFixWidget extends FixWidget {
   private applyHeaderToTable(headerType: string): void {
     const entireCellContent = this.cell.model.sharedModel.getSource();
     const target = this.issue.issueContentRaw;
-    
+
     const convertToHeaderCell = (cell: string): string => {
       // Remove any existing th tags if present
       cell = cell.replace(/<\/?th[^>]*>/g, '');
@@ -445,15 +468,19 @@ export class TableHeaderFixWidget extends FixWidget {
       const parser = new DOMParser();
       const doc = parser.parseFromString(tableHtml, 'text/html');
       const table = doc.querySelector('table');
-      
-      if (!table) return tableHtml;
+
+      if (!table) {
+        return tableHtml;
+      }
 
       // Get all rows, filtering out empty ones
-      const rows = Array.from(table.querySelectorAll('tr')).filter(row => 
-        row.querySelectorAll('td, th').length > 0
+      const rows = Array.from(table.querySelectorAll('tr')).filter(
+        row => row.querySelectorAll('td, th').length > 0
       );
-      
-      if (rows.length === 0) return tableHtml;
+
+      if (rows.length === 0) {
+        return tableHtml;
+      }
 
       switch (headerType) {
         case 'first-row': {

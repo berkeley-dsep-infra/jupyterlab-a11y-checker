@@ -1,7 +1,11 @@
 import { Widget } from '@lumino/widgets';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 
-import { ImageAltFixWidget, TableCaptionFixWidget, TableHeaderFixWidget } from './FixWidget';
+import {
+  ImageAltFixWidget,
+  TableCaptionFixWidget,
+  TableHeaderFixWidget
+} from './FixWidget';
 import { ICellIssue } from '../utils/types';
 
 export class CellIssueWidget extends Widget {
@@ -70,7 +74,7 @@ export class CellIssueWidget extends Widget {
     if (!fixWidgetContainer) {
       return;
     }
-    
+
     if (this.issue.violation.id === 'image-alt') {
       const textFieldFixWidget = new ImageAltFixWidget(
         this.issue,
@@ -79,6 +83,7 @@ export class CellIssueWidget extends Widget {
       );
       fixWidgetContainer.appendChild(textFieldFixWidget.node);
     } else if (this.issue.violation.id === 'table-has-caption') {
+      console.log('Table caption issue');
       const tableCaptionFixWidget = new TableCaptionFixWidget(
         this.issue,
         this.cell,

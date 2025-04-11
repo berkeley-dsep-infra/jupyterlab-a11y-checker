@@ -434,7 +434,7 @@
     }
 }
 
-.hidden {
+.hidden:not(.dropdown-content) {
     display: none;
 }
 
@@ -452,6 +452,8 @@
     position: relative;
     width: calc(100% - 16px);
     margin-bottom: 8px;
+    z-index: 9999;
+    isolation: isolate;
 }
 
 .dropdown-button {
@@ -506,6 +508,10 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.dropdown-content.hidden {
+    display: none;
+}
+
 .dropdown-option {
     padding: 8px 12px;
     cursor: pointer;
@@ -514,10 +520,6 @@
 .dropdown-option:hover {
     background-color: #2a4365;
     color: white;
-}
-
-.hidden {
-    display: none;
 }
 
 .table-header-fix-widget {

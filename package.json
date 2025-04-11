@@ -1,6 +1,6 @@
 {
     "name": "a11y-checker",
-    "version": "0.1.0",
+    "version": "0.1.5-alpha.0",
     "type": "module",
     "description": "A JupyterLab extension that checks and suggests fixes for a11y issues.",
     "keywords": [

@@ -9,20 +9,20 @@ export const issueCategoryNames = [
 ];
 
 export const issueToCategory = new Map<string, string>([
-  // Images
+  // 1. Images
   ['image-alt', 'Images'],
 
-  // TODO: Headings
+  // TODO: 2. Headings
 
-  // TODO: Lists
+  // TODO: 3. Lists
 
-  // Tables
+  // TODO: 4. Tables
   ['td-has-header', 'Tables'],
   ['table-has-caption', 'Tables']
 
-  // TODO: Color
+  // TODO: 5. Color
 
-  // TODO: Links
+  // TODO: 6. Links
 
-  // TODO: Other
+  // TODO: 7. Other
 ]);

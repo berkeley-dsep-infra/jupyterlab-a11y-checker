@@ -101,7 +101,12 @@ export class CellIssueWidget extends Widget {
   }
 
   private navigateToCell(): void {
-    this.cell.node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    this.cell.node.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+
+    requestAnimationFrame(() => {
+      this.cell.node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
     this.cell.node.style.transition = 'background-color 0.5s ease';
     this.cell.node.style.backgroundColor = '#DB3939';
 

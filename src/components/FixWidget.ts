@@ -327,7 +327,7 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
 
 // Dropdowns
 
-// TODO: abstract classDropdownFixWidget extends FixWidget {}
+// TODO: abstract class DropdownFixWidget extends FixWidget {}
 // The reason for making this class is because we might have a dropdown interface for another issue
 
 // TODO: Make this class extend DropdownFixWidget

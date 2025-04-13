@@ -3,7 +3,7 @@ requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0
 build-backend = "hatchling.build"
 
 [project]
-name = "a11y_checker"
+name = "jupyterlab_a11y_checker"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"

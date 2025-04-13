@@ -327,16 +327,17 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
 
 // Dropdowns
 
-// TODO: abstract class DropdownFixWidget extends FixWidget {}
-// The reason for making this class is because we might have a dropdown interface for another issue
-
-// TODO: Make this class extend DropdownFixWidget
-export class TableHeaderFixWidget extends FixWidget {
-  private selectedOption: string = '';
+abstract class DropdownFixWidget extends FixWidget {
+  protected dropdownButton: HTMLButtonElement;
+  protected dropdownContent: HTMLDivElement;
+  protected dropdownText: HTMLSpanElement;
+  protected applyButton: HTMLButtonElement;
+  protected selectedOption: string = '';
 
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
 
+    // Simplified DOM structure
     this.node.innerHTML = `
       <div class="table-header-fix-widget">
         <div class="custom-dropdown">
@@ -362,49 +363,30 @@ export class TableHeaderFixWidget extends FixWidget {
             <span class="material-icons">check</span>
             <div>Apply</div>
           </button>
-        <div class="button-container">
-          ${
-            aiEnabled
-              ? `
-            <button class="jp-Button2 suggest-button">
-              <span class="material-icons">auto_fix_high</span>
-              <div>Get AI Suggestions</div>
-            </button>
-          `
-              : ''
-          }
-        </div>
       </div>
     `;
 
-    // Dropdown button click handler
-    const dropdownButton = this.node.querySelector(
-      '.dropdown-button'
-    ) as HTMLButtonElement;
-    const dropdownContent = this.node.querySelector(
-      '.dropdown-content'
-    ) as HTMLDivElement;
-    const dropdownText = this.node.querySelector(
-      '.dropdown-text'
-    ) as HTMLSpanElement;
-    const applyButton = this.node.querySelector(
-      '.apply-button'
-    ) as HTMLButtonElement;
-    const suggestButton = this.node.querySelector(
-      '.suggest-button'
-    ) as HTMLButtonElement;
+    this.dropdownButton = this.node.querySelector('.dropdown-button') as HTMLButtonElement;
+    this.dropdownContent = this.node.querySelector('.dropdown-content') as HTMLDivElement;
+    this.dropdownText = this.node.querySelector('.dropdown-text') as HTMLSpanElement;
+    this.applyButton = this.node.querySelector('.apply-button') as HTMLButtonElement;
 
+    // Setup dropdown handlers
+    this.setupDropdownHandlers();
+  }
+
+  private setupDropdownHandlers(): void {
     // Toggle dropdown
-    dropdownButton.addEventListener('click', () => {
-      dropdownContent.classList.toggle('hidden');
-      dropdownButton.classList.toggle('active');
+    this.dropdownButton.addEventListener('click', () => {
+      this.dropdownContent.classList.toggle('hidden');
+      this.dropdownButton.classList.toggle('active');
     });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', event => {
       if (!this.node.contains(event.target as Node)) {
-        dropdownContent.classList.add('hidden');
-        dropdownButton.classList.remove('active');
+        this.dropdownContent.classList.add('hidden');
+        this.dropdownButton.classList.remove('active');
       }
     });
 
@@ -414,44 +396,30 @@ export class TableHeaderFixWidget extends FixWidget {
       option.addEventListener('click', () => {
         const value = (option as HTMLDivElement).dataset.value || '';
         this.selectedOption = value;
-        dropdownText.textContent =
-          (option as HTMLDivElement).textContent?.trim() || '';
-        dropdownContent.classList.add('hidden');
-        dropdownButton.classList.remove('active');
-        applyButton.style.display = 'flex';
+        this.dropdownText.textContent = (option as HTMLDivElement).textContent?.trim() || '';
+        this.dropdownContent.classList.add('hidden');
+        this.dropdownButton.classList.remove('active');
+        this.applyButton.style.display = 'flex';
       });
     });
 
     // Apply button
-    applyButton.addEventListener('click', () => {
+    this.applyButton.addEventListener('click', () => {
       if (this.selectedOption) {
-        this.applyHeaderToTable(this.selectedOption);
+        this.applyDropdownSelection(this.selectedOption);
       }
     });
-
-    // AI Suggestions button
-    if (aiEnabled && suggestButton) {
-      suggestButton.style.display = 'flex';
-      suggestButton.addEventListener('click', async () => {
-        try {
-          // Call AI Model
-          /*const prompt = formatPrompt(this.issue);
-          
-          const suggestion = await getFixSuggestions(
-            prompt,
-            ServerConnection.makeSettings().baseUrl + 'ollama/',
-            'mistral'
-          );*/
-        } catch (error) {
-          console.error('Error getting suggestions:', error);
-        }
-      });
-    } else if (suggestButton) {
-      suggestButton.style.display = 'none';
-    }
   }
 
-  private applyHeaderToTable(headerType: string): void {
+  abstract applyDropdownSelection(selectedValue: string): void;
+}
+
+export class TableHeaderFixWidget extends DropdownFixWidget {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+    super(issue, cell, aiEnabled);
+  }
+
+  applyDropdownSelection(headerType: string): void {
     const entireCellContent = this.cell.model.sharedModel.getSource();
     const target = this.issue.issueContentRaw;
 

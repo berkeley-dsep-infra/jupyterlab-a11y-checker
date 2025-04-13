@@ -321,13 +321,13 @@ __metadata:
   linkType: hard
 
 "@eslint-community/eslint-utils@npm:^4.2.0, @eslint-community/eslint-utils@npm:^4.4.0":
-  version: 4.5.1
-  resolution: "@eslint-community/eslint-utils@npm:4.5.1"
+  version: 4.6.0
+  resolution: "@eslint-community/eslint-utils@npm:4.6.0"
   dependencies:
     eslint-visitor-keys: "npm:^3.4.3"
   peerDependencies:
     eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
-  checksum: 853e681fd134e96ce88066b0cfb3ce8b7a87afc9ea207139059f51e302eb9e6de4ab73c9eeb3995407bd6c08f836aade9fce47e91124c254a4eea24a5465c2ac
+  checksum: 1d866093009949a269d5b5d19297fd8ed27c537edb1238f760af09b4ca7fd51d223393c223a664faa79b36dd4568a7d8fa78b2a96c4f90e412f8ce9720b2fd64
   languageName: node
   linkType: hard
 
@@ -571,37 +571,37 @@ __metadata:
   version: 4.4.0
   resolution: "@jupyterlab/builder@npm:4.4.0"
   dependencies:
-    "@lumino/algorithm": ^2.0.3
-    "@lumino/application": ^2.4.3
-    "@lumino/commands": ^2.3.2
-    "@lumino/coreutils": ^2.2.1
-    "@lumino/disposable": ^2.1.4
-    "@lumino/domutils": ^2.0.3
-    "@lumino/dragdrop": ^2.1.6
-    "@lumino/messaging": ^2.0.3
-    "@lumino/properties": ^2.0.3
-    "@lumino/signaling": ^2.1.4
-    "@lumino/virtualdom": ^2.0.3
-    "@lumino/widgets": ^2.7.0
-    ajv: ^8.12.0
-    commander: ^9.4.1
-    css-loader: ^6.7.1
-    duplicate-package-checker-webpack-plugin: ^3.0.0
-    fs-extra: ^10.1.0
-    glob: ~7.1.6
-    license-webpack-plugin: ^2.3.14
-    mini-css-extract-plugin: ^2.7.0
-    mini-svg-data-uri: ^1.4.4
-    path-browserify: ^1.0.0
-    process: ^0.11.10
-    source-map-loader: ~1.0.2
-    style-loader: ~3.3.1
-    supports-color: ^7.2.0
-    terser-webpack-plugin: ^5.3.7
-    webpack: ^5.76.1
-    webpack-cli: ^5.0.1
-    webpack-merge: ^5.8.0
-    worker-loader: ^3.0.2
+    "@lumino/algorithm": "npm:^2.0.3"
+    "@lumino/application": "npm:^2.4.3"
+    "@lumino/commands": "npm:^2.3.2"
+    "@lumino/coreutils": "npm:^2.2.1"
+    "@lumino/disposable": "npm:^2.1.4"
+    "@lumino/domutils": "npm:^2.0.3"
+    "@lumino/dragdrop": "npm:^2.1.6"
+    "@lumino/messaging": "npm:^2.0.3"
+    "@lumino/properties": "npm:^2.0.3"
+    "@lumino/signaling": "npm:^2.1.4"
+    "@lumino/virtualdom": "npm:^2.0.3"
+    "@lumino/widgets": "npm:^2.7.0"
+    ajv: "npm:^8.12.0"
+    commander: "npm:^9.4.1"
+    css-loader: "npm:^6.7.1"
+    duplicate-package-checker-webpack-plugin: "npm:^3.0.0"
+    fs-extra: "npm:^10.1.0"
+    glob: "npm:~7.1.6"
+    license-webpack-plugin: "npm:^2.3.14"
+    mini-css-extract-plugin: "npm:^2.7.0"
+    mini-svg-data-uri: "npm:^1.4.4"
+    path-browserify: "npm:^1.0.0"
+    process: "npm:^0.11.10"
+    source-map-loader: "npm:~1.0.2"
+    style-loader: "npm:~3.3.1"
+    supports-color: "npm:^7.2.0"
+    terser-webpack-plugin: "npm:^5.3.7"
+    webpack: "npm:^5.76.1"
+    webpack-cli: "npm:^5.0.1"
+    webpack-merge: "npm:^5.8.0"
+    worker-loader: "npm:^3.0.2"
   bin:
     build-labextension: lib/build-labextension.js
   checksum: 06e14bdc57ca43ccf157afa19ffa8af788fccfdc773975541e9d3856ef563c862ce87f31c4e5d9044c510f8808ef53c0220a0626d6802a0feeb6b5aa752b57c1
@@ -1570,11 +1570,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*":
-  version: 22.14.0
-  resolution: "@types/node@npm:22.14.0"
+  version: 22.14.1
+  resolution: "@types/node@npm:22.14.1"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 8bfae1d3c428b122d23750690bdc5b8295a53949823563ec60654a24ece98bde4fc0d2b5f06ddc6def6f01a08dfe62cece7c93e60964b74f736145dad5ee1302
+  checksum: e22363f40ac8290da2bb5261c2b348241fd93b000908cefd3c56575df9d4f6b8d102fc8631275eac7ec4a9e0ac4f38f01c9d8104ebbda76c936aef96fd1e55f3
   languageName: node
   linkType: hard
 
@@ -3180,9 +3180,9 @@ __metadata:
   version: 10.1.0
   resolution: "fs-extra@npm:10.1.0"
   dependencies:
-    graceful-fs: ^4.2.0
-    jsonfile: ^6.0.1
-    universalify: ^2.0.0
+    graceful-fs: "npm:^4.2.0"
+    jsonfile: "npm:^6.0.1"
+    universalify: "npm:^2.0.0"
   checksum: dc94ab37096f813cc3ca12f0f1b5ad6744dfed9ed21e953d72530d103cea193c2f81584a39e9dee1bea36de5ee66805678c0dddc048e8af1427ac19c00fffc50
   languageName: node
   linkType: hard
@@ -3813,15 +3813,15 @@ __metadata:
   linkType: hard
 
 "lib0@npm:^0.2.85, lib0@npm:^0.2.99":
-  version: 0.2.102
-  resolution: "lib0@npm:0.2.102"
+  version: 0.2.104
+  resolution: "lib0@npm:0.2.104"
   dependencies:
     isomorphic.js: "npm:^0.2.4"
   bin:
     0ecdsa-generate-keypair: bin/0ecdsa-generate-keypair.js
     0gentesthtml: bin/gentesthtml.js
     0serve: bin/0serve.js
-  checksum: f037c1b7eb4f7f0dd9c079e262f8c47e6a767f2836b0e0b3dd7df7845d44fbe18aef34db88a353c5410ba25c1ecb93c6bd0878fc16fa853fc923b2c2aeb6f94c
+  checksum: 0a6e26f585feebc0ebce00879dd19aa295dc5bb889147237299bea911bae75fedfdc7a748e30b93aba0f73048d74c030861cb968c83e80df93b79ffa5acd0d60
   languageName: node
   linkType: hard
 
@@ -4081,8 +4081,8 @@ __metadata:
   version: 2.9.2
   resolution: "mini-css-extract-plugin@npm:2.9.2"
   dependencies:
-    schema-utils: ^4.0.0
-    tapable: ^2.2.1
+    schema-utils: "npm:^4.0.0"
+    tapable: "npm:^2.2.1"
   peerDependencies:
     webpack: ^5.0.0
   checksum: 67a1f75359371a7776108999d472ae0942ccd904401e364e3a2c710d4b6fec61c4f53288594fcac35891f009e6df8825a00dfd3bfe4bcec0f862081d1f7cad50
@@ -4683,7 +4683,7 @@ __metadata:
   version: 0.8.0
   resolution: "rechoir@npm:0.8.0"
   dependencies:
-    resolve: ^1.20.0
+    resolve: "npm:^1.20.0"
   checksum: ad3caed8afdefbc33fbc30e6d22b86c35b3d51c2005546f4e79bcc03c074df804b3640ad18945e6bef9ed12caedc035655ec1082f64a5e94c849ff939dc0a788
   languageName: node
   linkType: hard
@@ -4748,7 +4748,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@patch:resolve@^1.20.0#~builtin<compat/resolve>":
+"resolve@patch:resolve@npm%3A^1.20.0#~builtin<compat/resolve>":
   version: 1.22.10
   resolution: "resolve@patch:resolve@npm%3A1.22.10#~builtin<compat/resolve>::version=1.22.10&hash=c3c19d"
   dependencies:
@@ -5633,19 +5633,19 @@ __metadata:
   version: 5.1.4
   resolution: "webpack-cli@npm:5.1.4"
   dependencies:
-    "@discoveryjs/json-ext": ^0.5.0
-    "@webpack-cli/configtest": ^2.1.1
-    "@webpack-cli/info": ^2.0.2
-    "@webpack-cli/serve": ^2.0.5
-    colorette: ^2.0.14
-    commander: ^10.0.1
-    cross-spawn: ^7.0.3
-    envinfo: ^7.7.3
-    fastest-levenshtein: ^1.0.12
-    import-local: ^3.0.2
-    interpret: ^3.1.1
-    rechoir: ^0.8.0
-    webpack-merge: ^5.7.3
+    "@discoveryjs/json-ext": "npm:^0.5.0"
+    "@webpack-cli/configtest": "npm:^2.1.1"
+    "@webpack-cli/info": "npm:^2.0.2"
+    "@webpack-cli/serve": "npm:^2.0.5"
+    colorette: "npm:^2.0.14"
+    commander: "npm:^10.0.1"
+    cross-spawn: "npm:^7.0.3"
+    envinfo: "npm:^7.7.3"
+    fastest-levenshtein: "npm:^1.0.12"
+    import-local: "npm:^3.0.2"
+    interpret: "npm:^3.1.1"
+    rechoir: "npm:^0.8.0"
+    webpack-merge: "npm:^5.7.3"
   peerDependencies:
     webpack: 5.x.x
   peerDependenciesMeta:

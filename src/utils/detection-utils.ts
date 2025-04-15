@@ -13,7 +13,7 @@ export async function analyzeCellsAccessibility(
   document.body.appendChild(tempDiv);
 
   const axeConfig: axe.RunOptions = {
-    runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+    runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']
   };
 
   try {

@@ -13,6 +13,8 @@ export const issueToCategory = new Map<string, string>([
   ['image-alt', 'Images'],
 
   // TODO: 2. Headings
+  ['page-has-heading-one', 'Headings'],
+  ['heading-order', 'Headings'],
 
   // TODO: 3. Lists
 

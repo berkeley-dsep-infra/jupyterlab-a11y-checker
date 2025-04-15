@@ -78,9 +78,8 @@ export async function getTableCaptionSuggestion(
   userURL: string,
   modelName: string
 ): Promise<string> {
-  const prompt = `Given this HTML table, please suggest a clear and concise caption that describes the table's content. Here's the table:
-    ${issue.issueContentRaw}
-    Please provide just the caption text without any HTML tags or formatting.`;
+  const prompt = `Given this HTML table, please respond with a short description of the table, without any explanation. Here's the table:
+    ${issue.issueContentRaw}`;
 
   try {
     const body = JSON.stringify({

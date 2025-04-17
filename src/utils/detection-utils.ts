@@ -61,7 +61,6 @@ export async function analyzeCellsAccessibility(
           notebookIssues.push(
             ...detectTableIssuesInCell(rawMarkdown, i, cellType)
           );
-          extractAndProcessImages(rawMarkdown);
         }
       } else if (cellType === 'code') {
         const codeInput = cell.node.querySelector('.jp-InputArea-editor');
@@ -178,35 +177,3 @@ function detectTableIssuesInCell(
 // TODO: Links
 
 // TODO: Other
-
-export async function extractAndProcessImages(
-  rawMarkdown: string
-): Promise<{ text: string; confidence: number }[]> {
-  const imageUrls: string[] = [];
-
-  // Match markdown image syntax: ![alt](url)
-  const mdImageRegex = /!\[.*?\]\((.*?)\)/g;
-  let match;
-  while ((match = mdImageRegex.exec(rawMarkdown)) !== null) {
-    imageUrls.push(match[1]);
-  }
-
-  // Match HTML img tags: <img src="url" ...>
-  const htmlImageRegex = /<img[^>]+src="([^">]+)"/g;
-  while ((match = htmlImageRegex.exec(rawMarkdown)) !== null) {
-    imageUrls.push(match[1]);
-  }
-
-  // Process each image URL
-  const results: { text: string; confidence: number }[] = [];
-  for (const url of imageUrls) {
-    try {
-      const result = await getTextInImage(url);
-      console.log(result);
-    } catch (error) {
-      console.error(`Failed to process image ${url}:`, error);
-    }
-  }
-
-  return results;
-}

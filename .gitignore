@@ -7,6 +7,7 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
+a11y_checker/
 jupyterlab_a11y_checker/labextension
 # Version file is handled by hatchling
 jupyterlab_a11y_checker/_version.py

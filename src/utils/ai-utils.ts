@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ICellIssue } from './types';
+import Tesseract from 'tesseract.js';
 
 export function formatPrompt(issue: ICellIssue): string {
   let prompt =
@@ -126,5 +127,22 @@ export async function pullOllamaModel(
   } catch (error) {
     console.error('Error pulling model:', error);
     throw error;
+  }
+}
+
+export async function getTextInImage(
+  imagePath: string
+): Promise<{ text: string; confidence: number }> {
+  const worker = await Tesseract.createWorker('eng');
+  try {
+    const {
+      data: { text, confidence }
+    } = await worker.recognize(imagePath);
+    if (!text) {
+      throw new Error('No text found in the image');
+    }
+    return { text, confidence };
+  } finally {
+    await worker.terminate();
   }
 }

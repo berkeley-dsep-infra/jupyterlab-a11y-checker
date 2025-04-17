@@ -7,4 +7,5 @@ export interface ICellIssue {
     descriptionUrl?: string;
   };
   issueContentRaw: string;
+  suggestedFix?: string;
 }

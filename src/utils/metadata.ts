@@ -20,9 +20,11 @@ export const issueToCategory = new Map<string, string>([
 
   // TODO: 4. Tables
   ['td-has-header', 'Tables'],
-  ['table-has-caption', 'Tables']
+  ['table-has-caption', 'Tables'],
 
   // TODO: 5. Color
+  ['detect-cc-normal', 'Color'],
+  ['detect-cc-large', 'Color']
 
   // TODO: 6. Links
 

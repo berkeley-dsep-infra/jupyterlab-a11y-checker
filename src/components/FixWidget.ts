@@ -13,12 +13,14 @@ abstract class FixWidget extends Widget {
   protected issue: ICellIssue;
   protected cell: Cell<ICellModel>;
   protected aiEnabled: boolean;
+  protected currentPath: string = '';
 
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super();
     this.issue = issue;
     this.cell = cell;
     this.aiEnabled = aiEnabled;
+    this.addClass('a11y-fix-widget');
   }
 
   // Method to remove the widget from the DOM

@@ -72,7 +72,7 @@ Find the package on PyPI [here](https://pypi.org/project/jupyterlab-a11y-checker
 
 ![UI of a11y_checker](./readme_img.png)
 
-### Contributions Welcome 🌟
+### Contributions Welcome
 
-We’re building this tool for the community, and we’d love your help! Whether it’s improving the algorithms, adding new accessibility checks, or refining the fix suggestions, your contributions can help this project make a broader impact.
+We’re building this tool for the community, and we’d love your help! Whether it’s adding new accessibility checks, or refining the fix suggestions, your contributions can help this project make a broader impact.
 

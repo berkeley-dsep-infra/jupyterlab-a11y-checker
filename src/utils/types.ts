@@ -11,4 +11,5 @@ export interface ICellIssue {
     previousHeadingLevel?: number;
     [key: string]: any;
   };
+  suggestedFix?: string;
 }

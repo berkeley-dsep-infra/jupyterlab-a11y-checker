@@ -7,9 +7,10 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
-a11y_checker/labextension
+a11y_checker/
+jupyterlab_a11y_checker/labextension
 # Version file is handled by hatchling
-a11y_checker/_version.py
+jupyterlab_a11y_checker/_version.py
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python

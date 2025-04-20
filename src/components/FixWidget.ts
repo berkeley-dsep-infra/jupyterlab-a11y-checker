@@ -13,12 +13,14 @@ abstract class FixWidget extends Widget {
   protected issue: ICellIssue;
   protected cell: Cell<ICellModel>;
   protected aiEnabled: boolean;
+  protected currentPath: string = '';
 
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super();
     this.issue = issue;
     this.cell = cell;
     this.aiEnabled = aiEnabled;
+    this.addClass('a11y-fix-widget');
   }
 
   // Method to remove the widget from the DOM
@@ -84,10 +86,15 @@ abstract class TextFieldFixWidget extends FixWidget {
 
     suggestButton.style.display = aiEnabled ? 'flex' : 'none';
 
-    if (suggestButton) {
-      suggestButton.addEventListener('click', () =>
-        this.displayAISuggestions()
-      );
+    suggestButton.addEventListener('click', () => this.displayAISuggestions());
+
+    // Textfield Value
+    const textFieldValue = this.node.querySelector(
+      '.jp-a11y-input'
+    ) as HTMLInputElement;
+
+    if (this.issue.suggestedFix) {
+      textFieldValue.value = this.issue.suggestedFix;
     }
   }
 
@@ -357,10 +364,18 @@ abstract class DropdownFixWidget extends FixWidget {
       </div>
     `;
 
-    this.dropdownButton = this.node.querySelector('.dropdown-button') as HTMLButtonElement;
-    this.dropdownContent = this.node.querySelector('.dropdown-content') as HTMLDivElement;
-    this.dropdownText = this.node.querySelector('.dropdown-text') as HTMLSpanElement;
-    this.applyButton = this.node.querySelector('.apply-button') as HTMLButtonElement;
+    this.dropdownButton = this.node.querySelector(
+      '.dropdown-button'
+    ) as HTMLButtonElement;
+    this.dropdownContent = this.node.querySelector(
+      '.dropdown-content'
+    ) as HTMLDivElement;
+    this.dropdownText = this.node.querySelector(
+      '.dropdown-text'
+    ) as HTMLSpanElement;
+    this.applyButton = this.node.querySelector(
+      '.apply-button'
+    ) as HTMLButtonElement;
 
     // Set initial text
     if (this.dropdownText) {
@@ -400,6 +415,8 @@ abstract class DropdownFixWidget extends FixWidget {
         const value = (option as HTMLDivElement).dataset.value || '';
         this.selectedOption = value;
         this.handleOptionSelect(value);
+        this.dropdownText.textContent =
+          (option as HTMLDivElement).textContent?.trim() || '';
         this.dropdownContent.classList.add('hidden');
         this.dropdownButton.classList.remove('active');
         if (this.shouldShowApplyButton()) {

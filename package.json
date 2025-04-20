@@ -55,6 +55,7 @@
     "dependencies": {
         "@jupyterlab/application": "^4.0.0",
         "@jupyterlab/notebook": "^4.3.5",
+        "@types/tesseract.js": "^0.0.2",
         "axe-core": "^4.10.3",
         "axios": "^1.8.2",
         "marked": "^15.0.7",
@@ -62,7 +63,7 @@
         "yarn": "^1.22.22"
     },
     "devDependencies": {
-        "@jupyterlab/builder": "^3.3.2",
+        "@jupyterlab/builder": "^4.3.6",
         "@types/json-schema": "^7.0.11",
         "@types/marked": "^5.0.2",
         "@types/react": "^18.0.26",

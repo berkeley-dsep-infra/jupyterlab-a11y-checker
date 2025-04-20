@@ -8,6 +8,7 @@ import {
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ServerConnection } from '@jupyterlab/services';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
 abstract class FixWidget extends Widget {
   protected issue: ICellIssue;
@@ -34,12 +35,27 @@ abstract class FixWidget extends Widget {
       }
     }
 
-    this.cell.node.style.transition = 'background-color 0.5s ease';
-    this.cell.node.style.backgroundColor = '#28A745';
-
-    setTimeout(() => {
-      this.cell.node.style.backgroundColor = '';
-    }, 1000);
+    // Only highlight the first cell if this is a heading one fix
+    if (this instanceof HeadingOneFixWidget) {
+      const notebookPanel = this.cell.parent?.parent as NotebookPanel;
+      if (notebookPanel) {
+        const firstCell = notebookPanel.content.widgets[0];
+        if (firstCell) {
+          firstCell.node.style.transition = 'background-color 0.5s ease';
+          firstCell.node.style.backgroundColor = '#28A745';
+          setTimeout(() => {
+            firstCell.node.style.backgroundColor = '';
+          }, 1000);
+        }
+      }
+    } else {
+      // For other fixes, highlight the current cell
+      this.cell.node.style.transition = 'background-color 0.5s ease';
+      this.cell.node.style.backgroundColor = '#28A745';
+      setTimeout(() => {
+        this.cell.node.style.backgroundColor = '';
+      }, 1000);
+    }
   }
 }
 
@@ -565,10 +581,24 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
       return;
     }
 
-    // Create a new markdown cell with the h1 heading at the top of the notebook
+    // Get the notebook panel from the cell's parent hierarchy
+    const notebookPanel = this.cell.parent?.parent as NotebookPanel;
+    if (!notebookPanel) {
+      console.error('Could not find notebook panel');
+      return;
+    }
+
+    // Create a new markdown cell with the h1 heading
     const newContent = `# ${providedHeading}`;
     
-    this.cell.model.sharedModel.setSource(newContent);
+    // Insert a new cell at the top of the notebook
+    const sharedModel = notebookPanel.content.model?.sharedModel;
+    if (sharedModel) {
+      sharedModel.insertCell(0, {
+        cell_type: 'markdown',
+        source: newContent
+      });
+    }
 
     // Remove the issue widget
     this.removeIssueWidget();

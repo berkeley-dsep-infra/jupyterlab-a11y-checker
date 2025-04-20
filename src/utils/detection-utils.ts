@@ -1,6 +1,8 @@
 import axe from 'axe-core';
 import { marked } from 'marked';
 import { NotebookPanel } from '@jupyterlab/notebook';
+import { Cell } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
 
 import { ICellIssue } from './types';
 
@@ -8,6 +10,10 @@ export async function analyzeCellsAccessibility(
   panel: NotebookPanel
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
+  const cells = panel.content.widgets;
+
+  // Add heading one check
+  notebookIssues.push(...detectHeadingOneIssue('', 0, 'markdown', cells));
 
   const tempDiv = document.createElement('div');
   document.body.appendChild(tempDiv);
@@ -17,7 +23,6 @@ export async function analyzeCellsAccessibility(
   };
 
   try {
-    const cells = panel.content.widgets;
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
       if (!cell || !cell.model) {
@@ -38,6 +43,10 @@ export async function analyzeCellsAccessibility(
           if (violations.length > 0) {
             violations.forEach(violation => {
               violation.nodes.forEach(node => {
+                // Customize description for heading-order issues
+                if (violation.id === 'heading-order') {
+                  violation.description = 'Ensure the order of headings is semantically correct. Please also ensure that headings are descriptive and accurate'
+                }
                 notebookIssues.push({
                   cellIndex: i,
                   cellType: cellType,
@@ -151,7 +160,43 @@ function detectTableIssuesInCell(
   return notebookIssues;
 }
 
-// TODO: Headings
+// Heading
+function detectHeadingOneIssue(
+  rawMarkdown: string,
+  cellIndex: number,
+  cellType: string,
+  cells: readonly Cell<ICellModel>[]
+): ICellIssue[] {
+  const notebookIssues: ICellIssue[] = [];
+  
+  // Check if any cell in the notebook has an h1 heading
+  let hasH1 = false;
+  for (const cell of cells) {
+    if (cell.model.type === 'markdown') {
+      const content = cell.model.sharedModel.getSource();
+      // Check for markdown h1 (# heading) or HTML h1 (<h1>heading</h1>)
+      if (content.match(/^#\s+[^\n]+/m) || content.match(/<h1[^>]*>.*?<\/h1>/)) {
+        hasH1 = true;
+        break;
+      }
+    }
+  }
+
+  if (!hasH1) {
+    notebookIssues.push({
+      cellIndex: 0, // We'll use the first cell for the heading
+      cellType: 'markdown',
+      violation: {
+        id: 'page-has-heading-one',
+        description: 'Ensure that the page or at least one of its frames contains a level-one heading. Please also ensure that headings are descriptive and accurate',
+        descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.7/page-has-heading-one'
+      },
+      issueContentRaw: '' // Empty since we're adding a new heading
+    });
+  }
+
+  return notebookIssues;
+}
 
 // TODO: Color
 

@@ -4,7 +4,9 @@ import { Cell, ICellModel } from '@jupyterlab/cells';
 import {
   ImageAltFixWidget,
   TableCaptionFixWidget,
-  TableHeaderFixWidget
+  TableHeaderFixWidget,
+  HeadingOneFixWidget,
+  HeadingOrderFixWidget
 } from './FixWidget';
 import { ICellIssue } from '../utils/types';
 
@@ -97,6 +99,20 @@ export class CellIssueWidget extends Widget {
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(tableHeaderFixWidget.node);
+    } else if (this.issue.violation.id === 'page-has-heading-one') {
+      const headingOneFixWidget = new HeadingOneFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
+      );
+      fixWidgetContainer.appendChild(headingOneFixWidget.node);
+    } else if (this.issue.violation.id === 'heading-order') {
+      const headingOrderFixWidget = new HeadingOrderFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
+      );
+      fixWidgetContainer.appendChild(headingOrderFixWidget.node);
     }
   }
 

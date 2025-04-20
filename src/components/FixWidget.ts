@@ -337,32 +337,23 @@ abstract class DropdownFixWidget extends FixWidget {
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
 
-    // Simplified DOM structure
+    // Simplified DOM structure with customizable text
     this.node.innerHTML = `
-      <div class="table-header-fix-widget">
+      <div class="dropdown-fix-widget">
         <div class="custom-dropdown">
           <button class="dropdown-button">
-            <span class="dropdown-text">Apply a table header</span>
+            <span class="dropdown-text"></span>
             <svg class="dropdown-arrow" viewBox="0 0 24 24" width="24" height="24">
               <path fill="currentColor" d="M7 10l5 5 5-5z"/>
             </svg>
           </button>
           <div class="dropdown-content hidden">
-            <div class="dropdown-option" data-value="first-row">
-              The first row is a header
-            </div>
-            <div class="dropdown-option" data-value="first-column">
-              The first column is a header
-            </div>
-            <div class="dropdown-option" data-value="both">
-              The first row and column are headers
-            </div>
           </div>
         </div>
-        <button class="jp-Button2 apply-button">
-            <span class="material-icons">check</span>
-            <div>Apply</div>
-          </button>
+        <button class="jp-Button2 apply-button" style="${this.shouldShowApplyButton() ? '' : 'display: none;'}">
+          <span class="material-icons">check</span>
+          <div>Apply</div>
+        </button>
       </div>
     `;
 
@@ -371,19 +362,30 @@ abstract class DropdownFixWidget extends FixWidget {
     this.dropdownText = this.node.querySelector('.dropdown-text') as HTMLSpanElement;
     this.applyButton = this.node.querySelector('.apply-button') as HTMLButtonElement;
 
+    // Set initial text
+    if (this.dropdownText) {
+      this.dropdownText.textContent = this.getDefaultDropdownText();
+    }
+
+    // Populate dropdown options
+    if (this.dropdownContent) {
+      this.dropdownContent.innerHTML = this.getDropdownOptions();
+    }
+
     // Setup dropdown handlers
     this.setupDropdownHandlers();
   }
 
-  private setupDropdownHandlers(): void {
+  protected setupDropdownHandlers(): void {
     // Toggle dropdown
-    this.dropdownButton.addEventListener('click', () => {
+    this.dropdownButton.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent event from bubbling up
       this.dropdownContent.classList.toggle('hidden');
       this.dropdownButton.classList.toggle('active');
     });
 
     // Close dropdown when clicking outside
-    document.addEventListener('click', event => {
+    document.addEventListener('click', (event) => {
       if (!this.node.contains(event.target as Node)) {
         this.dropdownContent.classList.add('hidden');
         this.dropdownButton.classList.remove('active');
@@ -391,15 +393,18 @@ abstract class DropdownFixWidget extends FixWidget {
     });
 
     // Option selection
-    const options = this.node.querySelectorAll('.dropdown-option');
+    const options = this.dropdownContent.querySelectorAll('.dropdown-option');
     options.forEach(option => {
-      option.addEventListener('click', () => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling up
         const value = (option as HTMLDivElement).dataset.value || '';
         this.selectedOption = value;
-        this.dropdownText.textContent = (option as HTMLDivElement).textContent?.trim() || '';
+        this.handleOptionSelect(value);
         this.dropdownContent.classList.add('hidden');
         this.dropdownButton.classList.remove('active');
-        this.applyButton.style.display = 'flex';
+        if (this.shouldShowApplyButton()) {
+          this.applyButton.style.display = 'flex';
+        }
       });
     });
 
@@ -411,12 +416,43 @@ abstract class DropdownFixWidget extends FixWidget {
     });
   }
 
+  // Abstract methods that must be implemented by child classes
+  protected abstract getDefaultDropdownText(): string;
+  protected abstract getDropdownOptions(): string;
+  protected abstract shouldShowApplyButton(): boolean;
+  protected abstract handleOptionSelect(value: string): void;
   abstract applyDropdownSelection(selectedValue: string): void;
 }
 
 export class TableHeaderFixWidget extends DropdownFixWidget {
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
+  }
+
+  protected getDefaultDropdownText(): string {
+    return 'Select header type';
+  }
+
+  protected getDropdownOptions(): string {
+    return `
+      <div class="dropdown-option" data-value="first-row">
+        The first row is a header
+      </div>
+      <div class="dropdown-option" data-value="first-column">
+        The first column is a header
+      </div>
+      <div class="dropdown-option" data-value="both">
+        The first row and column are headers
+      </div>
+    `;
+  }
+
+  protected shouldShowApplyButton(): boolean {
+    return true;
+  }
+
+  protected handleOptionSelect(value: string): void {
+    this.dropdownText.textContent = this.dropdownContent.querySelector(`[data-value="${value}"]`)?.textContent?.trim() || 'Select header type';
   }
 
   applyDropdownSelection(headerType: string): void {
@@ -495,3 +531,320 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
     this.removeIssueWidget();
   }
 }
+
+export class HeadingOneFixWidget extends TextFieldFixWidget {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+    super(issue, cell, aiEnabled);
+    
+    const input = this.node.querySelector('.jp-a11y-input') as HTMLInputElement;
+    if (input) {
+      input.placeholder = "Input h1 heading text...";
+    }
+  }
+
+  applyTextToCell(providedHeading: string): void {
+    if (providedHeading === '') {
+      console.log('Empty heading text, returning');
+      return;
+    }
+
+    // Create a new markdown cell with the h1 heading at the top of the notebook
+    const newContent = `# ${providedHeading}`;
+    
+    this.cell.model.sharedModel.setSource(newContent);
+
+    // Remove the issue widget
+    this.removeIssueWidget();
+  }
+
+  async displayAISuggestions(): Promise<void> {
+    console.log('Getting AI suggestions for heading');
+    const headingInput = this.node.querySelector('.jp-a11y-input') as HTMLInputElement;
+    if (!headingInput) {
+      return;
+    }
+
+    // Save the original placeholder text
+    const originalPlaceholder = headingInput.placeholder;
+
+    // Create loading overlay
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.style.position = 'absolute';
+    loadingOverlay.style.left = '8px';
+    loadingOverlay.style.top = '8px';
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.alignItems = 'center';
+    loadingOverlay.style.gap = '8px';
+    loadingOverlay.style.color = '#666';
+    loadingOverlay.innerHTML = `
+      <span class="material-icons loading">refresh</span>
+      Getting AI suggestions...
+    `;
+
+    // Add relative positioning to input container and append loading overlay
+    const inputContainer = headingInput.parentElement;
+    if (inputContainer) {
+      inputContainer.style.position = 'relative';
+      inputContainer.appendChild(loadingOverlay);
+    }
+
+    // Show loading state in the input
+    headingInput.disabled = true;
+    headingInput.style.color = 'transparent';
+    headingInput.placeholder = '';
+
+    try {
+      // TODO: Implement AI suggestion??? Is it needed?
+      headingInput.value = "Notebook Title"; 
+    } catch (error) {
+      console.error(error);
+      headingInput.placeholder = 'Error getting suggestions. Please try again.';
+    } finally {
+      headingInput.disabled = false;
+      headingInput.style.color = '';
+      loadingOverlay.remove();
+      if (headingInput.value) {
+        headingInput.placeholder = originalPlaceholder;
+      }
+    }
+  }
+}
+
+export class HeadingOrderFixWidget extends DropdownFixWidget {
+  private _currentLevel: number = 1;  // Initialize with default value
+  private previousLevel: number | undefined;
+  protected selectedLevel: number | undefined;
+
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+    super(issue, cell, aiEnabled);
+    
+    // Parse and set the current level immediately
+    this._currentLevel = HeadingOrderFixWidget.parseHeadingLevel(issue.issueContentRaw);
+    
+    // Initialize values after super
+    this.initializeValues(issue);
+
+    // Setup apply button handler
+    if (this.applyButton) {
+      this.applyButton.addEventListener('click', () => {
+        console.log('Apply button clicked');
+        if (this.selectedLevel) {
+          this.applyDropdownSelection(`h${this.selectedLevel}`);
+        }
+      });
+    }
+  }
+
+  protected shouldShowApplyButton(): boolean {
+    return true;
+  }
+
+  protected getDefaultDropdownText(): string {
+    return `Current: h${this._currentLevel}`;
+  }
+
+  protected getDropdownOptions(): string {
+    return ''; // Options are set in constructor after initialization
+  }
+
+  protected handleOptionSelect(value: string): void {
+    const level = parseInt(value.replace('h', ''));
+    this.selectedLevel = level;
+    this.dropdownText.textContent = `Change to h${level}`;
+    
+    // Hide the dropdown content
+    if (this.dropdownContent) {
+      this.dropdownContent.classList.add('hidden');
+      this.dropdownButton.classList.remove('active');
+    }
+
+    // Show the apply button
+    if (this.applyButton) {
+      this.applyButton.style.display = 'flex';
+    }
+  }
+
+  applyDropdownSelection(selectedValue: string): void {
+    console.log('applyDropdownSelection called with:', selectedValue);
+    if (!this.selectedLevel) {
+      console.log('No level selected');
+      return;
+    }
+
+    console.log('Applying heading level change to:', this.selectedLevel);
+    const entireCellContent = this.cell.model.sharedModel.getSource();
+    const target = this.issue.issueContentRaw;
+    let newContent = entireCellContent;
+
+    // Check if the content is in Markdown format (starts with #)
+    if (entireCellContent.trim().startsWith('#')) {
+      console.log('Processing Markdown heading');
+      const currentLevelMatch = entireCellContent.match(/^(#+)\s/);
+      if (currentLevelMatch) {
+        const currentMarkers = currentLevelMatch[1];
+        newContent = entireCellContent.replace(
+          new RegExp(`^${currentMarkers}\\s(.+)$`, 'm'),
+          `${'#'.repeat(this.selectedLevel)} $1`
+        );
+        console.log('New content:', newContent);
+      }
+    }
+    // Handle HTML headings
+    else if (target.match(/<h\d[^>]*>/)) {
+      console.log('Processing HTML heading');
+      console.log('Target content:', target);
+      console.log('Entire cell content:', entireCellContent);
+      
+      // Replace the heading in the entire cell content
+      newContent = entireCellContent.replace(
+        target,
+        `<h${this.selectedLevel}>${target.match(/<h\d[^>]*>(.*?)<\/h\d>/)?.[1] || ''}</h${this.selectedLevel}>`
+      );
+      console.log('New content:', newContent);
+    }
+
+    if (newContent !== entireCellContent) {
+      console.log('Updating cell content');
+      this.cell.model.sharedModel.setSource(newContent);
+      this.removeIssueWidget();
+    } else {
+      console.log('No changes made to content');
+    }
+  }
+
+  private initializeValues(issue: ICellIssue): void {
+    // Get previous level from metadata
+    this.previousLevel = issue.metadata?.previousHeadingLevel;
+    
+    // If metadata doesn't have previous level, try to find the closest previous heading
+    if (this.previousLevel === undefined) {
+      this.previousLevel = this.findClosestPreviousHeading(issue.cellIndex);
+      console.log('Found closest previous heading level:', this.previousLevel);
+    }
+    
+    console.log('Current level set to:', this._currentLevel);
+    console.log('Previous level:', this.previousLevel);
+
+    // Update the dropdown text explicitly after initialization
+    if (this.dropdownText) {
+      this.dropdownText.textContent = this.getDefaultDropdownText();
+    }
+
+    // Force update dropdown content after initialization
+    if (this.dropdownContent) {
+      const validLevels = this.getValidHeadingLevels();
+      console.log('Populating dropdown with levels:', Array.from(validLevels));
+      this.dropdownContent.innerHTML = Array.from(validLevels)
+        .sort((a, b) => a - b)
+        .map(level => `
+          <div class="dropdown-option" data-value="h${level}">
+            Change to h${level}
+          </div>
+        `).join('');
+
+      // Add click handlers to the options
+      const options = this.dropdownContent.querySelectorAll('.dropdown-option');
+      options.forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = (option as HTMLElement).dataset.value;
+          if (value) {
+            this.handleOptionSelect(value);
+          }
+        });
+      });
+    }
+  }
+
+  // Static helper method to parse heading level
+  private static parseHeadingLevel(rawContent: string): number {
+    console.log('Raw content:', rawContent);
+    
+    // Try HTML heading pattern first
+    let htmlMatch = rawContent.match(/<h([1-6])[^>]*>/i);
+    if (htmlMatch) {
+      console.log('HTML match found:', htmlMatch);
+      const level = parseInt(htmlMatch[1]);
+      console.log('Current level set to:', level);
+      return level;
+    }
+    
+    // Try Markdown heading pattern - match # followed by space
+    let mdMatch = rawContent.match(/^(#{1,6})\s+/m);
+    if (mdMatch) {
+      console.log('Markdown match found:', mdMatch);
+      const level = mdMatch[1].length;
+      console.log('Current level set to:', level);
+      return level;
+    }
+    
+    return 1; // Default level
+  }
+
+  private findClosestPreviousHeading(cellIndex: number): number | undefined {
+    const notebook = this.cell.parent;
+    if (!notebook) return undefined;
+
+    // Start from the cell before the current one and go backwards
+    for (let i = cellIndex - 1; i >= 0; i--) {
+      const prevCell = (notebook as any).widgets[i];
+      if (!prevCell || prevCell.model.type !== 'markdown') continue;
+
+      const content = prevCell.model.sharedModel.getSource();
+      // Check for markdown heading (# syntax)
+      const mdMatch = content.match(/^(#{1,6})\s+/m);
+      if (mdMatch) {
+        return mdMatch[1].length;
+      }
+      // Check for HTML heading
+      const htmlMatch = content.match(/<h([1-6])[^>]*>/i);
+      if (htmlMatch) {
+        return parseInt(htmlMatch[1]);
+      }
+    }
+    return undefined;
+  }
+
+  private getValidHeadingLevels(): Set<number> {
+    const validLevels = new Set<number>();
+    
+    if (this.previousLevel !== undefined) {
+      // Special case: if previous heading is h1, current heading must be h2
+      if (this.previousLevel === 1) {
+        validLevels.add(2);
+        console.log('Previous heading is h1, only allowing h2 as option');
+        return validLevels;
+      }
+
+      // Can stay at the same level as the previous heading (but not if it's the current level)
+      if (this.previousLevel !== this._currentLevel) {
+        validLevels.add(this.previousLevel);
+      }
+      
+      // Can go exactly one level deeper than the previous heading (but not if it's the current level)
+      if (this.previousLevel < 6) {
+        const nextLevel = this.previousLevel + 1;
+        if (nextLevel !== this._currentLevel) {
+          validLevels.add(nextLevel);
+        }
+      }
+
+      // Can go exactly one level higher than the previous heading (but not if it's the current level)
+      if (this.previousLevel > 1) {
+        const prevLevel = this.previousLevel - 1;
+        if (prevLevel !== this._currentLevel && prevLevel > 1) { // Also ensure we never include h1
+          validLevels.add(prevLevel);
+        }
+      }
+
+      console.log('Valid heading levels based on previous level:', this.previousLevel, Array.from(validLevels));
+    } else {
+      // If no previous level is found, only allow h2 (never h1)
+      validLevels.add(2);
+      console.log('No previous level found, defaulting to h2 option');
+    }
+
+    return validLevels;
+  }
+}
+

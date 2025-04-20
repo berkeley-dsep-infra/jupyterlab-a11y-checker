@@ -7,4 +7,8 @@ export interface ICellIssue {
     descriptionUrl?: string;
   };
   issueContentRaw: string;
+  metadata?: {
+    previousHeadingLevel?: number;
+    [key: string]: any;
+  };
 }

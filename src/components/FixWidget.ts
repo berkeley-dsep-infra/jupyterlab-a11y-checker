@@ -24,6 +24,8 @@ abstract class FixWidget extends Widget {
     this.addClass('a11y-fix-widget');
   }
 
+  protected abstract getDescription(): string;
+
   // Method to remove the widget from the DOM
   protected removeIssueWidget(): void {
     const issueWidget = this.node.closest('.issue-widget');
@@ -66,6 +68,7 @@ abstract class TextFieldFixWidget extends FixWidget {
 
     // Simplified DOM structure
     this.node.innerHTML = `
+        <div class="fix-description">${this.getDescription()}</div>
         <div class="textfield-fix-widget">
           <input type="text" class="jp-a11y-input" placeholder="Input text here...">
           <div class="textfield-buttons">
@@ -120,6 +123,10 @@ abstract class TextFieldFixWidget extends FixWidget {
 }
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
+  protected getDescription(): string {
+    return "Add or update alt text for the image:";
+  }
+
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
   }
@@ -244,6 +251,10 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
 }
 
 export class TableCaptionFixWidget extends TextFieldFixWidget {
+  protected getDescription(): string {
+    return "Add or update the caption for the table:";
+  }
+
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
   }
@@ -362,6 +373,7 @@ abstract class DropdownFixWidget extends FixWidget {
 
     // Simplified DOM structure with customizable text
     this.node.innerHTML = `
+      <div class="fix-description">${this.getDescription()}</div>
       <div class="dropdown-fix-widget">
         <div class="custom-dropdown">
           <button class="dropdown-button">
@@ -458,6 +470,10 @@ abstract class DropdownFixWidget extends FixWidget {
 }
 
 export class TableHeaderFixWidget extends DropdownFixWidget {
+  protected getDescription(): string {
+    return "Choose which row or column should be used as the header:";
+  }
+
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
   }
@@ -566,6 +582,10 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
 }
 
 export class HeadingOneFixWidget extends TextFieldFixWidget {
+  protected getDescription(): string {
+    return "Add a new level one (h1) heading to the top of the notebook:";
+  }
+
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
     
@@ -658,6 +678,10 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
 }
 
 export class HeadingOrderFixWidget extends DropdownFixWidget {
+  protected getDescription(): string {
+    return "Choose from one of the following heading styles instead:";
+  }
+
   private _currentLevel: number = 1;  // Initialize with default value
   private previousLevel: number | undefined;
   protected selectedLevel: number | undefined;

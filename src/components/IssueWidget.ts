@@ -28,7 +28,7 @@ export class CellIssueWidget extends Widget {
       </button>
       <div class="collapsible-content" style="display: none;">
           <p class="description">
-              ${issue.violation.description} <a href="${issue.violation.descriptionUrl}" target="_blank">(learn more about the issue)</a>.
+              ${issue.violation.description} <a href="${issue.violation.descriptionUrl}" target="_blank">(learn more about the issue and its impact)</a>.
           </p>
           <div class="button-container">
               <button class="jp-Button2 locate-button">

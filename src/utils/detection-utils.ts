@@ -46,9 +46,12 @@ export async function analyzeCellsAccessibility(
           if (violations.length > 0) {
             violations.forEach(violation => {
               violation.nodes.forEach(node => {
-                // Customize description for heading-order issues
+                // Customize description for various issues
                 if (violation.id === 'heading-order') {
-                  violation.description = 'Ensure the order of headings is semantically correct. Please also ensure that headings are descriptive and accurate'
+                  violation.description = 'Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure headings contain descriptive, accurate text'
+                }
+                if (violation.id === 'empty-heading') {
+                  violation.description = 'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.'
                 }
                 notebookIssues.push({
                   cellIndex: i,
@@ -173,7 +176,7 @@ async function detectImageIssuesInCell(
           cellType: cellType as 'code' | 'markdown',
           violation: {
             id: 'image-alt',
-            description: 'Images must have alternate text',
+            description: 'Images must have alternative text',
             descriptionUrl:
               'https://dequeuniversity.com/rules/axe/4.7/image-alt'
           },
@@ -259,7 +262,7 @@ function detectHeadingOneIssue(
       cellType: 'markdown',
       violation: {
         id: 'page-has-heading-one',
-        description: 'Ensure that the page or at least one of its frames contains a level-one heading. Please also ensure that headings are descriptive and accurate',
+        description: 'Ensure that the page or at least one of its frames contains a level-one heading. A missing level-one heading can leave screen reader users without a clear starting point, making it harder to understand the main purpose or content of the page. Please also ensure that headings contain descriptive, accurate text',
         descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.7/page-has-heading-one'
       },
       issueContentRaw: '' // Empty since we're adding a new heading

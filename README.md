@@ -23,9 +23,9 @@ You can install the extension directly via pip:
 
 ```bash
 pip install jupyterlab-a11y-checker
-
-Find the package on PyPI [here](https://pypi.org/project/jupyterlab-a11y-checker/).
 ```
+Find the package on PyPI [here](https://pypi.org/project/jupyterlab-a11y-checker/).
+
 
 ### Contributing
 

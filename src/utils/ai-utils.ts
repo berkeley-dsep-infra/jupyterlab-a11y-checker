@@ -62,6 +62,7 @@ export async function getImageAltSuggestion(
       stream: false
     });
 
+    console.log('Sending request to:', userURL + 'api/generate');
     const response = await axios.post(userURL + 'api/generate', body, {
       headers: { 'Content-Type': 'application/json' }
     });

@@ -110,14 +110,6 @@ export async function getTextInImage(
       data: { text, confidence }
     } = await worker.recognize(pathForTesseract);
 
-    if (confidence > 40) {
-      // verifyTextBlocks(pathForTesseract);
-      const result = await getColorContrastInImage(
-        imagePath,
-        currentDirectoryPath
-      );
-      console.log('From getTextInImage: ', result);
-    }
     if (!text) {
       throw new Error('No text found in the image');
     }
@@ -371,6 +363,8 @@ async function getColorContrastInImage(
         // Terminate the worker
         await worker.terminate();
 
+        console.log('Contrast:', minContrast);
+
         resolve({
           contrast: minContrast,
           isAccessible,
@@ -460,15 +454,15 @@ async function detectColorIssuesInCell(
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
-  // Check for images without alt text in markdown syntax
-  const mdSyntaxMissingAltRegex = /!\[\]\([^)]+\)/g;
+  // Check for all images in markdown syntax
+  const mdSyntaxImageRegex = /!\[[^\]]*\]\([^)]+\)/g;
 
-  // Check for images without alt tag or empty alt tag in HTML syntax
-  const htmlSyntaxMissingAltRegex = /<img[^>]*alt=""[^>]*>/g;
+  // Check for all images in HTML syntax
+  const htmlSyntaxImageRegex = /<img[^>]*>(?:<\/img>)?/g;
   let match;
   while (
-    (match = mdSyntaxMissingAltRegex.exec(rawMarkdown)) !== null ||
-    (match = htmlSyntaxMissingAltRegex.exec(rawMarkdown)) !== null
+    (match = mdSyntaxImageRegex.exec(rawMarkdown)) !== null ||
+    (match = htmlSyntaxImageRegex.exec(rawMarkdown)) !== null
   ) {
     const imageUrl =
       match[0].match(/\(([^)]+)\)/)?.[1] ||

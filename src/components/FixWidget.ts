@@ -199,7 +199,7 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
       const suggestion = await getImageAltSuggestion(
         this.issue,
         ServerConnection.makeSettings().baseUrl + 'ollama/',
-        'mistral'
+        'mistral:7b'
       );
       if (suggestion !== 'Error') {
         // Extract alt text from the suggestion, handling both single and double quotes

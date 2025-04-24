@@ -91,31 +91,9 @@ export class MainPanelWidget extends Widget {
 
     aiControlButton?.addEventListener('click', async () => {
       const aiIcon = '<span class="material-icons">auto_awesome</span>';
-      // Without pulling
-      this.aiEnabled = !this.aiEnabled;
-      console.log('AI Enabled:', this.aiEnabled);
-      aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
 
-      // if (!this.aiEnabled && !this.modelPulled) {
-      //   aiControlButton.innerHTML = `${progressIcon} Please wait...`;
-      //   aiControlButton.disabled = true;
-      //   try {
-      //     const SERVER_URL = PageConfig.getBaseUrl() + 'ollama/';
-      //     await pullOllamaModel(SERVER_URL, 'mistral');
-      //     this.modelPulled = true;
-      //     this.aiEnabled = true;
-      //   } catch (error) {
-      //     console.error('Failed to pull model:', error);
-      //   } finally {
-      //     aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.modelPulled ? 'Enabled' : 'Failed'}`;
-      //     aiControlButton.disabled = false;
-      //   }
-      // }
-      // // Toggle Use AI State
-      // else {
-      //   this.aiEnabled = !this.aiEnabled;
-      //   aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
-      // }
+      this.aiEnabled = !this.aiEnabled;
+      aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
 
       // Update every ai suggestion button visibility
       const suggestButtons = this.node.querySelectorAll('.suggest-button');

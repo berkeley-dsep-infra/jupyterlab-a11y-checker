@@ -10,7 +10,7 @@ jupyterlab-a11y-checker is a JupyterLab extension performs accessibility checks 
 While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a well-known [study](https://dl.acm.org/doi/pdf/10.1145/3597638.3608417). We utilize the [axe-core](https://github.com/dequelabs/axe-core) engine as well as custom detection algorithms. The issues the extension can detect are listed in [Issue Descriptions](./doc/rules.md).
 
 ### Fix Interfaces
-We provide a user interface tailored to each issue, such as a text field for adding alt-text, a dropdown for fixing header issues, etc. The fix interfaces are listed in [Fix Interface Descriptions](./doc/fix-intefaces.md).
+We provide a user interface tailored to each issue, such as a text field for adding alt-text, a dropdown for fixing header issues, etc. The fix interfaces are listed in [Fix Interface Descriptions](./doc/fix-interfaces.md).
 
 ### AI Functionality
 To simplify the remediation process, we integrate a Large Language Model (LLM) for generating recommendations. Using Ollama's mistral model, all processing is done locally on JupyterHub, ensuring user data privacy (details on this implementation will be shared in future releases).

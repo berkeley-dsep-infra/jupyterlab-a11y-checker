@@ -531,3 +531,12 @@
     justify-content: flex-end;
     gap: 8px;
 }
+
+.fix-description {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.dropdown-fix-widget .fix-description {
+    margin-bottom: 12px;
+}

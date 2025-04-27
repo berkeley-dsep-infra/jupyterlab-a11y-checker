@@ -15,6 +15,7 @@ export const issueToCategory = new Map<string, string>([
   // TODO: 2. Headings
   ['page-has-heading-one', 'Headings'],
   ['heading-order', 'Headings'],
+  ['empty-heading', 'Headings'],
 
   // TODO: 3. Lists
 

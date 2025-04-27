@@ -77,14 +77,14 @@ export class CellIssueWidget extends Widget {
       return;
     }
 
-    if (this.issue.violation.id === 'image-alt') {
+    if (this.issue.violation.id === 'alt-text-markdown') {
       const textFieldFixWidget = new ImageAltFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(textFieldFixWidget.node);
-    } else if (this.issue.violation.id === 'table-has-caption') {
+    } else if (this.issue.violation.id === 'table-caption') {
       console.log('Table caption issue');
       const tableCaptionFixWidget = new TableCaptionFixWidget(
         this.issue,
@@ -92,7 +92,7 @@ export class CellIssueWidget extends Widget {
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(tableCaptionFixWidget.node);
-    } else if (this.issue.violation.id === 'td-has-header') {
+    } else if (this.issue.violation.id === 'table-headers') {
       const tableHeaderFixWidget = new TableHeaderFixWidget(
         this.issue,
         this.cell,

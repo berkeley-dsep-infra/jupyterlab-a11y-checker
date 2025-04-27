@@ -1,66 +1,140 @@
-# a11y_checker
+# jupyterlab-a11y-checker
 
 *A successor repository that will soon replace [jupyterlab-a11y-checker repository](https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker).*
 
-This tool performs accessibility checks on Jupyter notebooks (on JupyterHub) using the [axe-core](https://github.com/dequelabs/axe-core) engine as well as custom detection algorithms to align with WCAG guidelines. The following are accessibility rules that our extension enforces.
+jupyterlab-a11y-checker is a JupyterLab extension performs accessibility checks on Jupyter Notebooks (on JupyterHub), leveraging the [axe-core engine](https://github.com/dequelabs/axe-core) and custom detection algorithms to align with WCAG 2.0 AA guidelines. It enables authors to identify accessibility issues in their notebooks and provides actionable suggestions to fix them.
 
-We also utilize a Large Language Model to suggest fixes to these issues. We use ollama in JupyterHub so that no user data is transferred to third parties (we will release the specifics later).
+## Tool Description
 
+### Issue Detection
+While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a well-known [study](https://dl.acm.org/doi/pdf/10.1145/3597638.3608417). We utilize the [axe-core](https://github.com/dequelabs/axe-core) engine as well as custom detection algorithms. The issues the extension can detect are listed in [Issue Descriptions](./doc/rules.md).
 
-## Image
+### Fix Interfaces
+We provide a user interface tailored to each issue, such as a text field for adding alt-text, a dropdown for fixing header issues, etc. The fix interfaces are listed in [Fix Interface Descriptions](./doc/fix-interfaces.md).
 
-| Rule ID                 | Description                                                     | WCAG     | Fix UI     | Status        |
-|------------------------|-----------------------------------------------------------------|----------|------------|----------------|
-| **1a detect-text-markdown** | Check for presence of alt text in images which are embedded in markdown | WCAG 1.1.1 | Textfield  | Done ✅    |
-| **1c detect-image-text**    | Check if image contains text                                 | WCAG 1.1.1 | Textfield  | In progress ⏳   |
-
----
-
-## Heading
-
-| Rule ID                      | Description                                                     | WCAG     | Fix UI     | Status           |
-|-----------------------------|-----------------------------------------------------------------|----------|------------|------------------|
-| **3a detect-heading-h1**         | Check for the presence of H1 tag in a notebook               | WCAG 2.4.2 | Textfield  | In progress ⏳       |
-| **4a detect-heading-unique**     | Check if the headings are unique                             | WCAG 2.4.6 | TBD        | In progress ⏳       |
-| **4b detect-heading-accurate**   | Check if the order of heading is accurate                    | WCAG 2.4.6 | Dropdown   | In progress ⏳       |
-| **4c detect-headings-descriptive** | Check if the content of the headings are descriptive and accurate | WCAG 2.4.6 | TBD        | Discussion Needed ❓ |
-
----
-
-## List
-
-| Rule ID                 | Description                                                                 | WCAG     | Fix UI     | Status             |
-|------------------------|-----------------------------------------------------------------------------|----------|------------|--------------------|
-| **5a detect-list-tags**      | Check for presence of lists in a notebook without using `ol` or `ul` tags | WCAG 1.3.1 | TBD   | Discussion Needed ❓ |
-
----
-
-## Table
-
-| Rule ID                 | Description                                                     | WCAG     | Fix UI     | Status   |
-|------------------------|-----------------------------------------------------------------|----------|------------|----------|
-| **6a detect-table-headers** | Check for row and column headers                             | WCAG 1.3.1 | Dropdown   | Done ✅     |
-| **6b detect-table-caption** | Check whether caption was added for a table                  | WCAG 1.3.1 | Textfield  | Done ✅     |
-| **6c detect-table-scope**   | Check whether `scope` attribute is present for rows and columns | WCAG 1.3.1 | Apply Button | Done ✅  |
-
----
-
-## Color
-
-| Rule ID                 | Description                                                                 | WCAG     | Fix UI     | Status             |
-|------------------------|-----------------------------------------------------------------------------|----------|------------|--------------------|
-| **7a detect-url-ui**         | Check URLs in notebooks are underlined or bolded                         | WCAG 1.4.1 | TBD        | Discussion Required ❓ |
-| **8a detect-cc-normal**      | Check if normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 | Picker     | In progress  ⏳       |
-| **8b detect-cc-large**       | Check if large text in images have a contrast ratio of 3:1               | WCAG 1.4.3 | Picker     | In progress ⏳        |
-
----
-
-## Link
-
-| Rule ID                 | Description                                                                 | WCAG     | Fix UI     | Status   |
-|------------------------|-----------------------------------------------------------------------------|----------|------------|----------|
-| **9a detect-meta-link**     | Check whether meta information about a link is included for screen readers | WCAG 2.4.4 | TBD        | TBD      |
+### AI Functionality
+To simplify the remediation process, we integrate a Large Language Model (LLM) for generating recommendations. Using Ollama's mistral model, all processing is done locally on JupyterHub, ensuring user data privacy (details on this implementation will be shared in future releases).
 
 
-![UI of a11y_checker](./readme_img.png)
+## Getting Started
+
+### Installing
+You can install the extension directly via pip:
+
+```bash
+pip install jupyterlab-a11y-checker
+```
+Find the package on PyPI [here](https://pypi.org/project/jupyterlab-a11y-checker/).
+
+
+### Contributing
+
+We’re building this tool for the community, and we’d love your help! Whether it’s adding new accessibility checks, or refining the fix suggestions, your contributions can help this project make a broader impact.
+
+#### Build from Scratch
+
+```bash
+# Create an environment using anaconda navigator: <env-name>
+
+conda activate <env-name>
+pip install cookie cutter
+python -m pip install jupyterlab notebook --pre
+mamba install -c conda-forge nodejs=18
+node -v #to check version
+
+# <pull code>
+OR
+cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout 4.0
+
+jlpm
+jlpm run build
+jupyter labextension develop . --overwrite
+python -m pip install -e .
+pip list #to verify it has been installed in editable mode
+jupyter labextension list #to verify it has been installed
+
+jupyter lab --no-browser #run a jupyterlab server
+
+#Run jlpm run build, then jupyter lab --no-browser to test your code after each change
+```
+
+#### Build from Temp Distribution
+
+```bash
+jlpm build:prod
+npm pack #creates a tarball (*.tgz file) containing your project as it would be uploaded to the npm registry. This file can be shared and installed locally.
+jupyter labextension install </path/to/your-package.tgz>
+
+
+# ALTERNATIOVELY IF GIVEN A tar.gz file:
+
+conda activate <env-name>
+jupyter labextension install </path/to/your-package.tgz>
+jupyter lab #this will open a local server of jupyterlab with all current extensions installed.
+```
+
+#### Pip Distribution
+```bash
+pip install twine
+
+# create a ~/.pypirc file at root and add this to it:
+[distutils]
+index-servers =
+	pypi
+
+[pypi]
+repository: https://upload.pypi.org/legacy/
+username: __token__
+password: your-api-token
+
+#run this command and publish to pip.
+twine upload your-package.whl
+```
+
+#### Development uninstall
+
+```bash
+pip uninstall jupyterlab_a11y_checker
+```
+
+#### Testing in a JupyterHub setup
+
+- Build the Jupyter Lab extension with the latest changes
+
+```bash
+jlpm 
+jlpm build
+jupyter lab build
+```
+- Package the extension as a wheel file (.whl)
+
+```bash
+python -m build
+```
+.whl file gets generated in the `dist/` directory
+
+- Copy the .whl file to the server where JupyterHub is installed (or include it in a Dockerfile if using Docker)
+
+- Install the .whl file:
+
+```bash
+pip install /path/to/your-extension.whl
+```
+
+- If the identical version of the extension is already installed then
+
+```bash
+pip uninstall extension-name
+pip install /path/to/your-extension.whl
+```
+
+- Refresh the page for the changes to apply
+
+In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
+command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
+folder is located. Then you can remove the symlink named `jupyterlab-a11y-checker` within that folder.
+
+
+
+
 

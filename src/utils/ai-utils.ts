@@ -62,6 +62,7 @@ export async function getImageAltSuggestion(
       stream: false
     });
 
+    console.log('Sending request to:', userURL + 'api/generate');
     const response = await axios.post(userURL + 'api/generate', body, {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -96,35 +97,5 @@ export async function getTableCaptionSuggestion(
   } catch (error) {
     console.error('Error getting suggestions:', error);
     return 'Error';
-  }
-}
-
-export async function pullOllamaModel(
-  userURL: string,
-  modelName: string
-): Promise<void> {
-  try {
-    const payload = {
-      name: modelName,
-      stream: false,
-      options: {
-        low_cpu_mem_usage: true,
-        use_fast_tokenizer: true
-      }
-    };
-
-    // Instead of aborting, let's just monitor the time
-    console.log('Starting model pull...');
-
-    const response = await axios.post(userURL + 'api/pull', payload, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (response.status !== 200) {
-      throw new Error('Failed to pull model');
-    }
-  } catch (error) {
-    console.error('Error pulling model:', error);
-    throw error;
   }
 }

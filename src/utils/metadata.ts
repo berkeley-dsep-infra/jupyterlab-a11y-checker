@@ -10,7 +10,7 @@ export const issueCategoryNames = [
 
 export const issueToCategory = new Map<string, string>([
   // 1. Images
-  ['image-alt', 'Images'],
+  ['alt-text-markdown', 'Images'],
 
   // TODO: 2. Headings
   ['page-has-heading-one', 'Headings'],
@@ -20,12 +20,12 @@ export const issueToCategory = new Map<string, string>([
   // TODO: 3. Lists
 
   // TODO: 4. Tables
-  ['td-has-header', 'Tables'],
-  ['table-has-caption', 'Tables'],
+  ['table-headers', 'Tables'],
+  ['table-caption', 'Tables'],
 
   // TODO: 5. Color
-  ['detect-cc-normal', 'Color'],
-  ['detect-cc-large', 'Color']
+  ['color-contrast-normal', 'Color'],
+  ['color-contrast-large', 'Color']
 
   // TODO: 6. Links
 

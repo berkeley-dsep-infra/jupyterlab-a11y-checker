@@ -21,7 +21,10 @@ export async function analyzeCellsAccessibility(
   document.body.appendChild(tempDiv);
 
   const axeConfig: axe.RunOptions = {
-    runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+    runOnly: {
+      type: 'rule',
+      values: []
+    }
   };
 
   try {
@@ -74,6 +77,8 @@ export async function analyzeCellsAccessibility(
             0,
             panel.context.path.lastIndexOf('/')
           );
+
+          // Add image issues
           notebookIssues.push(
             ...(await detectImageIssuesInCell(
               rawMarkdown,
@@ -82,15 +87,20 @@ export async function analyzeCellsAccessibility(
               folderPath
             ))
           );
+
+          // Add table issues
           notebookIssues.push(
             ...detectTableIssuesInCell(rawMarkdown, i, cellType)
           );
+
+          // Add color contrast issues
           notebookIssues.push(
             ...(await detectColorIssuesInCell(
               rawMarkdown,
               i,
               cellType,
-              folderPath
+              folderPath,
+              panel // Pass panel for attachment handling
             ))
           );
         }
@@ -124,14 +134,6 @@ export async function getTextInImage(
       data: { text, confidence }
     } = await worker.recognize(pathForTesseract);
 
-    if (confidence > 40) {
-      // verifyTextBlocks(pathForTesseract);
-      const result = await getColorContrastInImage(
-        imagePath,
-        currentDirectoryPath
-      );
-      console.log('From getTextInImage: ', result);
-    }
     if (!text) {
       throw new Error('No text found in the image');
     }
@@ -173,12 +175,12 @@ async function detectImageIssuesInCell(
       } catch (error) {
         console.error(`Failed to process image ${imageUrl}:`, error);
       } finally {
-    notebookIssues.push({
-      cellIndex,
-      cellType: cellType as 'code' | 'markdown',
-      violation: {
-        id: 'image-alt',
-            description: 'Images must have alternative text',
+        notebookIssues.push({
+          cellIndex,
+          cellType: cellType as 'code' | 'markdown',
+          violation: {
+            id: 'alt-text-markdown',
+            description: 'Images must have alternate text',
             descriptionUrl:
               'https://dequeuniversity.com/rules/axe/4.7/image-alt'
       },
@@ -208,7 +210,7 @@ function detectTableIssuesInCell(
       cellIndex,
       cellType: cellType as 'code' | 'markdown',
       violation: {
-        id: 'td-has-header',
+        id: 'table-headers',
         description: 'Tables must have header information',
         descriptionUrl:
           'https://dequeuniversity.com/rules/axe/4.10/td-has-header?application=RuleDescription'
@@ -225,7 +227,7 @@ function detectTableIssuesInCell(
       cellIndex,
       cellType: cellType as 'code' | 'markdown',
       violation: {
-        id: 'table-has-caption',
+        id: 'table-caption',
         description: 'Tables must have caption information',
         descriptionUrl: ''
       },
@@ -504,20 +506,102 @@ function calculateContrast(
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/**
+ * Extract image data from a JupyterLab attachment
+ * @param attachmentId The ID of the attachment (e.g., 'c6533816-e12f-47fb-8896-af4065f8a12f.png')
+ * @param panel The notebook panel containing the attachment
+ * @param cellIndex The index of the cell containing the attachment
+ * @returns Data URL for the image or null if not found
+ */
+async function getAttachmentDataUrl(
+  attachmentId: string,
+  panel: NotebookPanel,
+  cellIndex: number
+): Promise<string | null> {
+  try {
+    // Extract filename from attachment ID
+    console.log('Looking for attachment:', attachmentId, 'in cell:', cellIndex);
+
+    if (!panel.model) {
+      console.warn('No notebook model available');
+      return null;
+    }
+
+    const cell = panel.content.widgets[cellIndex];
+
+    if (!cell || !cell.model) {
+      console.warn(`Cell at index ${cellIndex} is not available`);
+      return null;
+    }
+
+    try {
+      // Access the cell data directly
+      const cellData = cell.model.toJSON() as any;
+      if (
+        cellData &&
+        cellData.attachments &&
+        cellData.attachments[attachmentId]
+      ) {
+        console.log('Found attachment in cell widget');
+        const data = cellData.attachments[attachmentId];
+
+        // Get the base64 data
+        if (data && typeof data === 'object') {
+          for (const mimetype in data) {
+            if (mimetype.startsWith('image/')) {
+              const base64 = data[mimetype];
+              if (typeof base64 === 'string') {
+                return `data:${mimetype};base64,${base64}`;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error accessing cell widget data:', e);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error extracting attachment:', error);
+    return null;
+  }
+}
+
 async function getColorContrastInImage(
   imagePath: string,
-  currentDirectoryPath: string
+  currentDirectoryPath: string,
+  panel?: NotebookPanel,
+  cellIndex?: number
 ): Promise<{ contrast: number; isAccessible: boolean; hasLargeText: boolean }> {
+  // Determine the source for the image
+  let imageSource: string;
+
+  // Check if this is a JupyterLab attachment
+  if (imagePath.startsWith('attachment:')) {
+    if (!panel || cellIndex === undefined) {
+      throw new Error(
+        'NotebookPanel and cellIndex required for attachment images'
+      );
+    }
+    const attachmentId = imagePath.substring('attachment:'.length);
+    const dataUrl = await getAttachmentDataUrl(attachmentId, panel, cellIndex);
+
+    if (!dataUrl) {
+      throw new Error(`Could not load attachment: ${attachmentId}`);
+    }
+    imageSource = dataUrl;
+  } else {
+    // Regular image path (local or remote)
+    imageSource = imagePath.startsWith('http')
+      ? imagePath
+      : `${PageConfig.getBaseUrl()}files/${currentDirectoryPath}/${imagePath}`;
+  }
+
   // Create canvas and load image
   const img = new Image();
-  img.crossOrigin = 'anonymous';
+  img.crossOrigin = 'Anonymous';
 
-  // Determine the path for the image
-  const pathForTesseract = imagePath.startsWith('http')
-    ? imagePath
-    : `${PageConfig.getBaseUrl()}files/${currentDirectoryPath}/${imagePath}`;
-
-  console.log('Using path for contrast analysis:', pathForTesseract);
+  img.src = imageSource;
 
   return new Promise((resolve, reject) => {
     img.onload = async () => {
@@ -545,6 +629,16 @@ async function getColorContrastInImage(
 
         // Recognize text blocks with PSM 11
         const result = await worker.recognize(canvas, {}, { blocks: true });
+        console.log('result', result);
+        if (result.data.confidence < 40) {
+          // We can't analyze the image, so we return the default values
+          resolve({
+            contrast: 21,
+            isAccessible: true,
+            hasLargeText: false
+          });
+          return;
+        }
 
         let minContrast = 21; // Default to maximum contrast
         let hasLargeText = false;
@@ -623,6 +717,8 @@ async function getColorContrastInImage(
         // Terminate the worker
         await worker.terminate();
 
+        console.log('Contrast:', minContrast);
+
         resolve({
           contrast: minContrast,
           isAccessible,
@@ -699,8 +795,6 @@ async function getColorContrastInImage(
       console.error('Image load error:', e);
       reject(new Error('Failed to load image'));
     };
-
-    img.src = pathForTesseract;
   });
 }
 
@@ -708,36 +802,45 @@ async function detectColorIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
   cellType: string,
-  notebookPath: string
+  notebookPath: string,
+  panel?: NotebookPanel
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
-  // Check for images without alt text in markdown syntax
-  const mdSyntaxMissingAltRegex = /!\[\]\([^)]+\)/g;
+  // Check for all images in markdown syntax (this will also catch attachment syntax)
+  const mdSyntaxImageRegex = /!\[[^\]]*\]\([^)]+\)/g;
 
-  // Check for images without alt tag or empty alt tag in HTML syntax
-  const htmlSyntaxMissingAltRegex = /<img[^>]*alt=""[^>]*>/g;
+  // Check for all images in HTML syntax
+  const htmlSyntaxImageRegex = /<img[^>]*>(?:<\/img>)?/g;
+
   let match;
   while (
-    (match = mdSyntaxMissingAltRegex.exec(rawMarkdown)) !== null ||
-    (match = htmlSyntaxMissingAltRegex.exec(rawMarkdown)) !== null
+    (match = mdSyntaxImageRegex.exec(rawMarkdown)) !== null ||
+    (match = htmlSyntaxImageRegex.exec(rawMarkdown)) !== null
   ) {
     const imageUrl =
       match[0].match(/\(([^)]+)\)/)?.[1] ||
       match[0].match(/src="([^"]+)"/)?.[1];
+
     if (imageUrl) {
       const suggestedFix: string = '';
       try {
+        // getColorContrastInImage will handle both regular images and attachments
         const { contrast, isAccessible, hasLargeText } =
-          await getColorContrastInImage(imageUrl, notebookPath);
+          await getColorContrastInImage(
+            imageUrl,
+            notebookPath,
+            panel,
+            cellIndex
+          );
         if (!isAccessible) {
           if (hasLargeText) {
             notebookIssues.push({
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
               violation: {
-                id: 'detect-cc-large',
-                description: `Large text in images have a contrast ratio of 3:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1.`,
+                id: 'color-contrast-normal',
+                description: `Large text in images have a contrast ratio of 3:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
                 descriptionUrl: ''
               },
               issueContentRaw: match[0],
@@ -748,8 +851,8 @@ async function detectColorIssuesInCell(
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
               violation: {
-                id: 'detect-cc-normal',
-                description: `Normal text in images have a contrast ratio of 4.5:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1.`,
+                id: 'color-contrast-large',
+                description: `Normal text in images have a contrast ratio of 4.5:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
                 descriptionUrl: ''
               },
               issueContentRaw: match[0],

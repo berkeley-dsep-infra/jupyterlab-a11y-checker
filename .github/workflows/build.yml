@@ -45,13 +45,13 @@ jobs:
 
         pip install build
         python -m build
-        pip uninstall -y "a11y_checker" jupyterlab
+        pip uninstall -y "jupyterlab_a11y_checker" jupyterlab
 
     - name: Upload extension packages
       uses: actions/upload-artifact@v4
       with:
         name: extension-artifacts
-        path: dist/a11y_checker*
+        path: dist/jupyterlab_a11y_checker*
         if-no-files-found: error
 
   test_isolated:
@@ -74,7 +74,7 @@ jobs:
         sudo rm -rf $(which node)
         sudo rm -rf $(which node)
 
-        pip install "jupyterlab>=4.0.0,<5" a11y_checker*.whl
+        pip install "jupyterlab>=4.0.0,<5" jupyterlab_a11y_checker*.whl
 
 
         jupyter labextension list

@@ -1,7 +1,6 @@
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { LabIcon } from '@jupyterlab/ui-components';
-import { PageConfig } from '@jupyterlab/coreutils';
 
 import { CellIssueWidget } from './IssueWidget';
 
@@ -9,10 +8,8 @@ import { ICellIssue } from '../utils/types';
 import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
 import { analyzeCellsAccessibility } from '../utils/detection-utils';
-import { pullOllamaModel } from '../utils/ai-utils';
 
 export class MainPanelWidget extends Widget {
-  private modelPulled: boolean = false;
   private aiEnabled: boolean = false;
   private currentNotebook: NotebookPanel | null = null;
 
@@ -94,27 +91,9 @@ export class MainPanelWidget extends Widget {
 
     aiControlButton?.addEventListener('click', async () => {
       const aiIcon = '<span class="material-icons">auto_awesome</span>';
-      // First Time Enabling AI
-      if (!this.aiEnabled && !this.modelPulled) {
-        aiControlButton.innerHTML = `${progressIcon} Please wait...`;
-        aiControlButton.disabled = true;
-        try {
-          const SERVER_URL = PageConfig.getBaseUrl() + 'ollama/';
-          await pullOllamaModel(SERVER_URL, 'mistral');
-          this.modelPulled = true;
-          this.aiEnabled = true;
-        } catch (error) {
-          console.error('Failed to pull model:', error);
-        } finally {
-          aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.modelPulled ? 'Enabled' : 'Failed'}`;
-          aiControlButton.disabled = false;
-        }
-      }
-      // Toggle Use AI State
-      else {
-        this.aiEnabled = !this.aiEnabled;
-        aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
-      }
+
+      this.aiEnabled = !this.aiEnabled;
+      aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
 
       // Update every ai suggestion button visibility
       const suggestButtons = this.node.querySelectorAll('.suggest-button');

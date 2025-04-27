@@ -685,9 +685,13 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
   private _currentLevel: number = 1;  // Initialize with default value
   private previousLevel: number | undefined;
   protected selectedLevel: number | undefined;
+  private notebookPanel: NotebookPanel;
 
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
+    
+    // Get reference to notebook panel
+    this.notebookPanel = cell.parent?.parent as NotebookPanel;
     
     // Parse and set the current level immediately
     this._currentLevel = HeadingOrderFixWidget.parseHeadingLevel(issue.issueContentRaw);
@@ -697,10 +701,36 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
 
     // Setup apply button handler
     if (this.applyButton) {
-      this.applyButton.addEventListener('click', () => {
+      this.applyButton.addEventListener('click', async () => {
         console.log('Apply button clicked');
         if (this.selectedLevel) {
           this.applyDropdownSelection(`h${this.selectedLevel}`);
+          
+          // Wait a short delay for the cell to update
+          // Allow UI to update before reanalyzing
+          setTimeout(async () => {
+            if (this.notebookPanel) {
+              try {
+                const utils = await import('../utils/detection-utils');
+                
+                // Only analyze heading hierarchy
+                const headingIssues = await utils.analyzeHeadingHierarchy(this.notebookPanel);
+                
+                // Find the main panel widget
+                const mainPanel = document.querySelector('.a11y-panel')?.closest('.lm-Widget');
+                if (mainPanel) {
+                  // Dispatch a custom event with just heading issues
+                  const event = new CustomEvent('notebookReanalyzed', {
+                    detail: { issues: headingIssues },
+                    bubbles: true
+                  });
+                  mainPanel.dispatchEvent(event);
+                }
+              } catch (error) {
+                console.error('Error reanalyzing notebook:', error);
+              }
+            }
+          }, 100); // Small delay to ensure cell content is updated
         }
       });
     }

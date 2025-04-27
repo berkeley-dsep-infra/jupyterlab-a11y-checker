@@ -6,6 +6,8 @@ import {
   getTableCaptionSuggestion
 } from '../utils/ai-utils';
 
+import { analyzeHeadingHierarchy } from '../utils/detection-utils';
+
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ServerConnection } from '@jupyterlab/services';
 import { NotebookPanel } from '@jupyterlab/notebook';
@@ -37,27 +39,12 @@ abstract class FixWidget extends Widget {
       }
     }
 
-    // Only highlight the first cell if this is a heading one fix
-    if (this instanceof HeadingOneFixWidget) {
-      const notebookPanel = this.cell.parent?.parent as NotebookPanel;
-      if (notebookPanel) {
-        const firstCell = notebookPanel.content.widgets[0];
-        if (firstCell) {
-          firstCell.node.style.transition = 'background-color 0.5s ease';
-          firstCell.node.style.backgroundColor = '#28A745';
-          setTimeout(() => {
-            firstCell.node.style.backgroundColor = '';
-          }, 1000);
-        }
-      }
-    } else {
-      // For other fixes, highlight the current cell
-      this.cell.node.style.transition = 'background-color 0.5s ease';
-      this.cell.node.style.backgroundColor = '#28A745';
-      setTimeout(() => {
-        this.cell.node.style.backgroundColor = '';
-      }, 1000);
-    }
+    // For all fixes, highlight the current cell
+    this.cell.node.style.transition = 'background-color 0.5s ease';
+    this.cell.node.style.backgroundColor = '#28A745';
+    setTimeout(() => {
+      this.cell.node.style.backgroundColor = '';
+    }, 1000);
   }
 }
 
@@ -595,6 +582,30 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
     }
   }
 
+  protected removeIssueWidget(): void {
+    const issueWidget = this.node.closest('.issue-widget');
+    if (issueWidget) {
+      const category = issueWidget.closest('.category');
+      issueWidget.remove();
+      if (category && !category.querySelector('.issue-widget')) {
+        category.remove();
+      }
+    }
+
+    // Highlight the first cell instead of the current cell
+    const notebookPanel = this.cell.parent?.parent as NotebookPanel;
+    if (notebookPanel) {
+      const firstCell = notebookPanel.content.widgets[0];
+      if (firstCell) {
+        firstCell.node.style.transition = 'background-color 0.5s ease';
+        firstCell.node.style.backgroundColor = '#28A745';
+        setTimeout(() => {
+          firstCell.node.style.backgroundColor = '';
+        }, 1000);
+      }
+    }
+  }
+
   applyTextToCell(providedHeading: string): void {
     if (providedHeading === '') {
       console.log('Empty heading text, returning');
@@ -710,11 +721,9 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
           // Allow UI to update before reanalyzing
           setTimeout(async () => {
             if (this.notebookPanel) {
-              try {
-                const utils = await import('../utils/detection-utils');
-                
+              try {                
                 // Only analyze heading hierarchy
-                const headingIssues = await utils.analyzeHeadingHierarchy(this.notebookPanel);
+                const headingIssues = await analyzeHeadingHierarchy(this.notebookPanel);
                 
                 // Find the main panel widget
                 const mainPanel = document.querySelector('.a11y-panel')?.closest('.lm-Widget');

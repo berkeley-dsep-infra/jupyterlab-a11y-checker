@@ -350,7 +350,8 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
     //console.log(`Total headings found: ${headingStructure.length}`);
     //console.log('Analyzing heading structure...');
 
-    // Track headings by level to detect duplicates
+    // Track headings by level to detect duplicates of content across a given heading level
+    // Format: Map<Heading Level (h1 - h6), Map<Heading Content/Text, Array of Cell Indices where content appears>>();
     const headingsByLevel = new Map<number, Map<string, number[]>>();
     
     // First pass: collect all headings by level and content

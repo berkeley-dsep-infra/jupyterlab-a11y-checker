@@ -10,24 +10,26 @@ export const issueCategoryNames = [
 
 export const issueToCategory = new Map<string, string>([
   // 1. Images
-  ['alt-text-markdown', 'Images'],
+  ['image-missing-alt', 'Images'],
 
   // TODO: 2. Headings
-  ['page-has-heading-one', 'Headings'],
-  ['heading-order', 'Headings'],
-  ['empty-heading', 'Headings'],
+  ['heading-missing-h1', 'Headings'],
+  ['heading-duplicate', 'Headings'],
+  ['heading-duplicate-h1', 'Headings'],
+  ['heading-wrong-order', 'Headings'],
+  ['heading-empty', 'Headings'],
 
-  // TODO: 3. Lists
+  // TODO: 3. Tables
+  ['table-missing-header', 'Tables'],
+  ['table-missing-caption', 'Tables'],
 
-  // TODO: 4. Tables
-  ['table-headers', 'Tables'],
-  ['table-caption', 'Tables'],
+  // TODO: 4. Color
+  ['color-insufficient-cc-normal', 'Color'],
+  ['color-insufficient-cc-large', 'Color']
 
-  // TODO: 5. Color
-  ['color-contrast-normal', 'Color'],
-  ['color-contrast-large', 'Color']
+  // TODO: Lists
 
-  // TODO: 6. Links
+  // TODO: Links
 
-  // TODO: 7. Other
+  // TODO: Other
 ]);

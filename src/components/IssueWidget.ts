@@ -77,14 +77,14 @@ export class CellIssueWidget extends Widget {
       return;
     }
 
-    if (this.issue.violation.id === 'alt-text-markdown') {
+    if (this.issue.violation.id === 'image-missing-alt') {
       const textFieldFixWidget = new ImageAltFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(textFieldFixWidget.node);
-    } else if (this.issue.violation.id === 'table-caption') {
+    } else if (this.issue.violation.id === 'table-missing-caption') {
       console.log('Table caption issue');
       const tableCaptionFixWidget = new TableCaptionFixWidget(
         this.issue,
@@ -92,21 +92,21 @@ export class CellIssueWidget extends Widget {
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(tableCaptionFixWidget.node);
-    } else if (this.issue.violation.id === 'table-headers') {
+    } else if (this.issue.violation.id === 'table-missing-header') {
       const tableHeaderFixWidget = new TableHeaderFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(tableHeaderFixWidget.node);
-    } else if (this.issue.violation.id === 'page-has-heading-one') {
+    } else if (this.issue.violation.id === 'heading-missing-h1') {
       const headingOneFixWidget = new HeadingOneFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(headingOneFixWidget.node);
-    } else if (this.issue.violation.id === 'heading-order') {
+    } else if (this.issue.violation.id === 'heading-wrong-order') {
       const headingOrderFixWidget = new HeadingOrderFixWidget(
         this.issue,
         this.cell,

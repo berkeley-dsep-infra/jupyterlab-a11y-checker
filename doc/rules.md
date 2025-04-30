@@ -4,7 +4,7 @@
 
 | No. | Rule ID                  | Description                                                                 | WCAG     | Status   |
 |-----|--------------------------|-----------------------------------------------------------------------------|----------|----------|
-| 1a   | alt-text-markdown         | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 | Done ✅ |
+| 1a   | image-missing-alt         | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 | Done ✅ |
 
 ---
 
@@ -12,9 +12,11 @@
 
 | No. | Rule ID                      | Description                                                                 | WCAG     | Status           |
 |-----|------------------------------|-----------------------------------------------------------------------------|----------|------------------|
-| 2a   | heading-h1            | Ensure the presence of H1 tag in a notebook                              | WCAG 2.4.2 | In progress ⏳   |
-| 2b   | heading-unique        | Ensure the headings are unique                                            | WCAG 2.4.6 | In progress ⏳   |
-| 2c   | heading-accurate      | Ensure the order of heading is accurate                                   | WCAG 2.4.6 | In progress ⏳   |
+| 2a   | heading-missing-h1          | Ensure the presence of H1 tag in a notebook                               | WCAG 2.4.2 | Done ✅   |
+| 2b   | heading-duplicate-h1        | Ensure there is only one H1 tag in a notebook                             | WCAG 2.4.6 | Done ✅   |
+| 2c   | heading-duplicate           | Ensure the headings are unique                                            | WCAG 2.4.6 | Done ✅   |
+| 2d   | heading-wrong-order         | Ensure the order of heading is accurate                                   | WCAG 2.4.6 | Done ✅   |
+| 2e   | heading-empty               | Ensure the heading content is non-empty                                   | WCAG 2.4.6 | Done ✅   |
 
 ---
 
@@ -22,9 +24,9 @@
 
 | No. | Rule ID               | Description                                                                 | WCAG     | Status   |
 |-----|------------------------|-----------------------------------------------------------------------------|----------|----------|
-| 3a   | table-headers  | Ensure row and column headers are present in a table                                         | WCAG 1.3.1 | Done ✅  |
-| 3b   | table-caption  | Ensure caption was added for a table                                 | WCAG 1.3.1 | Done ✅  |
-| 3c   | table-scope    | Ensure presence of `scope` attribute for rows and columns             | WCAG 1.3.1 | In progress ⏳ |
+| 3a   | table-missing-header  | Ensure row and column headers are present in a table                  | WCAG 1.3.1 | Done ✅  |
+| 3b   | table-missing-caption  | Ensure caption was added for a table                                 | WCAG 1.3.1 | Done ✅  |
+| 3c   | table-scope    | Ensure presence of `scope` attribute for rows and columns                   | WCAG 1.3.1 | In progress ⏳ |
 
 ---
 
@@ -32,9 +34,8 @@
 
 | No. | Rule ID              | Description                                                                 | WCAG     | Status             |
 |-----|----------------------|-----------------------------------------------------------------------------|----------|--------------------|
-| 4a  | color-url-ui        | Ensure URLs in notebooks are underlined or bolded                           | WCAG 1.4.1 | Discussion Required ❓ |
-| 4b  | color-contrast-normal     | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 | Done ✅   |
-| 4c  | color-contrast-large      | Ensure large text in images have a contrast ratio of 3:1                  | WCAG 1.4.3 | Done ✅   |
+| 4a  | color-insufficient-cc-normal     | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 | Done ✅   |
+| 4b  | color-insufficient-cc-large      | Ensure large text in images have a contrast ratio of 3:1                  | WCAG 1.4.3 | Done ✅   |
 
 ---
 

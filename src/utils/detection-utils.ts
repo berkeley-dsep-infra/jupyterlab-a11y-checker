@@ -15,7 +15,9 @@ export async function analyzeCellsAccessibility(
   const cells = panel.content.widgets;
 
   // Add heading one check
-  notebookIssues.push(...await detectHeadingOneIssue('', 0, 'markdown', cells));
+  notebookIssues.push(
+    ...(await detectHeadingOneIssue('', 0, 'markdown', cells))
+  );
 
   const tempDiv = document.createElement('div');
   document.body.appendChild(tempDiv);
@@ -52,8 +54,9 @@ export async function analyzeCellsAccessibility(
             violations.forEach(violation => {
               violation.nodes.forEach(node => {
                 // Customize description for various issues
-                if (violation.id === 'empty-heading') {
-                  violation.description = 'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.'
+                if (violation.id === 'heading-empty') {
+                  violation.description =
+                    'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.';
                 }
                 notebookIssues.push({
                   cellIndex: i,
@@ -176,14 +179,14 @@ async function detectImageIssuesInCell(
           cellIndex,
           cellType: cellType as 'code' | 'markdown',
           violation: {
-            id: 'alt-text-markdown',
+            id: 'image-missing-alt',
             description: 'Images must have alternate text',
             descriptionUrl:
               'https://dequeuniversity.com/rules/axe/4.7/image-alt'
-      },
+          },
           issueContentRaw: match[0],
           suggestedFix: suggestedFix
-    });
+        });
       }
     }
   }
@@ -207,7 +210,7 @@ function detectTableIssuesInCell(
       cellIndex,
       cellType: cellType as 'code' | 'markdown',
       violation: {
-        id: 'table-headers',
+        id: 'table-missing-header',
         description: 'Tables must have header information',
         descriptionUrl:
           'https://dequeuniversity.com/rules/axe/4.10/td-has-header?application=RuleDescription'
@@ -224,7 +227,7 @@ function detectTableIssuesInCell(
       cellIndex,
       cellType: cellType as 'code' | 'markdown',
       violation: {
-        id: 'table-caption',
+        id: 'table-missing-caption',
         description: 'Tables must have caption information',
         descriptionUrl: ''
       },
@@ -243,26 +246,30 @@ async function detectHeadingOneIssue(
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
   const tempDiv = document.createElement('div');
-  
+
   // Find the first heading in the notebook
   let firstHeadingFound = false;
   let firstHeadingContent = '';
 
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
-    if (cell.model.type !== 'markdown') continue;
+    if (cell.model.type !== 'markdown') {
+      continue;
+    }
 
     const content = cell.model.sharedModel.getSource();
-    if (!content.trim()) continue;
+    if (!content.trim()) {
+      continue;
+    }
 
     // Parse markdown to HTML
     tempDiv.innerHTML = await marked.parse(content);
     const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    
+
     if (headings.length > 0) {
       firstHeadingFound = true;
       firstHeadingContent = headings[0].outerHTML;
-      
+
       // Check if first heading is not h1
       const level = parseInt(headings[0].tagName[1]);
       if (level !== 1) {
@@ -270,9 +277,11 @@ async function detectHeadingOneIssue(
           cellIndex: i,
           cellType: 'markdown',
           violation: {
-            id: 'page-has-heading-one',
-            description: 'Ensure that the page or at least one of its frames contains a level-one heading. A missing level-one heading can leave screen reader users without a clear starting point, making it harder to understand the main purpose or content of the page. Please also ensure that headings contain descriptive, accurate text',
-            descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.7/page-has-heading-one'
+            id: 'heading-missing-h1',
+            description:
+              'Ensure that the page or at least one of its frames contains a level-one heading. A missing level-one heading can leave screen reader users without a clear starting point, making it harder to understand the main purpose or content of the page. Please also ensure that headings contain descriptive, accurate text',
+            descriptionUrl:
+              'https://dequeuniversity.com/rules/axe/4.7/heading-missing-h1'
           },
           issueContentRaw: firstHeadingContent
         });
@@ -287,9 +296,11 @@ async function detectHeadingOneIssue(
       cellIndex: 0,
       cellType: 'markdown',
       violation: {
-        id: 'page-has-heading-one',
-        description: 'Ensure that the page or at least one of its frames contains a level-one heading. A missing level-one heading can leave screen reader users without a clear starting point, making it harder to understand the main purpose or content of the page. Please also ensure that headings contain descriptive, accurate text',
-        descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.7/page-has-heading-one'
+        id: 'heading-missing-h1',
+        description:
+          'Ensure that the page or at least one of its frames contains a level-one heading. A missing level-one heading can leave screen reader users without a clear starting point, making it harder to understand the main purpose or content of the page. Please also ensure that headings contain descriptive, accurate text',
+        descriptionUrl:
+          'https://dequeuniversity.com/rules/axe/4.7/heading-missing-h1'
       },
       issueContentRaw: ''
     });
@@ -299,7 +310,9 @@ async function detectHeadingOneIssue(
   return notebookIssues;
 }
 
-export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICellIssue[]> {
+export async function analyzeHeadingHierarchy(
+  panel: NotebookPanel
+): Promise<ICellIssue[]> {
   //console.log('startingheading hierarchy analysis');
   const notebookIssues: ICellIssue[] = [];
   const cells = panel.content.widgets;
@@ -324,20 +337,22 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
       }
 
       const content = cell.model.sharedModel.getSource();
-      if (!content.trim()) continue;
+      if (!content.trim()) {
+        continue;
+      }
 
       // Parse markdown to HTML
       tempDiv.innerHTML = await marked.parse(content);
-      
+
       // Find all headings in the cell
       const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
       //console.log(`Cell ${i}: Found ${headings.length} headings`);
-      
+
       headings.forEach(heading => {
         const level = parseInt(heading.tagName[1]);
         const text = heading.textContent || '';
         //console.log(`  Level ${level} heading: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
-        
+
         headingStructure.push({
           cellIndex: i,
           level,
@@ -353,7 +368,7 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
     // Track headings by level to detect duplicates of content across a given heading level
     // Format: Map<Heading Level (h1 - h6), Map<Heading Content/Text, Array of Cell Indices where content appears>>();
     const headingsByLevel = new Map<number, Map<string, number[]>>();
-    
+
     // First pass: collect all headings by level and content
     headingStructure.forEach((heading, index) => {
       if (!headingsByLevel.has(heading.level)) {
@@ -380,7 +395,8 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
           cellType: 'markdown',
           violation: {
             id: 'duplicate-heading-one',
-            description: 'Ensure there is only one level-one heading (h1) in the notebook. The h1 heading should be at the top of the document and serve as the main title. Additional h1 headings can confuse screen reader users about the document structure. Please also ensure that headings contain descriptive, accurate text',
+            description:
+              'Ensure there is only one level-one heading (h1) in the notebook. The h1 heading should be at the top of the document and serve as the main title. Additional h1 headings can confuse screen reader users about the document structure. Please also ensure that headings contain descriptive, accurate text',
             descriptionUrl: ''
           },
           issueContentRaw: heading.html
@@ -405,8 +421,9 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
           cellIndex: current.cellIndex,
           cellType: 'markdown',
           violation: {
-            id: 'empty-heading',
-            description: 'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.',
+            id: 'heading-empty',
+            description:
+              'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.',
             descriptionUrl: ''
           },
           issueContentRaw: current.html
@@ -418,7 +435,7 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
       const levelMap = headingsByLevel.get(current.level)!;
       const normalizedContent = current.content.trim().toLowerCase();
       const duplicateIndices = levelMap.get(normalizedContent)!;
-      
+
       if (duplicateIndices.length > 1) {
         // Only report the first occurrence of each duplicate
         if (duplicateIndices[0] === i) {
@@ -428,7 +445,8 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
             cellType: 'markdown',
             violation: {
               id: 'duplicate-heading',
-              description: 'Ensure identical headings are not used at the same level. This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text',
+              description:
+                'Ensure identical headings are not used at the same level. This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text',
               descriptionUrl: ''
             },
             issueContentRaw: current.html,
@@ -440,20 +458,24 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
       }
 
       // Skip first heading (no previous to compare with)
-      if (!previous) continue;
+      if (!previous) {
+        continue;
+      }
 
       // Check for invalid heading level skips
       // Only flag violations when skipping to lower levels (e.g., h2 to h4)
       // Allow skips when returning to higher levels (e.g., h4 to h2)
       const levelDiff = current.level - previous.level;
-      if (levelDiff > 1) {  // Only check when going to lower levels
+      if (levelDiff > 1) {
+        // Only check when going to lower levels
         //console.log(`Found heading level skip from h${previous.level} to h${current.level} at cell ${current.cellIndex}`);
         notebookIssues.push({
           cellIndex: current.cellIndex,
           cellType: 'markdown',
           violation: {
-            id: 'heading-order',
-            description: 'Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure headings contain descriptive, accurate text',
+            id: 'heading-wrong-order',
+            description:
+              'Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure headings contain descriptive, accurate text',
             descriptionUrl: ''
           },
           issueContentRaw: current.html,
@@ -465,7 +487,6 @@ export async function analyzeHeadingHierarchy(panel: NotebookPanel): Promise<ICe
     }
 
     //console.log('Heading hierarchy analysis complete. Found issues:', notebookIssues.length);
-
   } catch (error) {
     console.error('Error in heading hierarchy analysis:', error);
   } finally {
@@ -837,7 +858,7 @@ async function detectColorIssuesInCell(
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
               violation: {
-                id: 'color-contrast-normal',
+                id: 'color-insufficient-cc-normal',
                 description: `Large text in images have a contrast ratio of 3:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
                 descriptionUrl: ''
               },
@@ -849,7 +870,7 @@ async function detectColorIssuesInCell(
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
               violation: {
-                id: 'color-contrast-large',
+                id: 'color-insufficient-cc-large',
                 description: `Normal text in images have a contrast ratio of 4.5:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
                 descriptionUrl: ''
               },

@@ -1,5 +1,5 @@
 import { ICellIssue } from '../../utils/types';
-import { analyzeHeadingHierarchy } from '../../utils/detection-utils';
+import { analyzeHeadingHierarchy } from '../../utils/detection/category/heading';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';

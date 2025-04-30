@@ -7,7 +7,7 @@ import { CellIssueWidget } from './issueWidget';
 import { ICellIssue } from '../utils/types';
 import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
-import { analyzeCellsAccessibility } from '../utils/detection-utils';
+import { analyzeCellsAccessibility } from '../utils/detection/base';
 
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;

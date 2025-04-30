@@ -7,7 +7,7 @@ import {
   TableHeaderFixWidget,
   HeadingOneFixWidget,
   HeadingOrderFixWidget
-} from './fixWidgets';
+} from './fix';
 
 import { issueToDescription } from '../utils/metadata';
 

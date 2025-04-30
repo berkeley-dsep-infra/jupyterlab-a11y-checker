@@ -1,8 +1,5 @@
-import { ICellIssue } from '../../utils/types';
-import {
-  getImageAltSuggestion,
-  getTableCaptionSuggestion
-} from '../../utils/ai-utils';
+import { ICellIssue } from '../../utils';
+import { getImageAltSuggestion, getTableCaptionSuggestion } from '../../utils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ServerConnection } from '@jupyterlab/services';

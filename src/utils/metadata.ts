@@ -39,7 +39,7 @@ export const issueToDescription = new Map<string, string>([
   ['image-missing-alt', 'This image is missing alt-text.'],
 
   // TODO: 2. Headings
-  ['heading-missing-h1', 'This notebook is missing an H1 heading.'],
+  ['heading-missing-h1', 'This notebook is missing a H1 heading.'],
   ['heading-duplicate-h1', 'This notebook has multiple H1 headings.'],
   ['heading-duplicate', 'This heading appears multiple times in the notebook.'],
   ['heading-wrong-order', 'This heading is out of order.'],

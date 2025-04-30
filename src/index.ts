@@ -4,7 +4,7 @@ import {
 } from '@jupyterlab/application';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ILabShell } from '@jupyterlab/application';
-import { MainPanelWidget } from './components/MainPanelWidget';
+import { MainPanelWidget } from './components/mainpanelWidget';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-a11y-fix',

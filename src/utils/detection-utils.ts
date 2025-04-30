@@ -1,10 +1,11 @@
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { Cell } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
+
 import axe from 'axe-core';
 import { marked } from 'marked';
 import Tesseract, { PSM } from 'tesseract.js';
-import { Cell } from '@jupyterlab/cells';
-import { ICellModel } from '@jupyterlab/cells';
 
 import { ICellIssue } from './types';
 
@@ -394,7 +395,7 @@ export async function analyzeHeadingHierarchy(
           cellIndex: heading.cellIndex,
           cellType: 'markdown',
           violation: {
-            id: 'duplicate-heading-one',
+            id: 'heading-duplicate-h1',
             description:
               'Ensure there is only one level-one heading (h1) in the notebook. The h1 heading should be at the top of the document and serve as the main title. Additional h1 headings can confuse screen reader users about the document structure. Please also ensure that headings contain descriptive, accurate text',
             descriptionUrl: ''
@@ -444,7 +445,7 @@ export async function analyzeHeadingHierarchy(
             cellIndex: current.cellIndex,
             cellType: 'markdown',
             violation: {
-              id: 'duplicate-heading',
+              id: 'heading-duplicate',
               description:
                 'Ensure identical headings are not used at the same level. This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text',
               descriptionUrl: ''

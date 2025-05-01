@@ -38,6 +38,30 @@ abstract class FixWidget extends Widget {
   }
 }
 
+export abstract class ButtonFixWidget extends FixWidget {
+  protected applyButton: HTMLButtonElement;
+
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+    super(issue, cell, aiEnabled);
+
+    this.node.innerHTML = `
+      <div class="fix-description">${this.getDescription()}</div>
+      <div class="button-container">
+        <button class="jp-Button2 button-fix-button">
+          <span class="material-icons">check</span>
+          <div>${this.getApplyButtonText()}</div>
+        </button>
+      </div>
+    `;
+
+    this.applyButton = this.node.querySelector('.button-fix-button') as HTMLButtonElement;
+    this.applyButton.addEventListener('click', () => this.applyFix());
+  }
+
+  protected abstract getApplyButtonText(): string;
+  protected abstract applyFix(): void;
+}
+
 export abstract class TextFieldFixWidget extends FixWidget {
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);

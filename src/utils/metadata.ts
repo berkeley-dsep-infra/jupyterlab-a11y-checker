@@ -22,6 +22,7 @@ export const issueToCategory = new Map<string, string>([
   // TODO: 3. Tables
   ['table-missing-header', 'Tables'],
   ['table-missing-caption', 'Tables'],
+  ['table-missing-scope', 'Tables'],
 
   // TODO: 4. Color
   ['color-insufficient-cc-normal', 'Color'],
@@ -48,12 +49,13 @@ export const issueToDescription = new Map<string, string>([
   // TODO: 3. Tables
   ['table-missing-header', 'This table is missing a header.'],
   ['table-missing-caption', 'This table is missing a caption.'],
+  ['table-missing-scope', 'This table header is missing a scope attribute.'],
 
   // TODO: 4. Color
-  ['color-insufficient-cc-normal', 'This image has bad color contrast.'],
+  ['color-insufficient-cc-normal', 'This image has insufficient color contrast.'],
   [
     'color-insufficient-cc-large',
-    'This image has bad color contrast for large text.'
+    'This image has insufficient color contrast for large text.'
   ]
 
   // TODO: Lists

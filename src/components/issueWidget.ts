@@ -5,6 +5,7 @@ import {
   ImageAltFixWidget,
   TableCaptionFixWidget,
   TableHeaderFixWidget,
+  TableScopeFixWidget,
   HeadingOneFixWidget,
   HeadingOrderFixWidget
 } from './fix';
@@ -116,6 +117,13 @@ export class CellIssueWidget extends Widget {
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(headingOrderFixWidget.node);
+    } else if (this.issue.violation.id === 'table-missing-scope') {
+      const tableScopeFixWidget = new TableScopeFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
+      );
+      fixWidgetContainer.appendChild(tableScopeFixWidget.node);
     }
   }
 

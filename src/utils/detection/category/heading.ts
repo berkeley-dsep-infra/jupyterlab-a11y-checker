@@ -42,13 +42,7 @@ export async function detectHeadingOneIssue(
         notebookIssues.push({
           cellIndex: i,
           cellType: 'markdown',
-          violation: {
-            id: 'heading-missing-h1',
-            description:
-              'Ensure that the page or at least one of its frames contains a level-one heading. A missing level-one heading can leave screen reader users without a clear starting point, making it harder to understand the main purpose or content of the page. Please also ensure that headings contain descriptive, accurate text',
-            descriptionUrl:
-              'https://dequeuniversity.com/rules/axe/4.7/heading-missing-h1'
-          },
+          violationId: 'heading-missing-h1',
           issueContentRaw: firstHeadingContent
         });
       }
@@ -61,13 +55,7 @@ export async function detectHeadingOneIssue(
     notebookIssues.push({
       cellIndex: 0,
       cellType: 'markdown',
-      violation: {
-        id: 'heading-missing-h1',
-        description:
-          'Ensure that the page or at least one of its frames contains a level-one heading. A missing level-one heading can leave screen reader users without a clear starting point, making it harder to understand the main purpose or content of the page. Please also ensure that headings contain descriptive, accurate text',
-        descriptionUrl:
-          'https://dequeuniversity.com/rules/axe/4.7/heading-missing-h1'
-      },
+      violationId: 'heading-missing-h1',
       issueContentRaw: ''
     });
   }
@@ -159,12 +147,7 @@ export async function analyzeHeadingHierarchy(
         notebookIssues.push({
           cellIndex: heading.cellIndex,
           cellType: 'markdown',
-          violation: {
-            id: 'heading-duplicate-h1',
-            description:
-              'Ensure there is only one level-one heading (h1) in the notebook. The h1 heading should be at the top of the document and serve as the main title. Additional h1 headings can confuse screen reader users about the document structure. Please also ensure that headings contain descriptive, accurate text',
-            descriptionUrl: ''
-          },
+          violationId: 'heading-duplicate-h1',
           issueContentRaw: heading.html
         });
       });
@@ -186,12 +169,7 @@ export async function analyzeHeadingHierarchy(
         notebookIssues.push({
           cellIndex: current.cellIndex,
           cellType: 'markdown',
-          violation: {
-            id: 'heading-empty',
-            description:
-              'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.',
-            descriptionUrl: ''
-          },
+          violationId: 'heading-empty',
           issueContentRaw: current.html
         });
         continue;
@@ -209,12 +187,7 @@ export async function analyzeHeadingHierarchy(
           notebookIssues.push({
             cellIndex: current.cellIndex,
             cellType: 'markdown',
-            violation: {
-              id: 'heading-duplicate',
-              description:
-                'Ensure identical headings are not used at the same level. This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text',
-              descriptionUrl: ''
-            },
+            violationId: 'heading-duplicate',
             issueContentRaw: current.html,
             metadata: {
               previousHeadingLevel: previous?.level
@@ -238,12 +211,7 @@ export async function analyzeHeadingHierarchy(
         notebookIssues.push({
           cellIndex: current.cellIndex,
           cellType: 'markdown',
-          violation: {
-            id: 'heading-wrong-order',
-            description:
-              'Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure headings contain descriptive, accurate text',
-            descriptionUrl: ''
-          },
+          violationId: 'heading-wrong-order',
           issueContentRaw: current.html,
           metadata: {
             previousHeadingLevel: previous.level

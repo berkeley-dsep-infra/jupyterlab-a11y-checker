@@ -148,6 +148,10 @@
     text-align: left;
     cursor: pointer;
     margin-bottom: 8px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .issue-widget .issue-header {
@@ -165,7 +169,18 @@
     font-size: 14px;
 }
 
-.issue-widget .description a {
+.issue-widget .detailed-description.visible {
+    display: block;
+}
+
+.issue-widget .detailed-description {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    display: none;
+    transition: display 0.3s ease;
+}
+
+.issue-widget .detailed-description a {
     color: inherit;
     text-decoration: underline;
 }
@@ -173,24 +188,15 @@
 /* Button Styles */
 .issue-widget .button-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: flex-end;
     gap: 8px;
     margin-bottom: 12px;
+    width: 100%;
 }
 
-.issue-widget .jp-Button {
-    background-color: #2c5282;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    width: 60%;
-    justify-content: flex-start;
-    gap: 8px;
+.issue-widget .button-container .jp-Button2 {
+    flex: 1;
 }
 
 .jp-Button2 {
@@ -198,26 +204,31 @@
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 8px 16px;
+    padding: 7px 15px;
     cursor: pointer;
     font-size: 14px;
-    width: 50%;
-    gap: 8px;
+    gap: 4px;
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.issue-widget .jp-Button:hover {
+.jp-Button:hover,
+.jp-Button2:hover {
     background-color: #2a4365;
 }
 
-.issue-widget .apply-button {
-    margin-top: 8px;
-    background-color: #2c5282;
+.apply-button,
+.suggest-button {
+    font-size: 12px;
     margin-left: auto;
     display: flex;
     width: auto !important;
+}
+
+.apply-button .material-icons,
+.suggest-button .material-icons {
+    font-size: 16px;
 }
 
 /* Suggestion Styles */
@@ -238,16 +249,14 @@
 
 .issue-widget .textfield-fix-widget {
     margin-bottom: 12px;
-    margin-left: 30px;
-    padding: 12px;
+    padding: 6px;
     border-radius: 4px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .textfield-fix-widget {
-    background-color: #DCDCDC;
     padding: 12px;
     border-radius: 8px;
     margin-top: 12px;
@@ -259,7 +268,6 @@
     width: calc(100% - 16px);
     padding: 8px;
     margin-bottom: 8px;
-    background-color: #DCDCDC;
     color: black;
     font-family: Inter, sans-serif;
     box-sizing: border-box;
@@ -269,16 +277,19 @@
 
 .textfield-buttons {
     display: flex;
-    gap: 8px;
     justify-content: flex-end;
     flex-wrap: wrap;
     width: 100%;
-    box-sizing: border-box;
+}
+
+.textfield-buttons .jp-Button2 {
+    margin-left: 4px;
 }
 
 /* Collapsible Content */
 .collapsible-content {
-    padding-left: 16px;
+    padding-left: 20px;
+    gap: 4px;
 }
 
 /* Icon Styles */
@@ -315,57 +326,6 @@
     100% {
         transform: rotate(360deg);
     }
-}
-
-.locate-button:hover {
-    background-color: #2a4365;
-}
-
-.suggest-button,
-.locate-button {
-    background-color: #2C5B8E;
-    color: white;
-    font-family: Inter, sans-serif;
-    flex: 0 0 auto;
-    min-width: 140px;
-    white-space: normal;
-    word-wrap: break-word;
-}
-
-.apply-alt-button {
-    background-color: #2C5B8E;
-    color: white;
-    font-family: Inter, sans-serif;
-    flex: 0 0 auto;
-    min-width: 90px;
-    white-space: normal;
-    word-wrap: break-word;
-    max-width: 25%;
-}
-
-.suggest-button div,
-.apply-alt-button div,
-.locate-button div {
-    text-align: left;
-    flex: 1;
-}
-
-.suggest-button svg,
-.apply-alt-button svg,
-.locate-button svg {
-    flex-shrink: 0;
-}
-
-.suggest-button {
-    max-width: 60%;
-}
-
-.suggest-button:hover {
-    background-color: #2a4365;
-}
-
-.apply-alt-button:hover {
-    background-color: #2a4365;
 }
 
 /* Material Icons Styles */
@@ -444,6 +404,7 @@
 
 .table-header-fix-widget .button-container {
     display: flex;
+    flex-direction: row;
     justify-content: flex-end;
     gap: 8px;
 }

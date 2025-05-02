@@ -15,12 +15,7 @@ export function detectTableIssuesInCell(
     notebookIssues.push({
       cellIndex,
       cellType: cellType as 'code' | 'markdown',
-      violation: {
-        id: 'table-missing-header',
-        description: 'Tables must have header information',
-        descriptionUrl:
-          'https://dequeuniversity.com/rules/axe/4.10/td-has-header?application=RuleDescription'
-      },
+      violationId: 'table-missing-header',
       issueContentRaw: match[0]
     });
   }
@@ -32,11 +27,7 @@ export function detectTableIssuesInCell(
     notebookIssues.push({
       cellIndex,
       cellType: cellType as 'code' | 'markdown',
-      violation: {
-        id: 'table-missing-caption',
-        description: 'Tables must have caption information',
-        descriptionUrl: ''
-      },
+      violationId: 'table-missing-caption',
       issueContentRaw: match[0]
     });
   }

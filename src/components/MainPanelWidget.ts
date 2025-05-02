@@ -136,7 +136,7 @@ export class MainPanelWidget extends Widget {
 
         notebookIssues.forEach(notebookIssue => {
           const categoryName: string =
-            issueToCategory.get(notebookIssue.violation.id) || 'Other';
+            issueToCategory.get(notebookIssue.violationId) || 'Other';
           if (!issuesByCategory.has(categoryName)) {
             issuesByCategory.set(categoryName, []);
           }
@@ -209,7 +209,7 @@ export class MainPanelWidget extends Widget {
 
       newIssues.forEach((notebookIssue: ICellIssue) => {
         const categoryName: string =
-          issueToCategory.get(notebookIssue.violation.id) || 'Other';
+          issueToCategory.get(notebookIssue.violationId) || 'Other';
         if (!issuesByCategory.has(categoryName)) {
           issuesByCategory.set(categoryName, []);
         }

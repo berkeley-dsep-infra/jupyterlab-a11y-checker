@@ -1,5 +1,5 @@
 import { NotebookPanel } from '@jupyterlab/notebook';
-import axe from 'axe-core';
+// import axe from 'axe-core';
 import { marked } from 'marked';
 import { ICellIssue } from '../types';
 import {
@@ -24,9 +24,9 @@ export async function analyzeCellsAccessibility(
   const tempDiv = document.createElement('div');
   document.body.appendChild(tempDiv);
 
-  const axeConfig: axe.RunOptions = {
-    runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
-  };
+  // const axeConfig: axe.RunOptions = {
+  //   runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+  // };
 
   try {
     // First, analyze heading hierarchy across the notebook
@@ -47,32 +47,23 @@ export async function analyzeCellsAccessibility(
         if (rawMarkdown.trim()) {
           tempDiv.innerHTML = await marked.parse(rawMarkdown);
 
-          // SUGGESTION: What if we limit axe to detect only the rules we want?
-          const results = await axe.run(tempDiv, axeConfig);
-          const violations = results.violations;
+          // TODO: Currently disabled axe
+          // const results = await axe.run(tempDiv, axeConfig);
+          // const violations = results.violations;
 
-          // Can have multiple violations in a single cell
-          if (violations.length > 0) {
-            violations.forEach(violation => {
-              violation.nodes.forEach(node => {
-                // Customize description for various issues
-                if (violation.id === 'heading-empty') {
-                  violation.description =
-                    'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.';
-                }
-                notebookIssues.push({
-                  cellIndex: i,
-                  cellType: cellType,
-                  violation: {
-                    id: violation.id,
-                    description: violation.description,
-                    descriptionUrl: violation.helpUrl
-                  },
-                  issueContentRaw: node.html
-                });
-              });
-            });
-          }
+          // // Can have multiple violations in a single cell
+          // if (violations.length > 0) {
+          //   violations.forEach(violation => {
+          //     violation.nodes.forEach(node => {
+          //       notebookIssues.push({
+          //         cellIndex: i,
+          //         cellType: cellType,
+          //         violationId: violation.id,
+          //         issueContentRaw: node.html
+          //       });
+          //     });
+          //   });
+          // }
 
           // Add custom image issue detection
           const folderPath = panel.context.path.substring(
@@ -80,7 +71,7 @@ export async function analyzeCellsAccessibility(
             panel.context.path.lastIndexOf('/')
           );
 
-          // Add image issues
+          // Image Issues
           notebookIssues.push(
             ...(await detectImageIssuesInCell(
               rawMarkdown,
@@ -90,12 +81,12 @@ export async function analyzeCellsAccessibility(
             ))
           );
 
-          // Add table issues
+          // Table Issues
           notebookIssues.push(
             ...detectTableIssuesInCell(rawMarkdown, i, cellType)
           );
 
-          // Add color contrast issues
+          // Color Issues
           notebookIssues.push(
             ...(await detectColorIssuesInCell(
               rawMarkdown,

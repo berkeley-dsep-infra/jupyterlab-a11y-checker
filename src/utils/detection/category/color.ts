@@ -363,11 +363,8 @@ export async function detectColorIssuesInCell(
             notebookIssues.push({
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
-              violation: {
-                id: 'color-insufficient-cc-normal',
-                description: `Large text in images have a contrast ratio of 3:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
-                descriptionUrl: ''
-              },
+              violationId: 'color-insufficient-cc-normal',
+              customDescription: `Current contrast ratio: ${contrast.toFixed(2)}:1`,
               issueContentRaw: match[0],
               suggestedFix: suggestedFix
             });
@@ -375,11 +372,8 @@ export async function detectColorIssuesInCell(
             notebookIssues.push({
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
-              violation: {
-                id: 'color-insufficient-cc-large',
-                description: `Normal text in images have a contrast ratio of 4.5:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
-                descriptionUrl: ''
-              },
+              violationId: 'color-insufficient-cc-large',
+              customDescription: `Current contrast ratio: ${contrast.toFixed(2)}:1`,
               issueContentRaw: match[0],
               suggestedFix: suggestedFix
             });

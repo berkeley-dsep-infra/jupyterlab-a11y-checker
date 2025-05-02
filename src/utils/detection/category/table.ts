@@ -40,5 +40,39 @@ export function detectTableIssuesInCell(
       issueContentRaw: match[0]
     });
   }
+
+  // Check for tables with th tags but missing scope attributes
+  const tableWithThRegex = /<table[^>]*>[\s\S]*?<\/table>/gi;
+  while ((match = tableWithThRegex.exec(rawMarkdown)) !== null) {
+    const tableHtml = match[0];
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(tableHtml, 'text/html');
+    const table = doc.querySelector('table');
+    
+    if (table) {
+      const thElements = table.querySelectorAll('th');
+      let hasMissingScope = false;
+      
+      thElements.forEach(th => {
+        if (!th.hasAttribute('scope')) {
+          hasMissingScope = true;
+        }
+      });
+      
+      if (hasMissingScope) {
+        notebookIssues.push({
+          cellIndex,
+          cellType: cellType as 'code' | 'markdown',
+          violation: {
+            id: 'table-missing-scope',
+            description: 'Table headers must have scope attributes',
+            descriptionUrl: ''
+          },
+          issueContentRaw: tableHtml
+        });
+      }
+    }
+  }
+
   return notebookIssues;
 }

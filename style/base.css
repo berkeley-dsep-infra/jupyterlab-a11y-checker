@@ -1,9 +1,22 @@
+/* CSS Variables for Colors */
+:root {
+  /* These will be overridden by JupyterLab theme variables */
+  --primary-blue: #2C5B8E;
+  --primary-blue-hover: #2a4365;
+  --text-light: var(--jp-ui-inverse-font-color1, #ffffff);
+  --border-color: var(--jp-border-color1, #ddd);
+  --error-red: var(--jp-error-color1, #DB3939);
+  --success-green: var(--jp-success-color1, #28A745);
+}
+
 /* Import Material Icons */
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-/* Main Panel Layout */
+/* ==========================================================================
+   Main Panel Layout
+   ========================================================================== */
 .a11y-panel {
-    background-color: white;
+    background-color: var(--jp-layout-color1);
     height: 100%;
     overflow-y: auto;
 }
@@ -12,10 +25,12 @@
     padding: 0;
 }
 
-/* Notice Section */
+/* ==========================================================================
+   Notice Section
+   ========================================================================== */
 .notice-container {
-    background-color: #2c5282;
-    color: white;
+    background-color: var(--primary-blue);
+    color: #ffffff;
     overflow: hidden;
     padding: 8px 12px;
 }
@@ -31,6 +46,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #ffffff;
 }
 
 .triangle {
@@ -40,7 +56,7 @@
 .notice-delete-button {
     background: none;
     border: none;
-    color: white;
+    color: #ffffff;
     cursor: pointer;
     font-size: 16px;
     padding: 4px;
@@ -48,17 +64,28 @@
 
 .notice-content {
     padding: 8px 20px;
+    color: #ffffff;
 }
 
-/* Main Title */
+.notice-content a {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   Main Title
+   ========================================================================== */
 .main-title {
     font-size: 24px;
     font-weight: bold;
     text-align: center;
     margin: 24px 4px;
+    color: var(--jp-ui-font-color1);
 }
 
-/* Controls Section */
+/* ==========================================================================
+   Controls Buttons Section
+   ========================================================================== */
 .controls-container {
     display: flex;
     flex-direction: column;
@@ -69,8 +96,8 @@
 }
 
 .control-button {
-    background-color: #2c5282;
-    color: white;
+    background-color: var(--primary-blue);
+    color: #ffffff;
     border: none;
     border-radius: 4px;
     padding: 12px;
@@ -87,25 +114,29 @@
     flex-shrink: 0;
     width: 24px;
     height: 24px;
+    fill: #ffffff;
 }
 
 .control-button div {
     text-align: left;
     flex: 1;
+    color: #ffffff;
 }
 
 .control-button:hover {
-    background-color: #2a4365;
+    background-color: var(--primary-blue-hover);
 }
 
-/* Categories Section */
+/* ==========================================================================
+   Issue Categories Section
+   ========================================================================== */
 .issues-container {
     padding: 0 16px;
 }
 
 .no-issues {
     text-align: center;
-    color: #666;
+    color: var(--jp-ui-font-color2);
     padding: 24px;
 }
 
@@ -116,11 +147,12 @@
 .category-title {
     font-size: 20px;
     margin-bottom: 8px;
+    color: var(--jp-ui-font-color1);
 }
 
 .category hr {
     border: none;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--border-color);
     margin: 0 0 16px 0;
 }
 
@@ -130,7 +162,9 @@
     gap: 12px;
 }
 
-/* Issue Widget */
+/* ==========================================================================
+   Issue Widget
+   ========================================================================== */
 .issue-widget {
     margin: 5px 0;
     margin-left: 12px;
@@ -154,7 +188,7 @@
     font-size: 16px;
     font-weight: 700;
     margin: 0;
-    color: #000;
+    color: var(--jp-ui-font-color1);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -163,14 +197,17 @@
 .issue-widget .description {
     margin: 0 0 12px 0;
     font-size: 14px;
+    color: var(--jp-ui-font-color1);
 }
 
 .issue-widget .description a {
-    color: inherit;
+    color: var(--jp-content-link-color);
     text-decoration: underline;
 }
 
-/* Button Styles */
+/* ==========================================================================
+   Issue Widget Buttons Section
+   ========================================================================== */
 .issue-widget .button-container {
     display: flex;
     flex-direction: column;
@@ -178,80 +215,92 @@
     margin-bottom: 12px;
 }
 
-.issue-widget .jp-Button {
-    background-color: #2c5282;
-    color: white;
+/* Base button styles that can be reused */
+.jp-Button,
+.jp-Button2,
+.suggest-button,
+.locate-button,
+.apply-button,
+.apply-alt-button,
+.button-fix-button {
+    background-color: var(--primary-blue);
+    color: #ffffff;
     border: none;
     border-radius: 4px;
     padding: 8px 16px;
     cursor: pointer;
     font-size: 14px;
+    font-family: var(--jp-ui-font-family);
     display: flex;
     align-items: center;
-    width: 60%;
-    justify-content: flex-start;
     gap: 8px;
+}
+
+.jp-Button:hover,
+.jp-Button2:hover,
+.suggest-button:hover,
+.locate-button:hover,
+.apply-button:hover,
+.apply-alt-button:hover,
+.button-fix-button:hover {
+    background-color: var(--primary-blue-hover);
+}
+
+/* Button-specific styles */
+.jp-Button,
+.suggest-button,
+.locate-button,
+.apply-button,
+.button-fix-button {
+    min-width: 140px;
 }
 
 .jp-Button2 {
-    background-color: #2c5282;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
     width: 50%;
-    gap: 8px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
 }
 
-.issue-widget .jp-Button:hover {
-    background-color: #2a4365;
+.apply-alt-button {
+    min-width: 90px;
+    max-width: 25%;
 }
 
-.issue-widget .apply-button {
-    margin-top: 8px;
-    background-color: #2c5282;
-    margin-left: auto;
-    display: flex;
-    width: auto !important;
+.suggest-button {
+    max-width: 60%;
 }
 
-/* Suggestion Styles */
-.issue-widget .suggestion-container {
-    margin-bottom: 12px;
-    margin-left: 30px;
-    padding: 12px;
-    background-color: #1a1a1a;
-    border-radius: 4px;
-    color: white;
-    font-family: monospace;
+/* Button content styles */
+.jp-Button div,
+.jp-Button2 div,
+.suggest-button div,
+.locate-button div,
+.apply-button div,
+.apply-alt-button div,
+.button-fix-button div {
+    text-align: left;
+    flex: 1;
+    color: #ffffff;
 }
 
-.issue-widget .suggestion {
-    word-wrap: break-word;
-    white-space: pre-wrap;
+.jp-Button svg,
+.jp-Button2 svg,
+.suggest-button svg,
+.locate-button svg,
+.apply-button svg,
+.apply-alt-button svg,
+.button-fix-button svg {
+    flex-shrink: 0;
+    fill: #ffffff;
 }
 
-.issue-widget .textfield-fix-widget {
-    margin-bottom: 12px;
-    margin-left: 30px;
-    padding: 12px;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
+/* ==========================================================================
+   Textfield Styles
+   ========================================================================== */
 .textfield-fix-widget {
-    background-color: #DCDCDC;
+    background-color: var(--jp-layout-color2);
     padding: 12px;
     border-radius: 8px;
     margin-top: 12px;
-    border: 1px solid black;
+    border: 1px solid var(--jp-border-color1);
     min-width: 145px;
 }
 
@@ -259,12 +308,16 @@
     width: calc(100% - 16px);
     padding: 8px;
     margin-bottom: 8px;
-    background-color: #DCDCDC;
-    color: black;
-    font-family: Inter, sans-serif;
+    background-color: var(--jp-layout-color2);
+    color: var(--jp-ui-font-color1);
+    font-family: var(--jp-ui-font-family);
     box-sizing: border-box;
     border: none;
     outline: none;
+}
+
+.jp-a11y-input::placeholder {
+    color: var(--jp-ui-font-color3);
 }
 
 .textfield-buttons {
@@ -276,178 +329,9 @@
     box-sizing: border-box;
 }
 
-/* Collapsible Content */
-.collapsible-content {
-    padding-left: 16px;
-}
-
-/* Icon Styles */
-.icon {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-}
-
-.chevron {
-    transition: transform 0.3s ease;
-    transform-origin: center center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    line-height: 1;
-}
-
-.chevron.expanded {
-    transform: rotate(180deg);
-}
-
-.loading {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.locate-button:hover {
-    background-color: #2a4365;
-}
-
-.suggest-button,
-.locate-button {
-    background-color: #2C5B8E;
-    color: white;
-    font-family: Inter, sans-serif;
-    flex: 0 0 auto;
-    min-width: 140px;
-    white-space: normal;
-    word-wrap: break-word;
-}
-
-.apply-alt-button {
-    background-color: #2C5B8E;
-    color: white;
-    font-family: Inter, sans-serif;
-    flex: 0 0 auto;
-    min-width: 90px;
-    white-space: normal;
-    word-wrap: break-word;
-    max-width: 25%;
-}
-
-.suggest-button div,
-.apply-alt-button div,
-.locate-button div {
-    text-align: left;
-    flex: 1;
-}
-
-.suggest-button svg,
-.apply-alt-button svg,
-.locate-button svg {
-    flex-shrink: 0;
-}
-
-.suggest-button {
-    max-width: 60%;
-}
-
-.suggest-button:hover {
-    background-color: #2a4365;
-}
-
-.apply-alt-button:hover {
-    background-color: #2a4365;
-}
-
-/* Material Icons Styles */
-.material-icons {
-    font-family: 'Material Icons';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    /* Preferred icon size */
-    display: inline-block;
-    line-height: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    white-space: nowrap;
-    direction: ltr;
-    vertical-align: middle;
-}
-
-/* Icon sizes */
-.material-icons.md-18 {
-    font-size: 18px;
-}
-
-.material-icons.md-24 {
-    font-size: 24px;
-}
-
-.material-icons.md-36 {
-    font-size: 36px;
-}
-
-.material-icons.md-48 {
-    font-size: 48px;
-}
-
-/* Icon colors */
-.material-icons.md-dark {
-    color: rgba(0, 0, 0, 0.54);
-}
-
-.material-icons.md-dark.md-inactive {
-    color: rgba(0, 0, 0, 0.26);
-}
-
-.material-icons.md-light {
-    color: rgba(255, 255, 255, 1);
-}
-
-.material-icons.md-light.md-inactive {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-/* Loading animation for Material Icons */
-.material-icons.loading {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.hidden:not(.dropdown-content) {
-    display: none;
-}
-
-.table-header-fix-widget {
-    margin-top: 8px;
-}
-
-.table-header-fix-widget .button-container {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
+/* ==========================================================================
+   Dropdown Styles
+   ========================================================================== */
 .custom-dropdown {
     position: relative;
     width: calc(100% - 16px);
@@ -459,12 +343,12 @@
 .dropdown-button {
     width: 100%;
     padding: 8px 12px;
-    background-color: white;
-    color: black;
-    border: 1px solid black;
+    background-color: var(--jp-layout-color1);
+    color: var(--jp-ui-font-color1);
+    border: 1px solid var(--jp-border-color1);
     border-radius: 4px;
     cursor: pointer;
-    font-family: Inter, sans-serif;
+    font-family: var(--jp-ui-font-family);
     font-size: 14px;
     height: 40px;
     display: flex;
@@ -472,14 +356,10 @@
     justify-content: space-between;
 }
 
-.dropdown-button:hover {
-    background-color: #2a4365;
-    color: white;
-}
-
+.dropdown-button:hover,
 .dropdown-button.active {
-    background-color: #2a4365;
-    color: white;
+    background-color: var(--primary-blue-hover);
+    color: var(--text-light);
 }
 
 .dropdown-text {
@@ -500,8 +380,8 @@
     top: 100%;
     left: 0;
     right: 0;
-    background-color: white;
-    border: 1px solid black;
+    background-color: var(--jp-layout-color1);
+    border: 1px solid var(--jp-border-color1);
     border-radius: 4px;
     margin-top: 4px;
     z-index: 1000;
@@ -515,13 +395,66 @@
 .dropdown-option {
     padding: 8px 12px;
     cursor: pointer;
+    color: var(--jp-ui-font-color1);
 }
 
 .dropdown-option:hover {
-    background-color: #2a4365;
-    color: white;
+    background-color: var(--primary-blue-hover);
+    color: #ffffff;
 }
 
+/* ==========================================================================
+   Material Icons
+   ========================================================================== */
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    vertical-align: middle;
+}
+
+/* Icon sizes */
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+
+/* Icon colors */
+.material-icons.md-dark { color: var(--jp-ui-font-color1); }
+.material-icons.md-dark.md-inactive { color: var(--jp-ui-font-color3); }
+.material-icons.md-light { color: var(--jp-ui-inverse-font-color1); }
+.material-icons.md-light.md-inactive { color: var(--jp-ui-inverse-font-color3); }
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+.hidden:not(.dropdown-content) {
+    display: none;
+}
+
+/* ==========================================================================
+   Fix Widgets
+   ========================================================================== */
 .table-header-fix-widget {
     margin-top: 8px;
 }
@@ -535,8 +468,69 @@
 .fix-description {
     margin-bottom: 8px;
     line-height: 1.4;
+    color: var(--jp-ui-font-color1);
 }
 
 .dropdown-fix-widget .fix-description {
     margin-bottom: 12px;
 }
+
+.apply-button {
+    background-color: var(--primary-blue);
+    color: #ffffff;
+    font-family: var(--jp-ui-font-family);
+    flex: 0 0 auto;
+    min-width: 140px;
+    white-space: normal;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.apply-button:hover {
+    background-color: var(--primary-blue-hover);
+}
+
+.apply-button div {
+    text-align: left;
+    flex: 1;
+    color: #ffffff;
+}
+
+.apply-button svg {
+    flex-shrink: 0;
+    fill: #ffffff;
+}
+
+.button-fix-button {
+    background-color: var(--primary-blue);
+    color: #ffffff;
+    font-family: var(--jp-ui-font-family);
+    flex: 0 0 auto;
+    min-width: 140px;
+    white-space: normal;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.button-fix-button:hover {
+    background-color: var(--primary-blue-hover);
+}
+
+.button-fix-button div {
+    text-align: left;
+    flex: 1;
+    color: #ffffff;
+}
+
+.button-fix-button svg {
+    flex-shrink: 0;
+    fill: #ffffff;
+}
+

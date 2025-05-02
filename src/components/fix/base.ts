@@ -31,11 +31,35 @@ abstract class FixWidget extends Widget {
 
     // For all fixes, highlight the current cell
     this.cell.node.style.transition = 'background-color 0.5s ease';
-    this.cell.node.style.backgroundColor = '#28A745';
+    this.cell.node.style.backgroundColor = 'var(--success-green)';
     setTimeout(() => {
       this.cell.node.style.backgroundColor = '';
     }, 1000);
   }
+}
+
+export abstract class ButtonFixWidget extends FixWidget {
+  protected applyButton: HTMLButtonElement;
+
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+    super(issue, cell, aiEnabled);
+
+    this.node.innerHTML = `
+      <div class="fix-description">${this.getDescription()}</div>
+      <div class="button-container">
+        <button class="jp-Button2 button-fix-button">
+          <span class="material-icons">check</span>
+          <div>${this.getApplyButtonText()}</div>
+        </button>
+      </div>
+    `;
+
+    this.applyButton = this.node.querySelector('.button-fix-button') as HTMLButtonElement;
+    this.applyButton.addEventListener('click', () => this.applyFix());
+  }
+
+  protected abstract getApplyButtonText(): string;
+  protected abstract applyFix(): void;
 }
 
 export abstract class TextFieldFixWidget extends FixWidget {

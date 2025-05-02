@@ -3,8 +3,6 @@
   /* These will be overridden by JupyterLab theme variables */
   --primary-blue: #2C5B8E;
   --primary-blue-hover: #2a4365;
-  --background-light: var(--jp-layout-color2, #f0eeee);
-  --text-dark: var(--jp-ui-font-color1, #000000);
   --text-light: var(--jp-ui-inverse-font-color1, #ffffff);
   --border-color: var(--jp-border-color1, #ddd);
   --error-red: var(--jp-error-color1, #DB3939);
@@ -32,7 +30,7 @@
    ========================================================================== */
 .notice-container {
     background-color: var(--primary-blue);
-    color: var(--text-light);
+    color: #ffffff;
     overflow: hidden;
     padding: 8px 12px;
 }
@@ -48,6 +46,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #ffffff;
 }
 
 .triangle {
@@ -57,7 +56,7 @@
 .notice-delete-button {
     background: none;
     border: none;
-    color: var(--text-light);
+    color: #ffffff;
     cursor: pointer;
     font-size: 16px;
     padding: 4px;
@@ -65,6 +64,12 @@
 
 .notice-content {
     padding: 8px 20px;
+    color: #ffffff;
+}
+
+.notice-content a {
+    color: #ffffff;
+    text-decoration: underline;
 }
 
 /* ==========================================================================
@@ -92,7 +97,7 @@
 
 .control-button {
     background-color: var(--primary-blue);
-    color: var(--text-light);
+    color: #ffffff;
     border: none;
     border-radius: 4px;
     padding: 12px;
@@ -109,12 +114,13 @@
     flex-shrink: 0;
     width: 24px;
     height: 24px;
-    fill: var(--text-light);
+    fill: #ffffff;
 }
 
 .control-button div {
     text-align: left;
     flex: 1;
+    color: #ffffff;
 }
 
 .control-button:hover {
@@ -209,72 +215,81 @@
     margin-bottom: 12px;
 }
 
-.issue-widget .jp-Button {
+/* Base button styles that can be reused */
+.jp-Button,
+.jp-Button2,
+.suggest-button,
+.locate-button,
+.apply-button,
+.apply-alt-button,
+.button-fix-button {
     background-color: var(--primary-blue);
-    color: var(--text-light);
+    color: #ffffff;
     border: none;
     border-radius: 4px;
     padding: 8px 16px;
     cursor: pointer;
     font-size: 14px;
+    font-family: var(--jp-ui-font-family);
     display: flex;
     align-items: center;
-    width: 60%;
-    justify-content: flex-start;
     gap: 8px;
 }
 
-.jp-Button2 {
-    background-color: var(--primary-blue);
-    color: var(--text-light);
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    width: 50%;
-    gap: 8px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.issue-widget .jp-Button:hover {
+.jp-Button:hover,
+.jp-Button2:hover,
+.suggest-button:hover,
+.locate-button:hover,
+.apply-button:hover,
+.apply-alt-button:hover,
+.button-fix-button:hover {
     background-color: var(--primary-blue-hover);
 }
 
-.issue-widget .apply-button {
-    margin-top: 8px;
-    background-color: var(--primary-blue);
-    margin-left: auto;
-    display: flex;
-    width: auto !important;
+/* Button-specific styles */
+.jp-Button,
+.suggest-button,
+.locate-button,
+.apply-button,
+.button-fix-button {
+    min-width: 140px;
 }
 
-/* Suggestion Styles */
-.issue-widget .suggestion-container {
-    margin-bottom: 12px;
-    margin-left: 30px;
-    padding: 12px;
-    background-color: #1a1a1a;
-    border-radius: 4px;
-    color: white;
-    font-family: monospace;
+.jp-Button2 {
+    width: 50%;
 }
 
-.issue-widget .suggestion {
-    word-wrap: break-word;
-    white-space: pre-wrap;
+.apply-alt-button {
+    min-width: 90px;
+    max-width: 25%;
 }
 
-.issue-widget .textfield-fix-widget {
-    margin-bottom: 12px;
-    margin-left: 30px;
-    padding: 12px;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.suggest-button {
+    max-width: 60%;
+}
+
+/* Button content styles */
+.jp-Button div,
+.jp-Button2 div,
+.suggest-button div,
+.locate-button div,
+.apply-button div,
+.apply-alt-button div,
+.button-fix-button div {
+    text-align: left;
+    flex: 1;
+    color: #ffffff;
+}
+
+.jp-Button svg,
+.jp-Button2 svg,
+.suggest-button svg,
+.locate-button svg,
+.apply-button svg,
+.apply-alt-button svg,
+.button-fix-button svg {
+    flex-shrink: 0;
+    fill: #ffffff;
 }
 
 /* ==========================================================================
@@ -293,12 +308,16 @@
     width: calc(100% - 16px);
     padding: 8px;
     margin-bottom: 8px;
-    background-color: var(--jp-layout-color1);
+    background-color: var(--jp-layout-color2);
     color: var(--jp-ui-font-color1);
     font-family: var(--jp-ui-font-family);
     box-sizing: border-box;
-    border: 1px solid var(--jp-border-color1);
+    border: none;
     outline: none;
+}
+
+.jp-a11y-input::placeholder {
+    color: var(--jp-ui-font-color3);
 }
 
 .textfield-buttons {
@@ -337,11 +356,7 @@
     justify-content: space-between;
 }
 
-.dropdown-button:hover {
-    background-color: var(--primary-blue-hover);
-    color: var(--text-light);
-}
-
+.dropdown-button:hover,
 .dropdown-button.active {
     background-color: var(--primary-blue-hover);
     color: var(--text-light);
@@ -385,61 +400,7 @@
 
 .dropdown-option:hover {
     background-color: var(--primary-blue-hover);
-    color: var(--text-light);
-}
-
-/* ==========================================================================
-   Button Variants
-   ========================================================================== */
-.locate-button:hover {
-    background-color: var(--primary-blue-hover);
-}
-
-.suggest-button,
-.locate-button {
-    background-color: var(--primary-blue);
-    color: var(--text-light);
-    font-family: var(--jp-ui-font-family);
-    flex: 0 0 auto;
-    min-width: 140px;
-    white-space: normal;
-    word-wrap: break-word;
-}
-
-.apply-alt-button {
-    background-color: var(--primary-blue);
-    color: var(--text-light);
-    font-family: var(--jp-ui-font-family);
-    flex: 0 0 auto;
-    min-width: 90px;
-    white-space: normal;
-    word-wrap: break-word;
-    max-width: 25%;
-}
-
-.suggest-button div,
-.apply-alt-button div,
-.locate-button div {
-    text-align: left;
-    flex: 1;
-}
-
-.suggest-button svg,
-.apply-alt-button svg,
-.locate-button svg {
-    flex-shrink: 0;
-}
-
-.suggest-button {
-    max-width: 60%;
-}
-
-.suggest-button:hover {
-    background-color: var(--primary-blue-hover);
-}
-
-.apply-alt-button:hover {
-    background-color: var(--primary-blue-hover);
+    color: #ffffff;
 }
 
 /* ==========================================================================
@@ -461,38 +422,16 @@
 }
 
 /* Icon sizes */
-.material-icons.md-18 {
-    font-size: 18px;
-}
-
-.material-icons.md-24 {
-    font-size: 24px;
-}
-
-.material-icons.md-36 {
-    font-size: 36px;
-}
-
-.material-icons.md-48 {
-    font-size: 48px;
-}
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
 
 /* Icon colors */
-.material-icons.md-dark {
-    color: var(--jp-ui-font-color1);
-}
-
-.material-icons.md-dark.md-inactive {
-    color: var(--jp-ui-font-color3);
-}
-
-.material-icons.md-light {
-    color: var(--jp-ui-inverse-font-color1);
-}
-
-.material-icons.md-light.md-inactive {
-    color: var(--jp-ui-inverse-font-color3);
-}
+.material-icons.md-dark { color: var(--jp-ui-font-color1); }
+.material-icons.md-dark.md-inactive { color: var(--jp-ui-font-color3); }
+.material-icons.md-light { color: var(--jp-ui-inverse-font-color1); }
+.material-icons.md-light.md-inactive { color: var(--jp-ui-inverse-font-color3); }
 
 /* ==========================================================================
    Animations
@@ -502,13 +441,8 @@
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* ==========================================================================
@@ -543,7 +477,7 @@
 
 .apply-button {
     background-color: var(--primary-blue);
-    color: var(--text-light);
+    color: #ffffff;
     font-family: var(--jp-ui-font-family);
     flex: 0 0 auto;
     min-width: 140px;
@@ -562,15 +496,17 @@
 .apply-button div {
     text-align: left;
     flex: 1;
+    color: #ffffff;
 }
 
 .apply-button svg {
     flex-shrink: 0;
+    fill: #ffffff;
 }
 
 .button-fix-button {
     background-color: var(--primary-blue);
-    color: var(--text-light);
+    color: #ffffff;
     font-family: var(--jp-ui-font-family);
     flex: 0 0 auto;
     min-width: 140px;
@@ -590,9 +526,11 @@
 .button-fix-button div {
     text-align: left;
     flex: 1;
+    color: #ffffff;
 }
 
 .button-fix-button svg {
     flex-shrink: 0;
+    fill: #ffffff;
 }
 

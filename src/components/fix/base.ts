@@ -31,7 +31,7 @@ abstract class FixWidget extends Widget {
 
     // For all fixes, highlight the current cell
     this.cell.node.style.transition = 'background-color 0.5s ease';
-    this.cell.node.style.backgroundColor = '#28A745';
+    this.cell.node.style.backgroundColor = 'var(--success-green)';
     setTimeout(() => {
       this.cell.node.style.backgroundColor = '';
     }, 1000);

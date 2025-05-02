@@ -135,7 +135,7 @@ export class CellIssueWidget extends Widget {
     });
 
     this.cell.node.style.transition = 'background-color 0.5s ease';
-    this.cell.node.style.backgroundColor = '#DB3939';
+    this.cell.node.style.backgroundColor = 'var(--error-red)';
 
     setTimeout(() => {
       this.cell.node.style.backgroundColor = '';

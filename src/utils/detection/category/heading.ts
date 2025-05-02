@@ -79,7 +79,6 @@ export async function detectHeadingOneIssue(
 export async function analyzeHeadingHierarchy(
   panel: NotebookPanel
 ): Promise<ICellIssue[]> {
-  //console.log('startingheading hierarchy analysis');
   const notebookIssues: ICellIssue[] = [];
   const cells = panel.content.widgets;
   const tempDiv = document.createElement('div');
@@ -112,12 +111,10 @@ export async function analyzeHeadingHierarchy(
 
       // Find all headings in the cell
       const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      //console.log(`Cell ${i}: Found ${headings.length} headings`);
 
       headings.forEach(heading => {
         const level = parseInt(heading.tagName[1]);
         const text = heading.textContent || '';
-        //console.log(`  Level ${level} heading: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
 
         headingStructure.push({
           cellIndex: i,
@@ -128,34 +125,38 @@ export async function analyzeHeadingHierarchy(
       });
     }
 
-    //console.log(`Total headings found: ${headingStructure.length}`);
-    //console.log('Analyzing heading structure...');
+    // Track headings by level to detect duplicates
+    // Only track h1 and h2 headings
+    const h1Headings = new Map<string, number[]>();
+    const h2Headings = new Map<string, number[]>();
 
-    // Track headings by level to detect duplicates of content across a given heading level
-    // Format: Map<Heading Level (h1 - h6), Map<Heading Content/Text, Array of Cell Indices where content appears>>();
-    const headingsByLevel = new Map<number, Map<string, number[]>>();
-
-    // First pass: collect all headings by level and content
+    // First pass: collect all h1 and h2 headings
     headingStructure.forEach((heading, index) => {
-      if (!headingsByLevel.has(heading.level)) {
-        headingsByLevel.set(heading.level, new Map());
+      if (heading.level === 1) {
+        const normalizedContent = heading.content.trim().toLowerCase();
+        if (!h1Headings.has(normalizedContent)) {
+          h1Headings.set(normalizedContent, []);
+        }
+        h1Headings.get(normalizedContent)!.push(index);
+      } else if (heading.level === 2) {
+        const normalizedContent = heading.content.trim().toLowerCase();
+        if (!h2Headings.has(normalizedContent)) {
+          h2Headings.set(normalizedContent, []);
+        }
+        h2Headings.get(normalizedContent)!.push(index);
       }
-
-      // Level map is a map of the content of the heading and the indices of the headings that have that content
-      const levelMap = headingsByLevel.get(heading.level)!;
-      const normalizedContent = heading.content.trim().toLowerCase();
-      if (!levelMap.has(normalizedContent)) {
-        levelMap.set(normalizedContent, []);
-      }
-      levelMap.get(normalizedContent)!.push(index);
     });
 
     // Check for multiple h1 headings
-    const h1Headings = headingStructure.filter(h => h.level === 1);
-    if (h1Headings.length > 1) {
-      // Flag all h1 headings after the first one
-      h1Headings.slice(1).forEach(heading => {
-        //console.log(`Found additional h1 heading at cell ${heading.cellIndex}`);
+    // First, find all h1 headings regardless of content
+    const allH1Indices = headingStructure
+      .map((heading, index) => heading.level === 1 ? index : -1)
+      .filter(index => index !== -1);
+
+    // If there are multiple h1 headings, flag all but the first one
+    if (allH1Indices.length > 1) {
+      allH1Indices.slice(1).forEach(index => {
+        const heading = headingStructure[index];
         notebookIssues.push({
           cellIndex: heading.cellIndex,
           cellType: 'markdown',
@@ -165,62 +166,81 @@ export async function analyzeHeadingHierarchy(
               'Ensure there is only one level-one heading (h1) in the notebook. The h1 heading should be at the top of the document and serve as the main title. Additional h1 headings can confuse screen reader users about the document structure. Please also ensure that headings contain descriptive, accurate text',
             descriptionUrl: ''
           },
-          issueContentRaw: heading.html
+          issueContentRaw: heading.html,
+          metadata: {
+            headingStructure: headingStructure.filter(h => h.level === 1 || h.level === 2)
+          }
         });
       });
     }
 
-    // Second pass: analyze heading structure and check for duplicates
+    // Check for duplicate h2 headings
+    h2Headings.forEach((indices, content) => {
+      if (indices.length > 1) {
+        // Flag all h2 headings after the first one
+        indices.slice(1).forEach(index => {
+          const heading = headingStructure[index];
+          notebookIssues.push({
+            cellIndex: heading.cellIndex,
+            cellType: 'markdown',
+            violation: {
+              id: 'heading-duplicate',
+              description:
+                'Ensure identical h2 headings are not used. This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text.',
+              descriptionUrl: ''
+            },
+            issueContentRaw: heading.html,
+            metadata: {
+              headingStructure: headingStructure.filter(h => h.level === 1 || h.level === 2)
+            }
+          });
+        });
+      }
+    });
+
+    // Check for headings that appear in both h1 and h2
+    h1Headings.forEach((h1Indices, content) => {
+      if (h2Headings.has(content)) {
+        // Flag all h2 headings that share content with h1
+        h2Headings.get(content)!.forEach(index => {
+          const heading = headingStructure[index];
+          notebookIssues.push({
+            cellIndex: heading.cellIndex,
+            cellType: 'markdown',
+            violation: {
+              id: 'heading-duplicate',
+              description:
+                'Ensure h1 and h2 headings do not share the same text. This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please use different text for h1 and h2 headings.',
+              descriptionUrl: ''
+            },
+            issueContentRaw: heading.html,
+            metadata: {
+              headingStructure: headingStructure.filter(h => h.level === 1 || h.level === 2)
+            }
+          });
+        });
+      }
+    });
+
+    // Second pass: analyze heading structure for other issues
     for (let i = 0; i < headingStructure.length; i++) {
       const current = headingStructure[i];
       const previous = i > 0 ? headingStructure[i - 1] : null;
 
-      // Skip h1 headings as they're handled separately
-      if (current.level === 1) {
-        continue;
-      }
-
       // Check for empty headings
       if (!current.content.trim()) {
-        //console.log(`Found empty heading at cell ${current.cellIndex}`);
         notebookIssues.push({
           cellIndex: current.cellIndex,
           cellType: 'markdown',
           violation: {
             id: 'heading-empty',
             description:
-              'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience, so it is crucial to ensure all headings contain descriptive, accurate text.',
+              'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience.',
             descriptionUrl: ''
           },
           issueContentRaw: current.html
         });
         continue;
-      }
-
-      // Check for duplicate headings at the same level
-      const levelMap = headingsByLevel.get(current.level)!;
-      const normalizedContent = current.content.trim().toLowerCase();
-      const duplicateIndices = levelMap.get(normalizedContent)!;
-
-      if (duplicateIndices.length > 1) {
-        // Only report the first occurrence of each duplicate
-        if (duplicateIndices[0] === i) {
-          //console.log(`Found duplicate heading "${current.content}" at level ${current.level}`);
-          notebookIssues.push({
-            cellIndex: current.cellIndex,
-            cellType: 'markdown',
-            violation: {
-              id: 'heading-duplicate',
-              description:
-                'Ensure identical headings are not used at the same level. This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text',
-              descriptionUrl: ''
-            },
-            issueContentRaw: current.html,
-            metadata: {
-              previousHeadingLevel: previous?.level
-            }
-          });
-        }
       }
 
       // Skip first heading (no previous to compare with)
@@ -234,14 +254,13 @@ export async function analyzeHeadingHierarchy(
       const levelDiff = current.level - previous.level;
       if (levelDiff > 1) {
         // Only check when going to lower levels
-        //console.log(`Found heading level skip from h${previous.level} to h${current.level} at cell ${current.cellIndex}`);
         notebookIssues.push({
           cellIndex: current.cellIndex,
           cellType: 'markdown',
           violation: {
             id: 'heading-wrong-order',
             description:
-              'Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure headings contain descriptive, accurate text',
+              'Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure that headings contain descriptive, accurate text',
             descriptionUrl: ''
           },
           issueContentRaw: current.html,
@@ -252,7 +271,6 @@ export async function analyzeHeadingHierarchy(
       }
     }
 
-    //console.log('Heading hierarchy analysis complete. Found issues:', notebookIssues.length);
   } catch (error) {
     console.error('Error in heading hierarchy analysis:', error);
   } finally {

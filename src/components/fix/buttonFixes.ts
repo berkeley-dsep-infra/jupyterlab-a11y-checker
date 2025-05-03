@@ -27,16 +27,16 @@ export class TableScopeFixWidget extends ButtonFixWidget {
 
       // Get all rows
       const rows = table.querySelectorAll('tr');
-      
+
       // Process each row
       rows.forEach((row, rowIndex) => {
         // Get all th elements in this row
         const headers = row.querySelectorAll('th');
-        
+
         headers.forEach(header => {
           // First row gets scope="col", others get scope="row"
           const scope = rowIndex === 0 ? 'col' : 'row';
-          
+
           // If scope already exists, update it
           if (header.hasAttribute('scope')) {
             header.setAttribute('scope', scope);

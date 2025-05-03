@@ -1,12 +1,12 @@
 /* CSS Variables for Colors */
 :root {
-  /* These will be overridden by JupyterLab theme variables */
-  --primary-blue: #2C5B8E;
-  --primary-blue-hover: #2a4365;
-  --text-light: var(--jp-ui-inverse-font-color1, #ffffff);
-  --border-color: var(--jp-border-color1, #ddd);
-  --error-red: var(--jp-error-color1, #DB3939);
-  --success-green: var(--jp-success-color1, #28A745);
+    /* These will be overridden by JupyterLab theme variables */
+    --primary-blue: #2C5B8E;
+    --primary-blue-hover: #2a4365;
+    --text-light: var(--jp-ui-inverse-font-color1, #ffffff);
+    --border-color: var(--jp-border-color1, #ddd);
+    --error-red: var(--jp-error-color1, #DB3939);
+    --success-green: var(--jp-success-color1, #28A745);
 }
 
 /* Import Material Icons */
@@ -182,6 +182,10 @@
     text-align: left;
     cursor: pointer;
     margin-bottom: 8px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .issue-widget .issue-header {
@@ -200,7 +204,18 @@
     color: var(--jp-ui-font-color1);
 }
 
-.issue-widget .description a {
+.issue-widget .detailed-description.visible {
+    display: block;
+}
+
+.issue-widget .detailed-description {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    display: none;
+    transition: display 0.3s ease;
+}
+
+.issue-widget .detailed-description a {
     color: var(--jp-content-link-color);
     text-decoration: underline;
 }
@@ -210,93 +225,80 @@
    ========================================================================== */
 .issue-widget .button-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: flex-end;
     gap: 8px;
     margin-bottom: 12px;
+    width: 100%;
 }
 
-/* Base button styles that can be reused */
-.jp-Button,
-.jp-Button2,
-.suggest-button,
-.locate-button,
-.apply-button,
-.apply-alt-button,
-.button-fix-button {
-    background-color: var(--primary-blue);
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: var(--jp-ui-font-family);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.issue-widget .button-container .jp-Button2 {
+    flex: 1;
 }
 
 .jp-Button:hover,
-.jp-Button2:hover,
-.suggest-button:hover,
-.locate-button:hover,
-.apply-button:hover,
-.apply-alt-button:hover,
-.button-fix-button:hover {
+.jp-Button2:hover {
     background-color: var(--primary-blue-hover);
 }
 
 /* Button-specific styles */
-.jp-Button,
-.suggest-button,
-.locate-button,
-.apply-button,
-.button-fix-button {
+.jp-Button {
     min-width: 140px;
 }
 
 .jp-Button2 {
-    width: 50%;
+    background-color: #2c5282;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 7px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    gap: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
-.apply-alt-button {
-    min-width: 90px;
-    max-width: 25%;
-}
-
+.apply-button,
 .suggest-button {
-    max-width: 60%;
+    font-size: 12px;
+    margin-left: auto;
+    display: flex;
+    width: auto !important;
 }
 
-/* Button content styles */
-.jp-Button div,
-.jp-Button2 div,
-.suggest-button div,
-.locate-button div,
-.apply-button div,
-.apply-alt-button div,
-.button-fix-button div {
-    text-align: left;
-    flex: 1;
-    color: #ffffff;
+.apply-button .material-icons,
+.suggest-button .material-icons {
+    font-size: 12px;
 }
 
-.jp-Button svg,
-.jp-Button2 svg,
-.suggest-button svg,
-.locate-button svg,
-.apply-button svg,
-.apply-alt-button svg,
-.button-fix-button svg {
-    flex-shrink: 0;
-    fill: #ffffff;
+/* Suggestion Styles */
+.issue-widget .suggestion-container {
+    margin-bottom: 12px;
+    margin-left: 30px;
+    padding: 12px;
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    color: white;
+    font-family: monospace;
 }
 
-/* ==========================================================================
-   Textfield Styles
-   ========================================================================== */
+.issue-widget .suggestion {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.issue-widget .textfield-fix-widget {
+    margin-bottom: 12px;
+    padding: 6px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .textfield-fix-widget {
-    background-color: var(--jp-layout-color2);
     padding: 12px;
     border-radius: 8px;
     margin-top: 12px;
@@ -308,9 +310,8 @@
     width: calc(100% - 16px);
     padding: 8px;
     margin-bottom: 8px;
-    background-color: var(--jp-layout-color2);
-    color: var(--jp-ui-font-color1);
-    font-family: var(--jp-ui-font-family);
+    color: black;
+    font-family: Inter, sans-serif;
     box-sizing: border-box;
     border: none;
     outline: none;
@@ -322,16 +323,138 @@
 
 .textfield-buttons {
     display: flex;
-    gap: 8px;
     justify-content: flex-end;
     flex-wrap: wrap;
     width: 100%;
-    box-sizing: border-box;
 }
 
-/* ==========================================================================
-   Dropdown Styles
-   ========================================================================== */
+.textfield-buttons .jp-Button2 {
+    margin-left: 4px;
+}
+
+/* Collapsible Content */
+.collapsible-content {
+    padding-left: 20px;
+    gap: 4px;
+}
+
+/* Icon Styles */
+.icon {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.chevron {
+    transition: transform 0.3s ease;
+    transform-origin: center center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
+}
+
+.chevron.expanded {
+    transform: rotate(180deg);
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Material Icons Styles */
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    vertical-align: middle;
+}
+
+/* Icon sizes */
+.material-icons.md-18 {
+    font-size: 18px;
+}
+
+.material-icons.md-24 {
+    font-size: 24px;
+}
+
+.material-icons.md-36 {
+    font-size: 36px;
+}
+
+.material-icons.md-48 {
+    font-size: 48px;
+}
+
+/* Icon colors */
+.material-icons.md-dark {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.material-icons.md-dark.md-inactive {
+    color: rgba(0, 0, 0, 0.26);
+}
+
+.material-icons.md-light {
+    color: rgba(255, 255, 255, 1);
+}
+
+.material-icons.md-light.md-inactive {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Loading animation for Material Icons */
+.material-icons.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.hidden:not(.dropdown-content) {
+    display: none;
+}
+
+.table-header-fix-widget {
+    margin-top: 8px;
+}
+
+.table-header-fix-widget .button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .custom-dropdown {
     position: relative;
     width: calc(100% - 16px);
@@ -422,16 +545,38 @@
 }
 
 /* Icon sizes */
-.material-icons.md-18 { font-size: 18px; }
-.material-icons.md-24 { font-size: 24px; }
-.material-icons.md-36 { font-size: 36px; }
-.material-icons.md-48 { font-size: 48px; }
+.material-icons.md-18 {
+    font-size: 18px;
+}
+
+.material-icons.md-24 {
+    font-size: 24px;
+}
+
+.material-icons.md-36 {
+    font-size: 36px;
+}
+
+.material-icons.md-48 {
+    font-size: 48px;
+}
 
 /* Icon colors */
-.material-icons.md-dark { color: var(--jp-ui-font-color1); }
-.material-icons.md-dark.md-inactive { color: var(--jp-ui-font-color3); }
-.material-icons.md-light { color: var(--jp-ui-inverse-font-color1); }
-.material-icons.md-light.md-inactive { color: var(--jp-ui-inverse-font-color3); }
+.material-icons.md-dark {
+    color: var(--jp-ui-font-color1);
+}
+
+.material-icons.md-dark.md-inactive {
+    color: var(--jp-ui-font-color3);
+}
+
+.material-icons.md-light {
+    color: var(--jp-ui-inverse-font-color1);
+}
+
+.material-icons.md-light.md-inactive {
+    color: var(--jp-ui-inverse-font-color3);
+}
 
 /* ==========================================================================
    Animations
@@ -441,8 +586,13 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* ==========================================================================
@@ -474,63 +624,3 @@
 .dropdown-fix-widget .fix-description {
     margin-bottom: 12px;
 }
-
-.apply-button {
-    background-color: var(--primary-blue);
-    color: #ffffff;
-    font-family: var(--jp-ui-font-family);
-    flex: 0 0 auto;
-    min-width: 140px;
-    white-space: normal;
-    word-wrap: break-word;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-}
-
-.apply-button:hover {
-    background-color: var(--primary-blue-hover);
-}
-
-.apply-button div {
-    text-align: left;
-    flex: 1;
-    color: #ffffff;
-}
-
-.apply-button svg {
-    flex-shrink: 0;
-    fill: #ffffff;
-}
-
-.button-fix-button {
-    background-color: var(--primary-blue);
-    color: #ffffff;
-    font-family: var(--jp-ui-font-family);
-    flex: 0 0 auto;
-    min-width: 140px;
-    white-space: normal;
-    word-wrap: break-word;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.button-fix-button:hover {
-    background-color: var(--primary-blue-hover);
-}
-
-.button-fix-button div {
-    text-align: left;
-    flex: 1;
-    color: #ffffff;
-}
-
-.button-fix-button svg {
-    flex-shrink: 0;
-    fill: #ffffff;
-}
-

@@ -57,15 +57,11 @@ export async function detectImageIssuesInCell(
       } catch (error) {
         console.error(`Failed to process image ${imageUrl}:`, error);
       } finally {
+        const issueId = 'image-missing-alt';
         notebookIssues.push({
           cellIndex,
           cellType: cellType as 'code' | 'markdown',
-          violation: {
-            id: 'image-missing-alt',
-            description: 'Images must have alternate text',
-            descriptionUrl:
-              'https://dequeuniversity.com/rules/axe/4.7/image-alt'
-          },
+          violationId: issueId,
           issueContentRaw: match[0],
           suggestedFix: suggestedFix
         });

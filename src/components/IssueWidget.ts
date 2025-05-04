@@ -27,7 +27,10 @@ export class CellIssueWidget extends Widget {
 
     const issueInformation = issueToDescription.get(issue.violationId);
     if (issue.customDescription) {
-      issueInformation!.detailedDescription = issue.customDescription;
+      issueInformation!.description = issue.customDescription;
+    }
+    if (issue.customDetailedDescription) {
+      issueInformation!.detailedDescription = issue.customDetailedDescription;
     }
 
     this.addClass('issue-widget');

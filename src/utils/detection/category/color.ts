@@ -364,7 +364,7 @@ export async function detectColorIssuesInCell(
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
               violationId: 'color-insufficient-cc-normal',
-              customDescription: `The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
+              customDescription: `Ensure that a text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
               issueContentRaw: match[0],
               suggestedFix: suggestedFix
             });
@@ -373,7 +373,7 @@ export async function detectColorIssuesInCell(
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
               violationId: 'color-insufficient-cc-large',
-              customDescription: `The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
+              customDescription: `Ensure that a large text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
               issueContentRaw: match[0],
               suggestedFix: suggestedFix
             });

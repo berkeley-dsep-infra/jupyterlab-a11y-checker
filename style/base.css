@@ -35,6 +35,10 @@
     padding: 4px 8px;
 }
 
+.notice-container .chevron {
+    color: #ffffff;
+}
+
 .notice-header {
     padding: 6px 8px;
     display: flex;

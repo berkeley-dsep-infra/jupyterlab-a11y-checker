@@ -37,15 +37,17 @@ export async function detectImageIssuesInCell(
   const mdSyntaxMissingAltRegex = /!\[\]\([^)]+\)/g;
 
   // Check for images without alt tag or empty alt tag in HTML syntax
-  const htmlSyntaxMissingAltRegex = /<img[^>]*alt=""[^>]*>/g;
+  const htmlSyntaxMissingAltRegex = /<img[^>]*alt=["']\s*["'][^>]*>/g;
+  const htmlSyntaxNoAltRegex = /<img(?!.*alt=)[^>]*>/g;
   let match;
   while (
     (match = mdSyntaxMissingAltRegex.exec(rawMarkdown)) !== null ||
-    (match = htmlSyntaxMissingAltRegex.exec(rawMarkdown)) !== null
+    (match = htmlSyntaxMissingAltRegex.exec(rawMarkdown)) !== null ||
+    (match = htmlSyntaxNoAltRegex.exec(rawMarkdown)) !== null
   ) {
     const imageUrl =
       match[0].match(/\(([^)]+)\)/)?.[1] ||
-      match[0].match(/src="([^"]+)"/)?.[1];
+      match[0].match(/src=["']([^"']+)["']/)?.[1];
     if (imageUrl) {
       let suggestedFix: string = '';
       try {

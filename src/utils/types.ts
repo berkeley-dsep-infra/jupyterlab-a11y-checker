@@ -3,6 +3,7 @@ export interface ICellIssue {
   cellType: 'markdown' | 'code';
   violationId: string;
   customDescription?: string;
+  customDetailedDescription?: string;
   issueContentRaw: string;
   metadata?: {
     previousHeadingLevel?: number;

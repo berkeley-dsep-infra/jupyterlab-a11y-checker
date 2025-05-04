@@ -32,7 +32,7 @@
     background-color: var(--primary-blue);
     color: #ffffff;
     overflow: hidden;
-    padding: 8px 12px;
+    padding: 4px 8px;
 }
 
 .notice-header {
@@ -212,6 +212,7 @@
     margin: 0 0 12px 0;
     font-size: 14px;
     display: none;
+    color: var(--jp-ui-font-color1);
     transition: display 0.3s ease;
 }
 
@@ -227,7 +228,7 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 12px;
     margin-bottom: 12px;
     width: 100%;
 }
@@ -278,9 +279,7 @@
     margin-bottom: 12px;
     margin-left: 30px;
     padding: 12px;
-    background-color: #1a1a1a;
     border-radius: 4px;
-    color: white;
     font-family: monospace;
 }
 
@@ -310,11 +309,11 @@
     width: calc(100% - 16px);
     padding: 8px;
     margin-bottom: 8px;
-    color: black;
     font-family: Inter, sans-serif;
-    box-sizing: border-box;
     border: none;
     outline: none;
+    background-color: var(--jp-layout-color1);
+    color: var(--jp-ui-font-color1);
 }
 
 .jp-a11y-input::placeholder {
@@ -354,6 +353,7 @@
     width: 24px;
     height: 24px;
     line-height: 1;
+    color: var(--jp-ui-font-color1);
 }
 
 .chevron.expanded {
@@ -623,4 +623,17 @@
 
 .dropdown-fix-widget .fix-description {
     margin-bottom: 12px;
+}
+
+.loading-overlay {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loading-overlay .material-icons.loading {
+    animation: spin 1s linear infinite;
 }

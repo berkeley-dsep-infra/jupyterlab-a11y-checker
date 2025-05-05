@@ -33,24 +33,24 @@ source = "nodejs"
 fields = ["description", "authors", "urls", "keywords"]
 
 [tool.hatch.build.targets.sdist]
-artifacts = ["a11y_checker/labextension"]
+artifacts = ["jupyterlab_a11y_checker/labextension"]
 exclude = [".github", "binder"]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"a11y_checker/labextension" = "share/jupyter/labextensions/a11y-checker"
-"install.json" = "share/jupyter/labextensions/a11y-checker/install.json"
+"jupyterlab_a11y_checker/labextension" = "share/jupyter/labextensions/jupyterlab-a11y-checker"
+"install.json" = "share/jupyter/labextensions/jupyterlab-a11y-checker/install.json"
 
 [tool.hatch.build.hooks.version]
-path = "a11y_checker/_version.py"
+path = "jupyterlab_a11y_checker/_version.py"
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = ["hatch-jupyter-builder>=0.5"]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
-    "a11y_checker/labextension/static/style.js",
-    "a11y_checker/labextension/package.json",
+    "jupyterlab_a11y_checker/labextension/static/style.js",
+    "jupyterlab_a11y_checker/labextension/package.json",
 ]
-skip-if-exists = ["a11y_checker/labextension/static/style.js"]
+skip-if-exists = ["jupyterlab_a11y_checker/labextension/static/style.js"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod"
@@ -60,7 +60,7 @@ npm = ["jlpm"]
 build_cmd = "install:extension"
 npm = ["jlpm"]
 source_dir = "src"
-build_dir = "a11y_checker/labextension"
+build_dir = "jupyterlab_a11y_checker/labextension"
 
 [tool.jupyter-releaser.options]
 version_cmd = "hatch version"

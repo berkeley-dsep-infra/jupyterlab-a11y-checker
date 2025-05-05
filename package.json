@@ -1,5 +1,5 @@
 {
-    "name": "a11y-checker",
+    "name": "jupyterlab-a11y-checker",
     "version": "0.1.5-alpha.3",
     "type": "module",
     "description": "A JupyterLab extension that checks and suggests fixes for a11y issues.",
@@ -36,7 +36,7 @@
         "clean": "jlpm clean:lib",
         "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
         "clean:lintcache": "rimraf .eslintcache .stylelintcache",
-        "clean:labextension": "rimraf a11y_checker/labextension a11y_checker/_version.py",
+        "clean:labextension": "rimraf jupyterlab_a11y_checker/labextension jupyterlab_a11y_checker/_version.py",
         "clean:all": "jlpm clean:lib && jlpm clean:labextension && jlpm clean:lintcache",
         "eslint": "jlpm eslint:check --fix",
         "eslint:check": "eslint . --cache --ext .ts,.tsx",
@@ -97,7 +97,7 @@
     },
     "jupyterlab": {
         "extension": true,
-        "outputDir": "a11y_checker/labextension"
+        "outputDir": "jupyterlab_a11y_checker/labextension"
     },
     "eslintIgnore": [
         "node_modules",

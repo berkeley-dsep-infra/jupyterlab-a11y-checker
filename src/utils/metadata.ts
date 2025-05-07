@@ -16,7 +16,7 @@ export const issueToCategory = new Map<string, string>([
 
   // TODO: 2. Headings
   ['heading-missing-h1', 'Headings'],
-  ['heading-duplicate-h1', 'Headings'],
+  ['heading-multiple-h1', 'Headings'],
   ['heading-duplicate', 'Headings'],
   ['heading-wrong-order', 'Headings'],
   ['heading-empty', 'Headings'],
@@ -65,7 +65,7 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     }
   ],
   [
-    'heading-duplicate-h1',
+    'heading-multiple-h1',
     {
       title: 'Duplicate H1 Heading',
       description:
@@ -75,9 +75,19 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     }
   ],
   [
-    'heading-duplicate',
+    'heading-duplicate-h2',
     {
-      title: 'Duplicate Heading',
+      title: 'Duplicate Heading h2',
+      description:
+        'Ensure identical headings are not used at the same level in the notebook.',
+      detailedDescription:
+        'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text.'
+    }
+  ],
+  [
+    'heading-duplicate-h1-h2',
+    {
+      title: 'Duplicate Heading h1 and h2',
       description:
         'Ensure identical headings are not used at the same level in the notebook.',
       detailedDescription:

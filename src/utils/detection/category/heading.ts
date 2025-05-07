@@ -148,7 +148,7 @@ export async function analyzeHeadingHierarchy(
         notebookIssues.push({
           cellIndex: heading.cellIndex,
           cellType: 'markdown',
-          violationId: 'heading-duplicate-h1',
+          violationId: 'heading-multiple-h1',
           issueContentRaw: heading.html,
           metadata: {
             headingStructure: headingStructure.filter(
@@ -168,7 +168,7 @@ export async function analyzeHeadingHierarchy(
           notebookIssues.push({
             cellIndex: heading.cellIndex,
             cellType: 'markdown',
-            violationId: 'heading-duplicate',
+            violationId: 'heading-duplicate-h2',
             customDescription: 'Ensure identical h2 headings are not used.',
             customDetailedDescription:
               'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text.',
@@ -192,7 +192,7 @@ export async function analyzeHeadingHierarchy(
           notebookIssues.push({
             cellIndex: heading.cellIndex,
             cellType: 'markdown',
-            violationId: 'heading-duplicate',
+            violationId: 'heading-duplicate-h1-h2',
             customDescription:
               'Ensure h1 and h2 headings do not share the same text.',
             customDetailedDescription:
@@ -221,7 +221,6 @@ export async function analyzeHeadingHierarchy(
           violationId: 'heading-empty',
           issueContentRaw: current.html
         });
-        continue;
       }
 
       // Skip first heading (no previous to compare with)

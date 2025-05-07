@@ -167,7 +167,10 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
                 if (mainPanel) {
                   // Dispatch a custom event with just heading issues
                   const event = new CustomEvent('notebookReanalyzed', {
-                    detail: { issues: headingIssues },
+                    detail: {
+                      issues: headingIssues,
+                      isHeadingUpdate: true
+                    },
                     bubbles: true
                   });
                   mainPanel.dispatchEvent(event);

@@ -13,10 +13,11 @@
 | No. | Rule ID                      | Description                                                                 | WCAG     | Status           |
 |-----|------------------------------|-----------------------------------------------------------------------------|----------|------------------|
 | 2a   | heading-missing-h1          | Ensure the presence of H1 tag in a notebook                               | WCAG 2.4.2 | Done ✅   |
-| 2b   | heading-duplicate-h1        | Ensure there is only one H1 tag in a notebook                             | WCAG 2.4.6 | Done ✅   |
-| 2c   | heading-duplicate           | Ensure the headings are unique                                            | WCAG 2.4.6 | Done ✅   |
-| 2d   | heading-wrong-order         | Ensure the order of heading is accurate                                   | WCAG 2.4.6 | Done ✅   |
-| 2e   | heading-empty               | Ensure the heading content is non-empty                                   | WCAG 2.4.6 | Done ✅   |
+| 2b   | heading-multiple-h1        | Ensure there is only one H1 tag in a notebook                             | WCAG 2.4.6 | Done ✅   |
+| 2c   | heading-duplicate-h2         | Ensure no two H2 headings share the same content                              | WCAG 2.4.6 | Done ✅   |
+| 2d   | heading-duplicate-h1-h2       | Ensure no two H1 and H2 headings share the same content              | WCAG 2.4.6 | Done ✅   |
+| 2e   | heading-wrong-order         | Ensure the order of heading is accurate                                   | WCAG 2.4.6 | Done ✅   |
+| 2f   | heading-empty               | Ensure the heading content is non-empty                                   | WCAG 2.4.6 | Done ✅   |
 
 ---
 

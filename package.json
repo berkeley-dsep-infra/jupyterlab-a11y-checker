@@ -1,6 +1,6 @@
 {
-    "name": "a11y-checker",
-    "version": "0.1.5-alpha.1",
+    "name": "jupyterlab-a11y-checker",
+    "version": "0.1.5-alpha.3",
     "type": "module",
     "description": "A JupyterLab extension that checks and suggests fixes for a11y issues.",
     "keywords": [
@@ -8,9 +8,9 @@
         "jupyterlab",
         "jupyterlab-extension"
     ],
-    "homepage": "https://github.com/Chanbinski/a11y-checker",
+    "homepage": "https://github.com/Chanbinski/jupyterlab-a11y-checker",
     "bugs": {
-        "url": "https://github.com/Chanbinski/a11y-checker/issues"
+        "url": "https://github.com/Chanbinski/jupyterlab-a11y-checker/issues"
     },
     "license": "BSD-3-Clause",
     "author": "Chanbin Park",
@@ -24,7 +24,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Chanbinski/a11y-checker.git"
+        "url": "https://github.com/Chanbinski/jupyterlab-a11y-checker.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",
@@ -36,7 +36,7 @@
         "clean": "jlpm clean:lib",
         "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
         "clean:lintcache": "rimraf .eslintcache .stylelintcache",
-        "clean:labextension": "rimraf a11y_checker/labextension a11y_checker/_version.py",
+        "clean:labextension": "rimraf jupyterlab_a11y_checker/labextension jupyterlab_a11y_checker/_version.py",
         "clean:all": "jlpm clean:lib && jlpm clean:labextension && jlpm clean:lintcache",
         "eslint": "jlpm eslint:check --fix",
         "eslint:check": "eslint . --cache --ext .ts,.tsx",
@@ -63,7 +63,7 @@
         "yarn": "^1.22.22"
     },
     "devDependencies": {
-        "@jupyterlab/builder": "^4.3.6",
+        "@jupyterlab/builder": "^3.3.2",
         "@types/json-schema": "^7.0.11",
         "@types/marked": "^5.0.2",
         "@types/react": "^18.0.26",
@@ -97,7 +97,7 @@
     },
     "jupyterlab": {
         "extension": true,
-        "outputDir": "a11y_checker/labextension"
+        "outputDir": "jupyterlab_a11y_checker/labextension"
     },
     "eslintIgnore": [
         "node_modules",

@@ -363,11 +363,8 @@ export async function detectColorIssuesInCell(
             notebookIssues.push({
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
-              violation: {
-                id: 'color-insufficient-cc-normal',
-                description: `Large text in images have a contrast ratio of 3:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
-                descriptionUrl: ''
-              },
+              violationId: 'color-insufficient-cc-normal',
+              customDescription: `Ensure that a text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
               issueContentRaw: match[0],
               suggestedFix: suggestedFix
             });
@@ -375,11 +372,8 @@ export async function detectColorIssuesInCell(
             notebookIssues.push({
               cellIndex,
               cellType: cellType as 'code' | 'markdown',
-              violation: {
-                id: 'color-insufficient-cc-large',
-                description: `Normal text in images have a contrast ratio of 4.5:1 and text contrast in general. Currently, the contrast ratio is ${contrast.toFixed(2)}:1. Please note that this may be inaccurate, so if this image doesn't contain text, ignore this.`,
-                descriptionUrl: ''
-              },
+              violationId: 'color-insufficient-cc-large',
+              customDescription: `Ensure that a large text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
               issueContentRaw: match[0],
               suggestedFix: suggestedFix
             });

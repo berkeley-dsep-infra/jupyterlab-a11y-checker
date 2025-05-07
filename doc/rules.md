@@ -26,7 +26,7 @@
 |-----|------------------------|-----------------------------------------------------------------------------|----------|----------|
 | 3a   | table-missing-header  | Ensure row and column headers are present in a table                  | WCAG 1.3.1 | Done ✅  |
 | 3b   | table-missing-caption  | Ensure caption was added for a table                                 | WCAG 1.3.1 | Done ✅  |
-| 3c   | table-scope    | Ensure presence of `scope` attribute for rows and columns                   | WCAG 1.3.1 | In progress ⏳ |
+| 3c   | table-missing-scope    | Ensure presence of `scope` attribute for rows and columns                   | WCAG 1.3.1 | Done ✅ |
 
 ---
 

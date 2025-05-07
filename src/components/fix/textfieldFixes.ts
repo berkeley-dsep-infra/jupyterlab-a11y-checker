@@ -78,13 +78,7 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
 
     // Create loading overlay (so we can see the loading state)
     const loadingOverlay = document.createElement('div');
-    loadingOverlay.style.position = 'absolute';
-    loadingOverlay.style.left = '8px'; // Matching input text padding
-    loadingOverlay.style.top = '8px';
-    loadingOverlay.style.display = 'flex';
-    loadingOverlay.style.alignItems = 'center';
-    loadingOverlay.style.gap = '8px';
-    loadingOverlay.style.color = '#666';
+    loadingOverlay.className = 'loading-overlay';
     loadingOverlay.innerHTML = `
             <span class="material-icons loading">refresh</span>
             Getting AI suggestions...
@@ -193,13 +187,7 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
 
     // Create loading overlay
     const loadingOverlay = document.createElement('div');
-    loadingOverlay.style.position = 'absolute';
-    loadingOverlay.style.left = '8px';
-    loadingOverlay.style.top = '8px';
-    loadingOverlay.style.display = 'flex';
-    loadingOverlay.style.alignItems = 'center';
-    loadingOverlay.style.gap = '8px';
-    loadingOverlay.style.color = '#666';
+    loadingOverlay.className = 'loading-overlay';
     loadingOverlay.innerHTML = `
             <span class="material-icons loading">refresh</span>
             Getting AI suggestions...
@@ -324,13 +312,7 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
 
     // Create loading overlay
     const loadingOverlay = document.createElement('div');
-    loadingOverlay.style.position = 'absolute';
-    loadingOverlay.style.left = '8px';
-    loadingOverlay.style.top = '8px';
-    loadingOverlay.style.display = 'flex';
-    loadingOverlay.style.alignItems = 'center';
-    loadingOverlay.style.gap = '8px';
-    loadingOverlay.style.color = '#666';
+    loadingOverlay.className = 'loading-overlay';
     loadingOverlay.innerHTML = `
         <span class="material-icons loading">refresh</span>
         Getting AI suggestions...

@@ -8,9 +8,9 @@
         "jupyterlab",
         "jupyterlab-extension"
     ],
-    "homepage": "https://github.com/Chanbinski/jupyterlab-a11y-checker",
+    "homepage": "https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker",
     "bugs": {
-        "url": "https://github.com/Chanbinski/jupyterlab-a11y-checker/issues"
+        "url": "https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker/issues"
     },
     "license": "BSD-3-Clause",
     "author": "Chanbin Park",
@@ -24,7 +24,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Chanbinski/jupyterlab-a11y-checker.git"
+        "url": "https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",

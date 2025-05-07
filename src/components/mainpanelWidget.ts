@@ -191,62 +191,33 @@ export class MainPanelWidget extends Widget {
     this.node.addEventListener('notebookReanalyzed', (event: Event) => {
       const customEvent = event as CustomEvent;
       const newIssues = customEvent.detail.issues;
+      const isHeadingUpdate = customEvent.detail.isHeadingUpdate;
 
-      // Clear the issues container (so that the new issues are not added to the old issues)
-      const issuesContainer = this.node.querySelector(
-        '.issues-container'
-      ) as HTMLElement;
-      issuesContainer.innerHTML = '';
+      if (isHeadingUpdate) {
+        // Find the Headings category section
+        const headingsCategory = Array.from(
+          this.node.querySelectorAll('.category-title')
+        )
+          .find(title => title.textContent === 'Headings')
+          ?.closest('.category');
 
-      if (newIssues.length === 0) {
-        issuesContainer.innerHTML =
-          '<div class="no-issues">No issues found</div>';
-        return;
-      }
+        if (headingsCategory) {
+          // Clear only the issues list in the Headings section
+          const issuesList = headingsCategory.querySelector('.issues-list');
+          if (issuesList) {
+            issuesList.innerHTML = '';
 
-      // Group issues by category
-      const issuesByCategory = new Map<string, ICellIssue[]>();
-
-      newIssues.forEach((notebookIssue: ICellIssue) => {
-        const categoryName: string =
-          issueToCategory.get(notebookIssue.violationId) || 'Other';
-        if (!issuesByCategory.has(categoryName)) {
-          issuesByCategory.set(categoryName, []);
+            // Add new heading issues to this section
+            newIssues.forEach((issue: ICellIssue) => {
+              const issueWidget = new CellIssueWidget(
+                issue,
+                this.currentNotebook!.content.widgets[issue.cellIndex],
+                this.aiEnabled
+              );
+              issuesList.appendChild(issueWidget.node);
+            });
+          }
         }
-        issuesByCategory.get(categoryName)!.push(notebookIssue);
-      });
-
-      // Create widgets for each category
-      for (const categoryName of issueCategoryNames) {
-        const categoryIssues: ICellIssue[] =
-          issuesByCategory.get(categoryName) || [];
-
-        if (categoryIssues.length === 0) {
-          continue;
-        }
-
-        const categoryWidget: HTMLDivElement = document.createElement('div');
-        categoryWidget.classList.add('category');
-        categoryWidget.innerHTML = `
-          <h2 class="category-title">${categoryName}</h2>
-          <hr>
-          <div class="issues-list"></div>
-        `;
-
-        issuesContainer.appendChild(categoryWidget);
-
-        const issuesList: HTMLDivElement = categoryWidget.querySelector(
-          '.issues-list'
-        ) as HTMLDivElement;
-
-        categoryIssues.forEach(issue => {
-          const issueWidget = new CellIssueWidget(
-            issue,
-            this.currentNotebook!.content.widgets[issue.cellIndex],
-            this.aiEnabled
-          );
-          issuesList.appendChild(issueWidget.node);
-        });
       }
     });
   }

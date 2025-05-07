@@ -7,7 +7,7 @@ export async function getImageAltSuggestion(
   modelName: string
 ): Promise<string> {
   let prompt =
-    'Given the following code, read the image url and respond with a short description of the image, without any explanation.';
+    'Given the following code, read the image url and respond with a short description of the image, without any explanation. Avoid using the word "image" in the description.';
   prompt += `Content: \n${issue.issueContentRaw}\n\n`;
 
   try {

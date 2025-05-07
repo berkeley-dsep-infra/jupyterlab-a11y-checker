@@ -13,7 +13,7 @@
 | No. | Rule ID                      | Fix Interface                                            |
 |-----|------------------------------|-----------------------------------------------------------------------------|
 | 2a   | heading-missing-h1          | A text field where the user can type in the h1.                            |
-| 2b   | heading-duplicate-h1        | None.                             |
+| 2b   | heading-multiple-h1        | None.                             |
 | 2c   | heading-duplicate           |                                            | 
 | 2d   | heading-wrong-order         | A dropdown where the user can select from the possible heading options.                                   | 
 | 2e   | heading-empty               | A text field where the user can type in the heading content.                                 |

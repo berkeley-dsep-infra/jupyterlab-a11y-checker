@@ -78,8 +78,7 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     'heading-duplicate-h2',
     {
       title: 'Duplicate Heading h2',
-      description:
-        'Ensure identical headings are not used at the same level in the notebook.',
+      description: 'Ensure identical h2 headings are not used.',
       detailedDescription:
         'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text.'
     }
@@ -88,10 +87,9 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     'heading-duplicate-h1-h2',
     {
       title: 'Duplicate Heading h1 and h2',
-      description:
-        'Ensure identical headings are not used at the same level in the notebook.',
+      description: 'Ensure h1 and h2 headings do not share the same text.',
       detailedDescription:
-        'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text.'
+        'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please use different text for h1 and h2 headings.'
     }
   ],
   [

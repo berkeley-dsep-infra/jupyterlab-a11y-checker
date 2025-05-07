@@ -169,9 +169,6 @@ export async function analyzeHeadingHierarchy(
             cellIndex: heading.cellIndex,
             cellType: 'markdown',
             violationId: 'heading-duplicate-h2',
-            customDescription: 'Ensure identical h2 headings are not used.',
-            customDetailedDescription:
-              'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text.',
             issueContentRaw: heading.html,
             metadata: {
               headingStructure: headingStructure.filter(
@@ -193,10 +190,6 @@ export async function analyzeHeadingHierarchy(
             cellIndex: heading.cellIndex,
             cellType: 'markdown',
             violationId: 'heading-duplicate-h1-h2',
-            customDescription:
-              'Ensure h1 and h2 headings do not share the same text.',
-            customDetailedDescription:
-              'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please use different text for h1 and h2 headings.',
             issueContentRaw: heading.html,
             metadata: {
               headingStructure: headingStructure.filter(

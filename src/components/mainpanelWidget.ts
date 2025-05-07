@@ -8,6 +8,7 @@ import { ICellIssue } from '../utils/types';
 import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
 import { analyzeCellsAccessibility } from '../utils/detection/base';
+import { analyzeTableIssues } from '../utils/detection/category/table';
 
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;
@@ -187,11 +188,11 @@ export class MainPanelWidget extends Widget {
     });
 
     // Add event listener for notebookReanalyzed event
-    // Allows for reanalyzing the notebook after a fix has been applied
-    this.node.addEventListener('notebookReanalyzed', (event: Event) => {
+    this.node.addEventListener('notebookReanalyzed', async (event: Event) => {
       const customEvent = event as CustomEvent;
       const newIssues = customEvent.detail.issues;
       const isHeadingUpdate = customEvent.detail.isHeadingUpdate;
+      const isTableUpdate = customEvent.detail.isTableUpdate;
 
       if (isHeadingUpdate) {
         // Find the Headings category section
@@ -209,6 +210,34 @@ export class MainPanelWidget extends Widget {
 
             // Add new heading issues to this section
             newIssues.forEach((issue: ICellIssue) => {
+              const issueWidget = new CellIssueWidget(
+                issue,
+                this.currentNotebook!.content.widgets[issue.cellIndex],
+                this.aiEnabled
+              );
+              issuesList.appendChild(issueWidget.node);
+            });
+          }
+        }
+      } else if (isTableUpdate) {
+        // Find the Tables category section
+        const tablesCategory = Array.from(
+          this.node.querySelectorAll('.category-title')
+        )
+          .find(title => title.textContent === 'Tables')
+          ?.closest('.category');
+
+        if (tablesCategory) {
+          // Clear only the issues list in the Tables section
+          const issuesList = tablesCategory.querySelector('.issues-list');
+          if (issuesList) {
+            issuesList.innerHTML = '';
+
+            // Reanalyze table issues
+            const tableIssues = await analyzeTableIssues(this.currentNotebook!);
+
+            // Add new table issues to this section
+            tableIssues.forEach((issue: ICellIssue) => {
               const issueWidget = new CellIssueWidget(
                 issue,
                 this.currentNotebook!.content.widgets[issue.cellIndex],

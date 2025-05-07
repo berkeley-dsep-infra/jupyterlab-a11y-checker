@@ -1,6 +1,6 @@
 import { ICellIssue } from '../../utils/types';
 import { analyzeHeadingHierarchy } from '../../utils/detection/category/heading';
-
+import { analyzeTableIssues } from '../../utils/detection/category/table';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { DropdownFixWidget } from './base';
@@ -116,6 +116,36 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
     const newContent = entireCellContent.replace(target, processTable(target));
     this.cell.model.sharedModel.setSource(newContent);
     this.removeIssueWidget();
+
+    // Wait a short delay for the cell to update
+    setTimeout(async () => {
+      if (this.cell.parent?.parent) {
+        try {
+          // Only analyze table issues
+          const tableIssues = await analyzeTableIssues(
+            this.cell.parent.parent as NotebookPanel
+          );
+
+          // Find the main panel widget
+          const mainPanel = document
+            .querySelector('.a11y-panel')
+            ?.closest('.lm-Widget');
+          if (mainPanel) {
+            // Dispatch a custom event with just table issues
+            const event = new CustomEvent('notebookReanalyzed', {
+              detail: {
+                issues: tableIssues,
+                isTableUpdate: true
+              },
+              bubbles: true
+            });
+            mainPanel.dispatchEvent(event);
+          }
+        } catch (error) {
+          console.error('Error reanalyzing notebook:', error);
+        }
+      }
+    }, 100); // Small delay to ensure cell content is updated
   }
 }
 

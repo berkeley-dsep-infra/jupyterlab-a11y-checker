@@ -1,4 +1,5 @@
 import { ICellIssue } from '../../types';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
 export function detectTableIssuesInCell(
   rawMarkdown: string,
@@ -59,6 +60,30 @@ export function detectTableIssuesInCell(
         });
       }
     }
+  }
+
+  return notebookIssues;
+}
+
+export async function analyzeTableIssues(
+  panel: NotebookPanel
+): Promise<ICellIssue[]> {
+  const notebookIssues: ICellIssue[] = [];
+  const cells = panel.content.widgets;
+
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    if (!cell || !cell.model || cell.model.type !== 'markdown') {
+      continue;
+    }
+
+    const content = cell.model.sharedModel.getSource();
+    if (!content.trim()) {
+      continue;
+    }
+
+    const cellIssues = detectTableIssuesInCell(content, i, 'markdown');
+    notebookIssues.push(...cellIssues);
   }
 
   return notebookIssues;

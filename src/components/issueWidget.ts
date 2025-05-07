@@ -6,7 +6,8 @@ import {
   TableCaptionFixWidget,
   TableHeaderFixWidget,
   HeadingOneFixWidget,
-  HeadingOrderFixWidget
+  HeadingOrderFixWidget,
+  TableScopeFixWidget
 } from './fix';
 
 import { issueToDescription } from '../utils/metadata';
@@ -102,6 +103,13 @@ export class CellIssueWidget extends Widget {
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(tableHeaderFixWidget.node);
+    } else if (this.issue.violation.id === 'table-missing-scope') {
+      const tableScopeFixWidget = new TableScopeFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
+      );
+      fixWidgetContainer.appendChild(tableScopeFixWidget.node);
     } else if (this.issue.violation.id === 'heading-missing-h1') {
       const headingOneFixWidget = new HeadingOneFixWidget(
         this.issue,

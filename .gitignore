@@ -120,6 +120,3 @@ dmypy.json
 
 # Yarn cache
 .yarn/
-
-# Test Notebook
-test_notebooks/

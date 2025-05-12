@@ -1,5 +1,5 @@
 import { ICellIssue } from '../../utils/types';
-import { analyzeHeadingHierarchy } from '../../utils/detection/category/heading';
+import { analyzeHeadingHierarchy, detectHeadingOneIssue } from '../../utils/detection/category/heading';
 import { analyzeTableIssues } from '../../utils/detection/category/table';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
@@ -185,20 +185,27 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
           setTimeout(async () => {
             if (this.notebookPanel) {
               try {
-                // Only analyze heading hierarchy
-                const headingIssues = await analyzeHeadingHierarchy(
+                // Run both heading checks
+                const headingHierarchyIssues = await analyzeHeadingHierarchy(
                   this.notebookPanel
                 );
+                const headingOneIssues = await detectHeadingOneIssue(
+                  '',
+                  0,
+                  'markdown',
+                  this.notebookPanel.content.widgets
+                );
+                const allHeadingIssues = [...headingHierarchyIssues, ...headingOneIssues];
 
                 // Find the main panel widget
                 const mainPanel = document
                   .querySelector('.a11y-panel')
                   ?.closest('.lm-Widget');
                 if (mainPanel) {
-                  // Dispatch a custom event with just heading issues
+                  // Dispatch a custom event with all heading issues
                   const event = new CustomEvent('notebookReanalyzed', {
                     detail: {
-                      issues: headingIssues,
+                      issues: allHeadingIssues,
                       isHeadingUpdate: true
                     },
                     bubbles: true

@@ -402,10 +402,12 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
   private getValidHeadingLevels(): Set<number> {
     const validLevels = new Set<number>();
 
+    // Always add h2 as a valid option
+    validLevels.add(2);
+
     if (this.previousLevel !== undefined) {
       // Special case: if previous heading is h1, current heading must be h2
       if (this.previousLevel === 1) {
-        validLevels.add(2);
         console.log('Previous heading is h1, only allowing h2 as option');
         return validLevels;
       }
@@ -438,8 +440,6 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
         Array.from(validLevels)
       );
     } else {
-      // If no previous level is found, only allow h2 (never h1)
-      validLevels.add(2);
       console.log('No previous level found, defaulting to h2 option');
     }
 

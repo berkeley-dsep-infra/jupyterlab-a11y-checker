@@ -17,6 +17,16 @@ export async function detectHeadingOneIssue(
   let firstHeadingFound = false;
   let firstHeadingContent = '';
 
+  // Check if first cell is a code cell
+  if (cells.length > 0 && cells[0].model.type === 'code') {
+    notebookIssues.push({
+      cellIndex: 0,
+      cellType: 'code',
+      violationId: 'heading-missing-h1',
+      issueContentRaw: ''
+    });
+  }
+
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
     if (cell.model.type !== 'markdown') {

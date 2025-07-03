@@ -13,17 +13,20 @@ import {
 import { issueToDescription } from '../utils/metadata';
 
 import { ICellIssue } from '../utils/types';
+import { MainPanelWidget } from './mainpanelWidget';
 
 export class CellIssueWidget extends Widget {
   private issue: ICellIssue;
   private cell: Cell<ICellModel>;
   private aiEnabled: boolean = false; // TODO: Create a higher order component to handle this
+  private mainPanel: MainPanelWidget;
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, mainPanel: MainPanelWidget) {
     super();
     this.issue = issue;
     this.cell = cell;
     this.aiEnabled = aiEnabled;
+    this.mainPanel = mainPanel;
 
     const issueInformation = issueToDescription.get(issue.violationId);
     if (issue.customDescription) {
@@ -92,9 +95,9 @@ export class CellIssueWidget extends Widget {
     });
 
     // Show suggest button initially if AI is enabled
-    const mainPanel = document.getElementById('a11y-sidebar') as HTMLElement;
-    if (mainPanel) {
-      const aiToggleButton = mainPanel.querySelector('.ai-control-button');
+    const mainPanelElement = document.getElementById('a11y-sidebar') as HTMLElement;
+    if (mainPanelElement) {
+      const aiToggleButton = mainPanelElement.querySelector('.ai-control-button');
       if (aiToggleButton && aiToggleButton.textContent?.includes('Enabled')) {
         this.aiEnabled = true;
       } else {
@@ -112,7 +115,8 @@ export class CellIssueWidget extends Widget {
       const textFieldFixWidget = new ImageAltFixWidget(
         this.issue,
         this.cell,
-        this.aiEnabled
+        this.aiEnabled,
+        this.mainPanel.getVisionModelSettings()
       );
       fixWidgetContainer.appendChild(textFieldFixWidget.node);
     } else if (this.issue.violationId === 'table-missing-caption') {
@@ -120,7 +124,8 @@ export class CellIssueWidget extends Widget {
       const tableCaptionFixWidget = new TableCaptionFixWidget(
         this.issue,
         this.cell,
-        this.aiEnabled
+        this.aiEnabled,
+        this.mainPanel.getLanguageModelSettings()
       );
       fixWidgetContainer.appendChild(tableCaptionFixWidget.node);
     } else if (this.issue.violationId === 'table-missing-header') {

@@ -1,18 +1,20 @@
 import { ICellIssue } from '../../utils';
-import { getImageAltSuggestion, getTableCaptionSuggestion } from '../../utils';
+import { getImageAltSuggestion, getTableCaptionSuggestion, ModelSettings } from '../../utils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
-import { ServerConnection } from '@jupyterlab/services';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { TextFieldFixWidget } from './base';
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
+  private visionSettings: ModelSettings;
+
   protected getDescription(): string {
     return 'Add or update alt text for the image:';
   }
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, visionSettings: ModelSettings) {
     super(issue, cell, aiEnabled);
+    this.visionSettings = visionSettings;
   }
 
   applyTextToCell(providedAltText: string): void {
@@ -99,8 +101,8 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
     try {
       const suggestion = await getImageAltSuggestion(
         this.issue,
-        ServerConnection.makeSettings().baseUrl + 'ollama/',
-        'mistral:7b'
+        this.cell.node.querySelector('img')?.src || '',
+        this.visionSettings
       );
       if (suggestion !== 'Error') {
         // Extract alt text from the suggestion, handling both single and double quotes
@@ -129,12 +131,15 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
 }
 
 export class TableCaptionFixWidget extends TextFieldFixWidget {
+  private languageSettings: ModelSettings;
+
   protected getDescription(): string {
     return 'Add or update the caption for the table:';
   }
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
+  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, languageSettings: ModelSettings) {
     super(issue, cell, aiEnabled);
+    this.languageSettings = languageSettings;
   }
 
   applyTextToCell(providedCaption: string): void {
@@ -208,8 +213,7 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
     try {
       const suggestion = await getTableCaptionSuggestion(
         this.issue,
-        ServerConnection.makeSettings().baseUrl + 'ollama/',
-        'mistral'
+        this.languageSettings
       );
       if (suggestion !== 'Error') {
         captionInput.value = suggestion;

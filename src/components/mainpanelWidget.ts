@@ -1,10 +1,12 @@
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { LabIcon } from '@jupyterlab/ui-components';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { CellIssueWidget } from './issueWidget';
 
 import { ICellIssue } from '../utils/types';
+import { ModelSettings } from '../utils/ai-utils';
 import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
 import { analyzeCellsAccessibility } from '../utils/detection/base';
@@ -13,9 +15,30 @@ import { analyzeTableIssues } from '../utils/detection/category/table';
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;
   private currentNotebook: NotebookPanel | null = null;
+  private languageModelSettings: ModelSettings;
+  private visionModelSettings: ModelSettings;
 
-  constructor() {
+  constructor(settingRegistry?: ISettingRegistry) {
     super();
+
+    // Default settings
+    this.languageModelSettings = {
+      baseUrl: '',
+      apiKey: '',
+      model: ''
+    };
+
+    this.visionModelSettings = {
+      baseUrl: '',
+      apiKey: '',
+      model: ''
+    };
+
+    // Load settings if available
+    if (settingRegistry) {
+      this.loadSettings(settingRegistry);
+    }
+
     this.addClass('a11y-panel');
     this.id = 'a11y-sidebar';
     const accessibilityIcon = new LabIcon({
@@ -173,7 +196,8 @@ export class MainPanelWidget extends Widget {
             const issueWidget = new CellIssueWidget(
               issue,
               this.currentNotebook!.content.widgets[issue.cellIndex],
-              this.aiEnabled
+              this.aiEnabled,
+              this
             );
             issuesList.appendChild(issueWidget.node);
           });
@@ -213,7 +237,8 @@ export class MainPanelWidget extends Widget {
               const issueWidget = new CellIssueWidget(
                 issue,
                 this.currentNotebook!.content.widgets[issue.cellIndex],
-                this.aiEnabled
+                this.aiEnabled,
+                this
               );
               issuesList.appendChild(issueWidget.node);
             });
@@ -241,7 +266,8 @@ export class MainPanelWidget extends Widget {
               const issueWidget = new CellIssueWidget(
                 issue,
                 this.currentNotebook!.content.widgets[issue.cellIndex],
-                this.aiEnabled
+                this.aiEnabled,
+                this
               );
               issuesList.appendChild(issueWidget.node);
             });
@@ -249,6 +275,40 @@ export class MainPanelWidget extends Widget {
         }
       }
     });
+  }
+
+  private async loadSettings(settingRegistry: ISettingRegistry): Promise<void> {
+    try {
+      const settings = await settingRegistry.load('jupyterlab-a11y-checker:plugin');
+
+      if (settings.get('languageModel').composite) {
+        const langModel = settings.get('languageModel').composite as any;
+        this.languageModelSettings = {
+          baseUrl: langModel.baseUrl || this.languageModelSettings.baseUrl,
+          apiKey: langModel.apiKey || this.languageModelSettings.apiKey,
+          model: langModel.model || this.languageModelSettings.model
+        };
+      }
+
+      if (settings.get('visionModel').composite) {
+        const visionModel = settings.get('visionModel').composite as any;
+        this.visionModelSettings = {
+          baseUrl: visionModel.baseUrl || this.visionModelSettings.baseUrl,
+          apiKey: visionModel.apiKey || this.visionModelSettings.apiKey,
+          model: visionModel.model || this.visionModelSettings.model
+        };
+      }
+    } catch (error) {
+      console.warn('Failed to load settings:', error);
+    }
+  }
+
+  getLanguageModelSettings(): ModelSettings {
+    return this.languageModelSettings;
+  }
+
+  getVisionModelSettings(): ModelSettings {
+    return this.visionModelSettings;
   }
 
   setNotebook(notebook: NotebookPanel) {

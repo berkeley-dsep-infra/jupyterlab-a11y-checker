@@ -135,6 +135,14 @@ command. To find its location, you can run `jupyter labextension list` to figure
 folder is located. Then you can remove the symlink named `jupyterlab-a11y-checker` within that folder.
 
 
+## Acknowledgements
 
-
+| Name                   | Role                GitHub                           |
+|------------------------|------------------------------------------------------|
+| Chanbin Park  | Student Developer     | [@chanbinski](https://github.com/Chanbinski) |
+| Vivian Liu  |  Student Developer      | [@vzliu](https://github.com/vzliu) |
+| Shreyas Rana | Student Developer       | [@ranashreyas](https://github.com/ranashreyas) |
+| Balaji Alwar | Project Lead       | [@balajialg](https://github.com/balajialg) |
+| Ryan Lovett | Volunteer (Jupyter expert)      | [@ryanlovett]([https://github.com/balajialg](https://github.com/ryanlovett)) |
+| Joe Feria Galicia | Volunteer (a11y expert)       | NA |
 

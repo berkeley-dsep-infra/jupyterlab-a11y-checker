@@ -41,7 +41,7 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
       // Draw the image on canvas
       ctx.drawImage(img, 0, 0);
 
-      // Convert to JPEG base64 (quality 95% like in your Python example)
+      // Convert to JPEG base64 (quality 95% like in the Python example)
       const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.95);
 
       // Extract just the base64 part (remove "data:image/jpeg;base64,")
@@ -70,6 +70,7 @@ export async function getImageAltSuggestion(
 
   // New River implementation - using OpenAI Chat Completions API format
   console.log('visionSettings', visionSettings);
+  console.log('imageData', imageData);
   try {
     const imageUrl = imageData.startsWith("data:image")
       ? imageData
@@ -102,6 +103,7 @@ export async function getImageAltSuggestion(
     });
 
     console.log('Sending request to:', visionSettings.baseUrl);
+    console.log('Body:', body);
     const response = await axios.post(visionSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',

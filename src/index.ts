@@ -11,7 +11,11 @@ const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-a11y-checker:plugin',
   autoStart: true,
   requires: [ILabShell, ISettingRegistry],
-  activate: (app: JupyterFrontEnd, labShell: ILabShell, settingRegistry: ISettingRegistry) => {
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    settingRegistry: ISettingRegistry
+  ) => {
     console.log('JupyterLab extension jupyterlab-a11y-checker is activated!');
 
     const panel = new MainPanelWidget(settingRegistry);

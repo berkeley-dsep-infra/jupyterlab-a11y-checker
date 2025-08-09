@@ -38,7 +38,7 @@ export class TableScopeFixWidget extends ButtonFixWidget {
 
       // Create new table structure
       const newTable = doc.createElement('table');
-      
+
       // Copy all attributes from original table
       Array.from(table.attributes).forEach(attr => {
         newTable.setAttribute(attr.name, attr.value);
@@ -59,7 +59,7 @@ export class TableScopeFixWidget extends ButtonFixWidget {
       if (headerCells.length > 0) {
         const thead = doc.createElement('thead');
         const newHeaderRow = doc.createElement('tr');
-        
+
         headerCells.forEach(cell => {
           // Convert td to th if it's in the header row
           const newCell = doc.createElement('th');
@@ -67,7 +67,7 @@ export class TableScopeFixWidget extends ButtonFixWidget {
           newCell.setAttribute('scope', 'col');
           newHeaderRow.appendChild(newCell);
         });
-        
+
         thead.appendChild(newHeaderRow);
         newTable.appendChild(thead);
       }
@@ -77,7 +77,7 @@ export class TableScopeFixWidget extends ButtonFixWidget {
       rows.slice(1).forEach(row => {
         const newRow = doc.createElement('tr');
         const cells = row.querySelectorAll('td, th');
-        
+
         cells.forEach((cell, index) => {
           const newCell = cell.cloneNode(true) as HTMLTableCellElement;
           if (cell.tagName.toLowerCase() === 'th') {
@@ -85,17 +85,17 @@ export class TableScopeFixWidget extends ButtonFixWidget {
           }
           newRow.appendChild(newCell);
         });
-        
+
         tbody.appendChild(newRow);
       });
-      
+
       newTable.appendChild(tbody);
 
       // Format the table HTML with proper indentation
       const formatTable = (table: HTMLElement): string => {
         const indent = '  '; // 2 spaces for indentation
         let result = '<table';
-        
+
         // Add attributes
         Array.from(table.attributes).forEach(attr => {
           result += ` ${attr.name}="${attr.value}"`;
@@ -148,12 +148,15 @@ export class TableScopeFixWidget extends ButtonFixWidget {
     // Find the table in the cell content
     const tableRegex = /<table[^>]*>[\s\S]*?<\/table>/;
     const match = entireCellContent.match(tableRegex);
-    
+
     if (match) {
-      const newContent = entireCellContent.replace(match[0], processTable(match[0]));
+      const newContent = entireCellContent.replace(
+        match[0],
+        processTable(match[0])
+      );
       this.cell.model.sharedModel.setSource(newContent);
-    } 
-    
+    }
+
     this.removeIssueWidget();
   }
 }

@@ -279,7 +279,9 @@ export class MainPanelWidget extends Widget {
 
   private async loadSettings(settingRegistry: ISettingRegistry): Promise<void> {
     try {
-      const settings = await settingRegistry.load('jupyterlab-a11y-checker:plugin');
+      const settings = await settingRegistry.load(
+        'jupyterlab-a11y-checker:plugin'
+      );
 
       if (settings.get('languageModel').composite) {
         const langModel = settings.get('languageModel').composite as any;

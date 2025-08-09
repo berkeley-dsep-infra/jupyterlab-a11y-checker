@@ -1,5 +1,9 @@
 import { ICellIssue } from '../../utils';
-import { getImageAltSuggestion, getTableCaptionSuggestion, ModelSettings } from '../../utils';
+import {
+  getImageAltSuggestion,
+  getTableCaptionSuggestion,
+  ModelSettings
+} from '../../utils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
@@ -12,7 +16,12 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
     return 'Add or update alt text for the image:';
   }
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, visionSettings: ModelSettings) {
+  constructor(
+    issue: ICellIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean,
+    visionSettings: ModelSettings
+  ) {
     super(issue, cell, aiEnabled);
     this.visionSettings = visionSettings;
   }
@@ -137,7 +146,12 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
     return 'Add or update the caption for the table:';
   }
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, languageSettings: ModelSettings) {
+  constructor(
+    issue: ICellIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean,
+    languageSettings: ModelSettings
+  ) {
     super(issue, cell, aiEnabled);
     this.languageSettings = languageSettings;
   }

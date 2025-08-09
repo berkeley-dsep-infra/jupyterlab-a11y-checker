@@ -1,5 +1,8 @@
 import { ICellIssue } from '../../utils/types';
-import { analyzeHeadingHierarchy, detectHeadingOneIssue } from '../../utils/detection/category/heading';
+import {
+  analyzeHeadingHierarchy,
+  detectHeadingOneIssue
+} from '../../utils/detection/category/heading';
 import { analyzeTableIssues } from '../../utils/detection/category/table';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
@@ -195,7 +198,10 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
                   'markdown',
                   this.notebookPanel.content.widgets
                 );
-                const allHeadingIssues = [...headingHierarchyIssues, ...headingOneIssues];
+                const allHeadingIssues = [
+                  ...headingHierarchyIssues,
+                  ...headingOneIssues
+                ];
 
                 // Find the main panel widget
                 const mainPanel = document

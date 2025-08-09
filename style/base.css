@@ -1,12 +1,12 @@
 /* CSS Variables for Colors */
 :root {
-    /* These will be overridden by JupyterLab theme variables */
-    --primary-blue: #2C5B8E;
-    --primary-blue-hover: #2a4365;
-    --text-light: var(--jp-ui-inverse-font-color1, #ffffff);
-    --border-color: var(--jp-border-color1, #ddd);
-    --error-red: var(--jp-error-color1, #DB3939);
-    --success-green: var(--jp-success-color1, #28A745);
+  /* These will be overridden by JupyterLab theme variables */
+  --primary-blue: #2c5b8e;
+  --primary-blue-hover: #2a4365;
+  --text-light: var(--jp-ui-inverse-font-color1, #ffffff);
+  --border-color: var(--jp-border-color1, #ddd);
+  --error-red: var(--jp-error-color1, #db3939);
+  --success-green: var(--jp-success-color1, #28a745);
 }
 
 /* Import Material Icons */
@@ -16,628 +16,628 @@
    Main Panel Layout
    ========================================================================== */
 .a11y-panel {
-    background-color: var(--jp-layout-color1);
-    height: 100%;
-    overflow-y: auto;
+  background-color: var(--jp-layout-color1);
+  height: 100%;
+  overflow-y: auto;
 }
 
 .a11y-panel .main-container {
-    padding: 0;
+  padding: 0;
 }
 
 /* ==========================================================================
    Notice Section
    ========================================================================== */
 .notice-container {
-    background-color: var(--primary-blue);
-    color: #ffffff;
-    overflow: hidden;
-    padding: 4px 8px;
+  background-color: var(--primary-blue);
+  color: #ffffff;
+  overflow: hidden;
+  padding: 4px 8px;
 }
 
 .notice-container .chevron {
-    color: #ffffff;
+  color: #ffffff;
 }
 
 .notice-header {
-    padding: 6px 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .notice-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
 }
 
 .triangle {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 .notice-delete-button {
-    background: none;
-    border: none;
-    color: #ffffff;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
 }
 
 .notice-content {
-    padding: 8px 20px;
-    color: #ffffff;
+  padding: 8px 20px;
+  color: #ffffff;
 }
 
 .notice-content a {
-    color: #ffffff;
-    text-decoration: underline;
+  color: #ffffff;
+  text-decoration: underline;
 }
 
 /* ==========================================================================
    Main Title
    ========================================================================== */
 .main-title {
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    margin: 24px 4px;
-    color: var(--jp-ui-font-color1);
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin: 24px 4px;
+  color: var(--jp-ui-font-color1);
 }
 
 /* ==========================================================================
    Controls Buttons Section
    ========================================================================== */
 .controls-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 0 16px;
-    margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 24px;
 }
 
 .control-button {
-    background-color: var(--primary-blue);
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    padding: 12px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 60%;
+  background-color: var(--primary-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 60%;
 }
 
 .control-button svg {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    fill: #ffffff;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  fill: #ffffff;
 }
 
 .control-button div {
-    text-align: left;
-    flex: 1;
-    color: #ffffff;
+  text-align: left;
+  flex: 1;
+  color: #ffffff;
 }
 
 .control-button:hover {
-    background-color: var(--primary-blue-hover);
+  background-color: var(--primary-blue-hover);
 }
 
 /* ==========================================================================
    Issue Categories Section
    ========================================================================== */
 .issues-container {
-    padding: 0 16px;
+  padding: 0 16px;
 }
 
 .no-issues {
-    text-align: center;
-    color: var(--jp-ui-font-color2);
-    padding: 24px;
+  text-align: center;
+  color: var(--jp-ui-font-color2);
+  padding: 24px;
 }
 
 .category {
-    margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .category-title {
-    font-size: 20px;
-    margin-bottom: 8px;
-    color: var(--jp-ui-font-color1);
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: var(--jp-ui-font-color1);
 }
 
 .category hr {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 0 0 16px 0;
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 0 0 16px 0;
 }
 
 .issues-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* ==========================================================================
    Issue Widget
    ========================================================================== */
 .issue-widget {
-    margin: 5px 0;
-    margin-left: 12px;
+  margin: 5px 0;
+  margin-left: 12px;
 }
 
 .issue-widget .container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .issue-widget .issue-header-button {
-    background: none;
-    border: none;
-    padding: 0;
-    text-align: left;
-    cursor: pointer;
-    margin-bottom: 8px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 8px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .issue-widget .issue-header {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0;
-    color: var(--jp-ui-font-color1);
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--jp-ui-font-color1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .issue-widget .description {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    color: var(--jp-ui-font-color1);
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: var(--jp-ui-font-color1);
 }
 
 .issue-widget .detailed-description.visible {
-    display: block;
+  display: block;
 }
 
 .issue-widget .detailed-description {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    display: none;
-    color: var(--jp-ui-font-color1);
-    transition: display 0.3s ease;
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  display: none;
+  color: var(--jp-ui-font-color1);
+  transition: display 0.3s ease;
 }
 
 .issue-widget .detailed-description a {
-    color: var(--jp-content-link-color);
-    text-decoration: underline;
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
 }
 
 /* ==========================================================================
    Issue Widget Buttons Section
    ========================================================================== */
 .issue-widget .button-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-bottom: 12px;
-    width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
 }
 
 .issue-widget .button-container .jp-Button2 {
-    flex: 1;
+  flex: 1;
 }
 
 .jp-Button:hover,
 .jp-Button2:hover {
-    background-color: var(--primary-blue-hover);
+  background-color: var(--primary-blue-hover);
 }
 
 /* Button-specific styles */
 .jp-Button {
-    min-width: 140px;
+  min-width: 140px;
 }
 
 .jp-Button2 {
-    background-color: #2c5282;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 7px 15px;
-    cursor: pointer;
-    font-size: 14px;
-    gap: 4px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+  background-color: #2c5282;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  gap: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .apply-button,
 .suggest-button {
-    font-size: 12px;
-    margin-left: auto;
-    display: flex;
-    width: auto !important;
+  font-size: 12px;
+  margin-left: auto;
+  display: flex;
+  width: auto !important;
 }
 
 .apply-button .material-icons,
 .suggest-button .material-icons {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 /* Suggestion Styles */
 .issue-widget .suggestion-container {
-    margin-bottom: 12px;
-    margin-left: 30px;
-    padding: 12px;
-    border-radius: 4px;
-    font-family: monospace;
+  margin-bottom: 12px;
+  margin-left: 30px;
+  padding: 12px;
+  border-radius: 4px;
+  font-family: monospace;
 }
 
 .issue-widget .suggestion {
-    word-wrap: break-word;
-    white-space: pre-wrap;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .issue-widget .textfield-fix-widget {
-    margin-bottom: 12px;
-    padding: 6px;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  margin-bottom: 12px;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .textfield-fix-widget {
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 12px;
-    border: 1px solid var(--jp-border-color1);
-    min-width: 145px;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  border: 1px solid var(--jp-border-color1);
+  min-width: 145px;
 }
 
 .jp-a11y-input {
-    width: calc(100% - 16px);
-    padding: 8px;
-    margin-bottom: 8px;
-    font-family: Inter, sans-serif;
-    border: none;
-    outline: none;
-    background-color: var(--jp-layout-color1);
-    color: var(--jp-ui-font-color1);
+  width: calc(100% - 16px);
+  padding: 8px;
+  margin-bottom: 8px;
+  font-family: Inter, sans-serif;
+  border: none;
+  outline: none;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-a11y-input::placeholder {
-    color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color3);
 }
 
 .textfield-buttons {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .textfield-buttons .jp-Button2 {
-    margin-left: 4px;
+  margin-left: 4px;
 }
 
 /* Collapsible Content */
 .collapsible-content {
-    padding-left: 20px;
-    gap: 4px;
+  padding-left: 20px;
+  gap: 4px;
 }
 
 /* Icon Styles */
 .icon {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
 }
 
 .chevron {
-    transition: transform 0.3s ease;
-    transform-origin: center center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    line-height: 1;
-    color: var(--jp-ui-font-color1);
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  color: var(--jp-ui-font-color1);
 }
 
 .chevron.expanded {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .loading {
-    animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
+  0% {
+    transform: rotate(0deg);
+  }
 
-    100% {
-        transform: rotate(360deg);
-    }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Material Icons Styles */
 .material-icons {
-    font-family: 'Material Icons';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    /* Preferred icon size */
-    display: inline-block;
-    line-height: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    white-space: nowrap;
-    direction: ltr;
-    vertical-align: middle;
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: middle;
 }
 
 /* Icon sizes */
 .material-icons.md-18 {
-    font-size: 18px;
+  font-size: 18px;
 }
 
 .material-icons.md-24 {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 .material-icons.md-36 {
-    font-size: 36px;
+  font-size: 36px;
 }
 
 .material-icons.md-48 {
-    font-size: 48px;
+  font-size: 48px;
 }
 
 /* Icon colors */
 .material-icons.md-dark {
-    color: rgba(0, 0, 0, 0.54);
+  color: rgba(0, 0, 0, 0.54);
 }
 
 .material-icons.md-dark.md-inactive {
-    color: rgba(0, 0, 0, 0.26);
+  color: rgba(0, 0, 0, 0.26);
 }
 
 .material-icons.md-light {
-    color: rgba(255, 255, 255, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .material-icons.md-light.md-inactive {
-    color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 /* Loading animation for Material Icons */
 .material-icons.loading {
-    animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
+  0% {
+    transform: rotate(0deg);
+  }
 
-    100% {
-        transform: rotate(360deg);
-    }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .hidden:not(.dropdown-content) {
-    display: none;
+  display: none;
 }
 
 .table-header-fix-widget {
-    margin-top: 8px;
+  margin-top: 8px;
 }
 
 .table-header-fix-widget .button-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    gap: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .custom-dropdown {
-    position: relative;
-    width: calc(100% - 16px);
-    margin-bottom: 8px;
-    z-index: 9999;
-    isolation: isolate;
+  position: relative;
+  width: calc(100% - 16px);
+  margin-bottom: 8px;
+  z-index: 9999;
+  isolation: isolate;
 }
 
 .dropdown-button {
-    width: 100%;
-    padding: 8px 12px;
-    background-color: var(--jp-layout-color1);
-    color: var(--jp-ui-font-color1);
-    border: 1px solid var(--jp-border-color1);
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: var(--jp-ui-font-family);
-    font-size: 14px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--jp-ui-font-family);
+  font-size: 14px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .dropdown-button:hover,
 .dropdown-button.active {
-    background-color: var(--primary-blue-hover);
-    color: var(--text-light);
+  background-color: var(--primary-blue-hover);
+  color: var(--text-light);
 }
 
 .dropdown-text {
-    flex: 1;
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dropdown-arrow {
-    margin-left: 8px;
-    flex-shrink: 0;
+  margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .dropdown-content {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--jp-layout-color1);
-    border: 1px solid var(--jp-border-color1);
-    border-radius: 4px;
-    margin-top: 4px;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 4px;
+  margin-top: 4px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-content.hidden {
-    display: none;
+  display: none;
 }
 
 .dropdown-option {
-    padding: 8px 12px;
-    cursor: pointer;
-    color: var(--jp-ui-font-color1);
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--jp-ui-font-color1);
 }
 
 .dropdown-option:hover {
-    background-color: var(--primary-blue-hover);
-    color: #ffffff;
+  background-color: var(--primary-blue-hover);
+  color: #ffffff;
 }
 
 /* ==========================================================================
    Material Icons
    ========================================================================== */
 .material-icons {
-    font-family: 'Material Icons';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    display: inline-block;
-    line-height: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    white-space: nowrap;
-    direction: ltr;
-    vertical-align: middle;
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: middle;
 }
 
 /* Icon sizes */
 .material-icons.md-18 {
-    font-size: 18px;
+  font-size: 18px;
 }
 
 .material-icons.md-24 {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 .material-icons.md-36 {
-    font-size: 36px;
+  font-size: 36px;
 }
 
 .material-icons.md-48 {
-    font-size: 48px;
+  font-size: 48px;
 }
 
 /* Icon colors */
 .material-icons.md-dark {
-    color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .material-icons.md-dark.md-inactive {
-    color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color3);
 }
 
 .material-icons.md-light {
-    color: var(--jp-ui-inverse-font-color1);
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .material-icons.md-light.md-inactive {
-    color: var(--jp-ui-inverse-font-color3);
+  color: var(--jp-ui-inverse-font-color3);
 }
 
 /* ==========================================================================
    Animations
    ========================================================================== */
 .loading {
-    animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
+  0% {
+    transform: rotate(0deg);
+  }
 
-    100% {
-        transform: rotate(360deg);
-    }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* ==========================================================================
    Utility Classes
    ========================================================================== */
 .hidden:not(.dropdown-content) {
-    display: none;
+  display: none;
 }
 
 /* ==========================================================================
    Fix Widgets
    ========================================================================== */
 .table-header-fix-widget {
-    margin-top: 8px;
+  margin-top: 8px;
 }
 
 .table-header-fix-widget .button-container {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .fix-description {
-    margin-bottom: 8px;
-    line-height: 1.4;
-    color: var(--jp-ui-font-color1);
+  margin-bottom: 8px;
+  line-height: 1.4;
+  color: var(--jp-ui-font-color1);
 }
 
 .dropdown-fix-widget .fix-description {
-    margin-bottom: 12px;
+  margin-bottom: 12px;
 }
 
 .loading-overlay {
-    position: absolute;
-    left: 8px;
-    top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .loading-overlay .material-icons.loading {
-    animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }

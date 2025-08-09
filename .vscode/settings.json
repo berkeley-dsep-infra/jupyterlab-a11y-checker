@@ -14,5 +14,7 @@
       "mode": "auto"
     }
   ],
-  "eslint.format.enable": true
+  "eslint.format.enable": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": false
 }

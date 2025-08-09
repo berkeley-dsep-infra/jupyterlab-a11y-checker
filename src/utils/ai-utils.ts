@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ICellIssue } from './types';
 
-export interface ModelSettings {
+export interface IModelSettings {
   baseUrl: string;
   apiKey: string;
   model: string;
@@ -62,7 +62,7 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
 export async function getImageAltSuggestion(
   issue: ICellIssue,
   imageData: string,
-  visionSettings: ModelSettings
+  visionSettings: IModelSettings
 ): Promise<string> {
   let prompt =
     'Read the provided image and respond with a short description of the image, without any explanation. Avoid using the word "image" in the description.';
@@ -132,7 +132,7 @@ export async function getImageAltSuggestion(
 
 export async function getTableCaptionSuggestion(
   issue: ICellIssue,
-  languageSettings: ModelSettings
+  languageSettings: IModelSettings
 ): Promise<string> {
   const prompt = `Given this HTML table, please respond with a short description of the table, without any explanation. Here's the table:
     ${issue.issueContentRaw}`;

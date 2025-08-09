@@ -1,16 +1,15 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
 /* CSS Variables for Colors */
 :root {
   /* These will be overridden by JupyterLab theme variables */
   --primary-blue: #2c5b8e;
   --primary-blue-hover: #2a4365;
-  --text-light: var(--jp-ui-inverse-font-color1, #ffffff);
+  --text-light: var(--jp-ui-inverse-font-color1, #fff);
   --border-color: var(--jp-border-color1, #ddd);
   --error-red: var(--jp-error-color1, #db3939);
   --success-green: var(--jp-success-color1, #28a745);
 }
-
-/* Import Material Icons */
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 /* ==========================================================================
    Main Panel Layout
@@ -30,13 +29,26 @@
    ========================================================================== */
 .notice-container {
   background-color: var(--primary-blue);
-  color: #ffffff;
+  color: #fff;
   overflow: hidden;
   padding: 4px 8px;
 }
 
+/* Chevron base styles should appear before context-specific overrides */
+.chevron {
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  color: var(--jp-ui-font-color1);
+}
+
 .notice-container .chevron {
-  color: #ffffff;
+  color: #fff;
 }
 
 .notice-header {
@@ -50,7 +62,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ffffff;
+  color: #fff;
 }
 
 .triangle {
@@ -60,7 +72,7 @@
 .notice-delete-button {
   background: none;
   border: none;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   font-size: 16px;
   padding: 4px;
@@ -68,11 +80,11 @@
 
 .notice-content {
   padding: 8px 20px;
-  color: #ffffff;
+  color: #fff;
 }
 
 .notice-content a {
-  color: #ffffff;
+  color: #fff;
   text-decoration: underline;
 }
 
@@ -101,7 +113,7 @@
 
 .control-button {
   background-color: var(--primary-blue);
-  color: #ffffff;
+  color: #fff;
   border: none;
   border-radius: 4px;
   padding: 12px;
@@ -118,13 +130,13 @@
   flex-shrink: 0;
   width: 24px;
   height: 24px;
-  fill: #ffffff;
+  fill: #fff;
 }
 
 .control-button div {
   text-align: left;
   flex: 1;
-  color: #ffffff;
+  color: #fff;
 }
 
 .control-button:hover {
@@ -157,7 +169,7 @@
 .category hr {
   border: none;
   border-top: 1px solid var(--border-color);
-  margin: 0 0 16px 0;
+  margin: 0 0 16px;
 }
 
 .issues-list {
@@ -203,7 +215,7 @@
 }
 
 .issue-widget .description {
-  margin: 0 0 12px 0;
+  margin: 0 0 12px;
   font-size: 14px;
   color: var(--jp-ui-font-color1);
 }
@@ -213,7 +225,7 @@
 }
 
 .issue-widget .detailed-description {
-  margin: 0 0 12px 0;
+  margin: 0 0 12px;
   font-size: 14px;
   display: none;
   color: var(--jp-ui-font-color1);
@@ -228,25 +240,6 @@
 /* ==========================================================================
    Issue Widget Buttons Section
    ========================================================================== */
-.issue-widget .button-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.issue-widget .button-container .jp-Button2 {
-  flex: 1;
-}
-
-.jp-Button:hover,
-.jp-Button2:hover {
-  background-color: var(--primary-blue-hover);
-}
-
-/* Button-specific styles */
 .jp-Button {
   min-width: 140px;
 }
@@ -265,17 +258,35 @@
   align-items: center;
 }
 
+.jp-Button:hover,
+.jp-Button2:hover {
+  background-color: var(--primary-blue-hover);
+}
+
+.textfield-buttons .jp-Button2 {
+  margin-left: 4px;
+}
+
+/* Containers and specific layout */
+.issue-widget .button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.issue-widget .button-container .jp-Button2 {
+  flex: 1;
+}
+
 .apply-button,
 .suggest-button {
   font-size: 12px;
   margin-left: auto;
   display: flex;
   width: auto !important;
-}
-
-.apply-button .material-icons,
-.suggest-button .material-icons {
-  font-size: 12px;
 }
 
 /* Suggestion Styles */
@@ -292,6 +303,14 @@
   white-space: pre-wrap;
 }
 
+.textfield-fix-widget {
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  border: 1px solid var(--jp-border-color1);
+  min-width: 145px;
+}
+
 .issue-widget .textfield-fix-widget {
   margin-bottom: 12px;
   padding: 6px;
@@ -299,14 +318,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.textfield-fix-widget {
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-  border: 1px solid var(--jp-border-color1);
-  min-width: 145px;
 }
 
 .jp-a11y-input {
@@ -331,10 +342,6 @@
   width: 100%;
 }
 
-.textfield-buttons .jp-Button2 {
-  margin-left: 4px;
-}
-
 /* Collapsible Content */
 .collapsible-content {
   padding-left: 20px;
@@ -345,19 +352,7 @@
 .icon {
   width: 18px;
   height: 18px;
-  fill: currentColor;
-}
-
-.chevron {
-  transition: transform 0.3s ease;
-  transform-origin: center center;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  line-height: 1;
-  color: var(--jp-ui-font-color1);
+  fill: currentcolor;
 }
 
 .chevron.expanded {
@@ -378,12 +373,18 @@
   }
 }
 
-/* Material Icons Styles */
+/* ==========================================================================
+   Material Icons
+   ========================================================================== */
+
+/* If your tooling supports CSS nesting (or you’re using a preprocessor) */
+
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: 'Material Icons', sans-serif;
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
+
   /* Preferred icon size */
   display: inline-block;
   line-height: 1;
@@ -393,70 +394,42 @@
   white-space: nowrap;
   direction: ltr;
   vertical-align: middle;
-}
 
-/* Icon sizes */
-.material-icons.md-18 {
-  font-size: 18px;
-}
-
-.material-icons.md-24 {
-  font-size: 24px;
-}
-
-.material-icons.md-36 {
-  font-size: 36px;
-}
-
-.material-icons.md-48 {
-  font-size: 48px;
-}
-
-/* Icon colors */
-.material-icons.md-dark {
-  color: rgba(0, 0, 0, 0.54);
-}
-
-.material-icons.md-dark.md-inactive {
-  color: rgba(0, 0, 0, 0.26);
-}
-
-.material-icons.md-light {
-  color: rgba(255, 255, 255, 1);
-}
-
-.material-icons.md-light.md-inactive {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-/* Loading animation for Material Icons */
-.material-icons.loading {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+  &.md-18 {
+    font-size: 18px;
   }
 
-  100% {
-    transform: rotate(360deg);
+  &.md-24 {
+    font-size: 24px;
   }
-}
 
-.hidden:not(.dropdown-content) {
-  display: none;
-}
+  &.md-36 {
+    font-size: 36px;
+  }
 
-.table-header-fix-widget {
-  margin-top: 8px;
-}
+  &.md-48 {
+    font-size: 48px;
+  }
 
-.table-header-fix-widget .button-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  gap: 8px;
+  &.md-dark {
+    color: var(--jp-ui-font-color1);
+  }
+
+  &.md-dark.md-inactive {
+    color: var(--jp-ui-font-color3);
+  }
+
+  &.md-light {
+    color: var(--jp-ui-inverse-font-color1);
+  }
+
+  &.md-light.md-inactive {
+    color: var(--jp-ui-inverse-font-color3);
+  }
+
+  &.loading {
+    animation: spin 1s linear infinite;
+  }
 }
 
 .custom-dropdown {
@@ -512,7 +485,7 @@
   border-radius: 4px;
   margin-top: 4px;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
 }
 
 .dropdown-content.hidden {
@@ -527,67 +500,12 @@
 
 .dropdown-option:hover {
   background-color: var(--primary-blue-hover);
-  color: #ffffff;
-}
-
-/* ==========================================================================
-   Material Icons
-   ========================================================================== */
-.material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  vertical-align: middle;
-}
-
-/* Icon sizes */
-.material-icons.md-18 {
-  font-size: 18px;
-}
-
-.material-icons.md-24 {
-  font-size: 24px;
-}
-
-.material-icons.md-36 {
-  font-size: 36px;
-}
-
-.material-icons.md-48 {
-  font-size: 48px;
-}
-
-/* Icon colors */
-.material-icons.md-dark {
-  color: var(--jp-ui-font-color1);
-}
-
-.material-icons.md-dark.md-inactive {
-  color: var(--jp-ui-font-color3);
-}
-
-.material-icons.md-light {
-  color: var(--jp-ui-inverse-font-color1);
-}
-
-.material-icons.md-light.md-inactive {
-  color: var(--jp-ui-inverse-font-color3);
+  color: #fff;
 }
 
 /* ==========================================================================
    Animations
    ========================================================================== */
-.loading {
-  animation: spin 1s linear infinite;
-}
 
 @keyframes spin {
   0% {
@@ -615,6 +533,7 @@
 
 .table-header-fix-widget .button-container {
   display: flex;
+  flex-direction: row;
   justify-content: flex-end;
   gap: 8px;
 }

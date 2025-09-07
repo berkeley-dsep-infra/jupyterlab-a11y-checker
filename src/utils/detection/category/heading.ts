@@ -109,6 +109,8 @@ export async function analyzeHeadingHierarchy(
 
       // Find all headings in the cell
       const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      console.log('Headings: ', headings);
+      console.log('\n\n');
 
       headings.forEach(heading => {
         const level = parseInt(heading.tagName[1]);

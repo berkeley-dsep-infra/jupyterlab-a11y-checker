@@ -66,6 +66,7 @@
         "@jupyterlab/builder": "^4.4.5",
         "@types/json-schema": "^7.0.11",
         "@types/marked": "^5.0.2",
+        "@types/node": "18",
         "@types/react": "^18.0.26",
         "@types/react-addons-linked-state-mixin": "^0.14.22",
         "@typescript-eslint/eslint-plugin": "^6.1.0",
@@ -84,7 +85,7 @@
         "stylelint-config-standard": "^34.0.0",
         "stylelint-csstree-validator": "^3.0.0",
         "stylelint-prettier": "^4.0.0",
-        "typescript": "~5.0.2",
+        "typescript": "4.9",
         "yjs": "^13.5.0"
     },
     "sideEffects": [
@@ -190,6 +191,5 @@
             "selector-no-vendor-prefix": null,
             "value-no-vendor-prefix": null
         }
-    },
-    "packageManager": "yarn@4.7.0"
+    }
 }

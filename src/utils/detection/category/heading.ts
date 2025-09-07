@@ -109,12 +109,13 @@ export async function analyzeHeadingHierarchy(
 
       // Find all headings in the cell
       const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      console.log('Headings: ', headings);
-      console.log('\n\n');
 
       headings.forEach(heading => {
         const level = parseInt(heading.tagName[1]);
         const text = heading.textContent || '';
+
+        // Bug Check: Is the rendered h1 really h1? (Markdown Setext-heading) -> Can be improved.
+        if (heading.tagName === 'H1' && ((heading.textContent || '').match(/(?<!\\)\$\$/g) || []).length === 1) return;
 
         headingStructure.push({
           cellIndex: i,

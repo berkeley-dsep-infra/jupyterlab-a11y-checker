@@ -6,7 +6,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CellIssueWidget } from './issueWidget';
 
 import { ICellIssue } from '../utils/types';
-import { ModelSettings } from '../utils/ai-utils';
+import { IModelSettings } from '../utils/ai-utils';
 import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
 import { analyzeCellsAccessibility } from '../utils/detection/base';
@@ -15,8 +15,8 @@ import { analyzeTableIssues } from '../utils/detection/category/table';
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;
   private currentNotebook: NotebookPanel | null = null;
-  private languageModelSettings: ModelSettings;
-  private visionModelSettings: ModelSettings;
+  private languageModelSettings: IModelSettings;
+  private visionModelSettings: IModelSettings;
 
   constructor(settingRegistry?: ISettingRegistry) {
     super();
@@ -305,11 +305,11 @@ export class MainPanelWidget extends Widget {
     }
   }
 
-  getLanguageModelSettings(): ModelSettings {
+  getLanguageModelSettings(): IModelSettings {
     return this.languageModelSettings;
   }
 
-  getVisionModelSettings(): ModelSettings {
+  getVisionModelSettings(): IModelSettings {
     return this.visionModelSettings;
   }
 

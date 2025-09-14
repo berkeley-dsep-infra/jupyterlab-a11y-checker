@@ -9,7 +9,7 @@ node_modules/
 *.tsbuildinfo
 a11y_checker/
 jupyterlab_a11y_checker/labextension
-test_notebooks/
+test_notebooks/*
 # Version file is handled by hatchling
 jupyterlab_a11y_checker/_version.py
 

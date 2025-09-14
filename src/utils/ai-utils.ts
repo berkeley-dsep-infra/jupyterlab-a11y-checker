@@ -134,7 +134,7 @@ export async function getTableCaptionSuggestion(
   issue: ICellIssue,
   languageSettings: IModelSettings
 ): Promise<string> {
-  const prompt = `Given this HTML table, please respond with a short description of the table, without any explanation. Here's the table:
+  const prompt = `Given this HTML table, please provide a caption for the table to be served as a title or heading for the table. Avoid using the word "table" in the caption. Here's the table:
     ${issue.issueContentRaw}`;
 
   // New River implementation - using OpenAI Chat Completions API format

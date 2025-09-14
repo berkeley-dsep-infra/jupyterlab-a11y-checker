@@ -115,7 +115,12 @@ export async function analyzeHeadingHierarchy(
         const text = heading.textContent || '';
 
         // Bug Check: Is the rendered h1 really h1? (Markdown Setext-heading) -> Can be improved.
-        if (heading.tagName === 'H1' && ((heading.textContent || '').match(/(?<!\\)\$\$/g) || []).length === 1) return;
+        if (
+          heading.tagName === 'H1' &&
+          ((heading.textContent || '').match(/(?<!\\)\$\$/g) || []).length === 1
+        ) {
+          return;
+        }
 
         headingStructure.push({
           cellIndex: i,

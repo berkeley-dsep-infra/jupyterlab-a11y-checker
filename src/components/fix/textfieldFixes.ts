@@ -48,7 +48,7 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
       else {
         return entireCellContent.replace(
           target,
-          target.replace(/>$/, ` alt="${providedAltText}">`)
+          target.replace(/\s*\/?>(?=$)/, ` alt="${providedAltText}"$&`)
         );
       }
     };

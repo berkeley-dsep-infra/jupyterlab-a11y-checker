@@ -111,3 +111,58 @@ export async function analyzeCellsAccessibility(
 
   return notebookIssues;
 }
+
+// Analyze a single cell (content-based categories only). Headings are excluded
+// because heading structure depends on the entire notebook.
+export async function analyzeCellIssues(
+  panel: NotebookPanel,
+  cellIndex: number
+): Promise<ICellIssue[]> {
+  const issues: ICellIssue[] = [];
+  const cells = panel.content.widgets;
+  const cell = cells[cellIndex];
+  if (!cell || !cell.model) {
+    return issues;
+  }
+
+  const cellType = cell.model.type;
+  if (cellType !== 'markdown') {
+    return issues;
+  }
+
+  const rawMarkdown = cell.model.sharedModel.getSource();
+  if (!rawMarkdown.trim()) {
+    return issues;
+  }
+
+  const folderPath = panel.context.path.substring(
+    0,
+    panel.context.path.lastIndexOf('/')
+  );
+
+  // Images
+  issues.push(
+    ...(await detectImageIssuesInCell(
+      rawMarkdown,
+      cellIndex,
+      cellType,
+      folderPath
+    ))
+  );
+
+  // Tables
+  issues.push(...detectTableIssuesInCell(rawMarkdown, cellIndex, cellType));
+
+  // Color
+  issues.push(
+    ...(await detectColorIssuesInCell(
+      rawMarkdown,
+      cellIndex,
+      cellType,
+      folderPath,
+      panel
+    ))
+  );
+
+  return issues;
+}

@@ -366,6 +366,10 @@ export async function detectColorIssuesInCell(
               violationId: 'color-insufficient-cc-large',
               customDescription: `Ensure that a text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
               issueContentRaw: match[0],
+              metadata: {
+                offsetStart: match.index ?? 0,
+                offsetEnd: (match.index ?? 0) + match[0].length
+              },
               suggestedFix: suggestedFix
             });
           } else {
@@ -375,6 +379,10 @@ export async function detectColorIssuesInCell(
               violationId: 'color-insufficient-cc-normal',
               customDescription: `Ensure that a large text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? '3:1' : '4.5:1'} ratio for ${hasLargeText ? 'large' : 'normal'} text.`,
               issueContentRaw: match[0],
+              metadata: {
+                offsetStart: match.index ?? 0,
+                offsetEnd: (match.index ?? 0) + match[0].length
+              },
               suggestedFix: suggestedFix
             });
           }

@@ -1,6 +1,7 @@
 // In src/components/fix/buttonFixes.ts
 
 import { ButtonFixWidget } from './base';
+import { getIssueOffsets, replaceSlice } from '../../utils';
 
 export class TableScopeFixWidget extends ButtonFixWidget {
   protected getDescription(): string {
@@ -11,9 +12,8 @@ export class TableScopeFixWidget extends ButtonFixWidget {
     return 'Apply Scope Fixes';
   }
 
-  protected applyFix(): void {
+  protected async applyFix(): Promise<void> {
     const entireCellContent = this.cell.model.sharedModel.getSource();
-    //const target = this.issue.issueContentRaw;
 
     //console.log('Processing table for scope fix:', target);
 
@@ -145,17 +145,33 @@ export class TableScopeFixWidget extends ButtonFixWidget {
       return result;
     };
 
-    // Find the table in the cell content
-    const tableRegex = /<table[^>]*>[\s\S]*?<\/table>/;
-    const match = entireCellContent.match(tableRegex);
-
-    if (match) {
-      const newContent = entireCellContent.replace(
-        match[0],
-        processTable(match[0])
+    // Prefer precise slice replacement using detector-provided offsets
+    const offsets = getIssueOffsets(this.issue, entireCellContent.length);
+    if (offsets) {
+      const { offsetStart, offsetEnd } = offsets;
+      const originalSlice = entireCellContent.slice(offsetStart, offsetEnd);
+      const replacedSlice = processTable(originalSlice);
+      const newContent = replaceSlice(
+        entireCellContent,
+        offsetStart,
+        offsetEnd,
+        replacedSlice
       );
       this.cell.model.sharedModel.setSource(newContent);
+    } else {
+      // Fallback: find and replace first table occurrence
+      const tableRegex = /<table[^>]*>[\s\S]*?<\/table>/;
+      const match = entireCellContent.match(tableRegex);
+      if (match) {
+        const newContent = entireCellContent.replace(
+          match[0],
+          processTable(match[0])
+        );
+        this.cell.model.sharedModel.setSource(newContent);
+      }
     }
+
+    await this.reanalyzeCellAndDispatch();
 
     this.removeIssueWidget();
   }

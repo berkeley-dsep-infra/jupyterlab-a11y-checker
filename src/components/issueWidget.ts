@@ -42,6 +42,9 @@ export class CellIssueWidget extends Widget {
     }
 
     this.addClass('issue-widget');
+    // Tag widget with identifiers so the panel can selectively update
+    this.node.setAttribute('data-cell-index', String(issue.cellIndex));
+    this.node.setAttribute('data-violation-id', issue.violationId);
     this.node.innerHTML = `
       <button class="issue-header-button">
           <h3 class="issue-header"> ${issueInformation?.title || issue.violationId}</h3>

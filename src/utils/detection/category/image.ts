@@ -60,12 +60,19 @@ export async function detectImageIssuesInCell(
         console.error(`Failed to process image ${imageUrl}:`, error);
       } finally {
         const issueId = 'image-missing-alt';
+        const start = match.index ?? 0;
+        const end = start + match[0].length;
         notebookIssues.push({
           cellIndex,
           cellType: cellType as 'code' | 'markdown',
           violationId: issueId,
           issueContentRaw: match[0],
-          suggestedFix: suggestedFix
+          suggestedFix: suggestedFix,
+          metadata: {
+            issueId: `cell-${cellIndex}-${issueId}-o${start}-${end}`,
+            offsetStart: start,
+            offsetEnd: end
+          }
         });
       }
     }

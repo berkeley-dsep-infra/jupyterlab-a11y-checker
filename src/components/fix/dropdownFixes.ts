@@ -1,12 +1,12 @@
 import { ICellIssue } from '../../utils/types';
-import {
-  analyzeHeadingHierarchy,
-  detectHeadingOneIssue
-} from '../../utils/detection/category/heading';
+import { getIssueOffsets, replaceSlice } from '../../utils';
+// Keep imports minimal; reanalysis now handled by base class helpers
 import { analyzeTableIssues } from '../../utils/detection/category/table';
-import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
+import { Cell, ICellModel } from '@jupyterlab/cells';
+// import { NotebookPanel } from '@jupyterlab/notebook';
 import { DropdownFixWidget } from './base';
+import { analyzeHeadingHierarchy, detectHeadingOneIssue } from '../../utils/detection/category/heading';
 export class TableHeaderFixWidget extends DropdownFixWidget {
   protected getDescription(): string {
     return 'Choose which row or column should be used as the header:';
@@ -116,7 +116,10 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
       return table.outerHTML;
     };
 
-    const newContent = entireCellContent.replace(target, processTable(target));
+    const newContent = entireCellContent.replace(
+      target,
+      processTable(target)
+    );
     this.cell.model.sharedModel.setSource(newContent);
     this.removeIssueWidget();
 
@@ -160,13 +163,14 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
   private _currentLevel: number = 1; // Initialize with default value
   private previousLevel: number | undefined;
   protected selectedLevel: number | undefined;
-  private notebookPanel: NotebookPanel;
+  // private notebookPanel: NotebookPanel;
 
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
 
     // Get reference to notebook panel
-    this.notebookPanel = cell.parent?.parent as NotebookPanel;
+    // Keep reference in case other methods require it; not used in reanalysis anymore
+    // this.notebookPanel = cell.parent?.parent as NotebookPanel;
 
     // Parse and set the current level immediately
     this._currentLevel = HeadingOrderFixWidget.parseHeadingLevel(
@@ -182,47 +186,7 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
         console.log('Apply button clicked');
         if (this.selectedLevel) {
           this.applyDropdownSelection(`h${this.selectedLevel}`);
-
-          // Wait a short delay for the cell to update
-          // Allow UI to update before reanalyzing
-          setTimeout(async () => {
-            if (this.notebookPanel) {
-              try {
-                // Run both heading checks
-                const headingHierarchyIssues = await analyzeHeadingHierarchy(
-                  this.notebookPanel
-                );
-                const headingOneIssues = await detectHeadingOneIssue(
-                  '',
-                  0,
-                  'markdown',
-                  this.notebookPanel.content.widgets
-                );
-                const allHeadingIssues = [
-                  ...headingHierarchyIssues,
-                  ...headingOneIssues
-                ];
-
-                // Find the main panel widget
-                const mainPanel = document
-                  .querySelector('.a11y-panel')
-                  ?.closest('.lm-Widget');
-                if (mainPanel) {
-                  // Dispatch a custom event with all heading issues
-                  const event = new CustomEvent('notebookReanalyzed', {
-                    detail: {
-                      issues: allHeadingIssues,
-                      isHeadingUpdate: true
-                    },
-                    bubbles: true
-                  });
-                  mainPanel.dispatchEvent(event);
-                }
-              } catch (error) {
-                console.error('Error reanalyzing notebook:', error);
-              }
-            }
-          }, 100); // Small delay to ensure cell content is updated
+          await this.reanalyzeNotebookAndDispatch();
         }
       });
     }
@@ -269,31 +233,47 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     const target = this.issue.issueContentRaw;
     let newContent = entireCellContent;
 
-    // Check if the content is in Markdown format (starts with #)
-    if (entireCellContent.trim().startsWith('#')) {
-      console.log('Processing Markdown heading');
-      const currentLevelMatch = entireCellContent.match(/^(#+)\s/);
-      if (currentLevelMatch) {
-        const currentMarkers = currentLevelMatch[1];
-        newContent = entireCellContent.replace(
-          new RegExp(`^${currentMarkers}\\s(.+)$`, 'm'),
-          `${'#'.repeat(this.selectedLevel)} $1`
-        );
-        console.log('New content:', newContent);
-      }
-    }
-    // Handle HTML headings
-    else if (target.match(/<h\d[^>]*>/)) {
-      console.log('Processing HTML heading');
-      console.log('Target content:', target);
-      console.log('Entire cell content:', entireCellContent);
+    const offsets = getIssueOffsets(this.issue, entireCellContent.length);
+    if (offsets) {
+      const { offsetStart, offsetEnd } = offsets;
+      const originalSlice = entireCellContent.slice(offsetStart, offsetEnd);
 
-      // Replace the heading in the entire cell content
-      newContent = entireCellContent.replace(
-        target,
-        `<h${this.selectedLevel}>${target.match(/<h\d[^>]*>(.*?)<\/h\d>/)?.[1] || ''}</h${this.selectedLevel}>`
+      let replacedSlice = originalSlice;
+      // Markdown heading: starts with hashes (allow missing or multiple spaces)
+      const mdMatch = originalSlice.match(/^(#{1,6})[ \t]*(.*)$/m);
+      if (mdMatch) {
+        const headingText = (mdMatch[2] || '').trim();
+        const trailingNewline = originalSlice.endsWith('\n') ? '\n' : '';
+        replacedSlice = `${'#'.repeat(this.selectedLevel)} ${headingText}${trailingNewline}`;
+      } else {
+        // HTML heading
+        const inner = originalSlice.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/i)?.[1] || '';
+        replacedSlice = `<h${this.selectedLevel}>${inner}</h${this.selectedLevel}>`;
+      }
+
+      newContent = replaceSlice(
+        entireCellContent,
+        offsetStart,
+        offsetEnd,
+        replacedSlice
       );
-      console.log('New content:', newContent);
+    } else {
+      // Fallback: use previous behavior on entire cell
+      if (entireCellContent.trim().startsWith('#')) {
+        const currentLevelMatch = entireCellContent.match(/^(#+)[ \t]*/);
+        if (currentLevelMatch) {
+          const currentMarkers = currentLevelMatch[1];
+          newContent = entireCellContent.replace(
+            new RegExp(`^${currentMarkers}[ \\t]*(.*)$`, 'm'),
+            `${'#'.repeat(this.selectedLevel)} $1`
+          );
+        }
+      } else if (target.match(/<h\d[^>]*>/)) {
+        newContent = entireCellContent.replace(
+          target,
+          `<h${this.selectedLevel}>${target.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/)?.[1] || ''}</h${this.selectedLevel}>`
+        );
+      }
     }
 
     if (newContent !== entireCellContent) {
@@ -450,5 +430,41 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     }
 
     return validLevels;
+  }
+
+  // Override notebook reanalysis to run heading-wide checks
+  protected async reanalyzeNotebookAndDispatch(): Promise<void> {
+    const notebookPanel = this.cell.parent?.parent as NotebookPanel;
+    if (!notebookPanel) {
+      return;
+    }
+    setTimeout(async () => {
+      const headingHierarchyIssues = await analyzeHeadingHierarchy(
+        notebookPanel
+      );
+      const headingOneIssues = await detectHeadingOneIssue(
+        '',
+        0,
+        'markdown',
+        notebookPanel.content.widgets
+      );
+      const allHeadingIssues = [
+        ...headingHierarchyIssues,
+        ...headingOneIssues
+      ];
+      const mainPanel = document
+        .querySelector('.a11y-panel')
+        ?.closest('.lm-Widget');
+      if (mainPanel) {
+        const event = new CustomEvent('notebookReanalyzed', {
+          detail: {
+            issues: allHeadingIssues,
+            isHeadingUpdate: true
+          },
+          bubbles: true
+        });
+        mainPanel.dispatchEvent(event);
+      }
+    }, 100);
   }
 }

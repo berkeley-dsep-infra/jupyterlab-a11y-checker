@@ -39,29 +39,37 @@ export async function detectImageIssuesInCell(
   // Check for images without alt tag or empty alt tag in HTML syntax
   const htmlSyntaxMissingAltRegex = /<img[^>]*alt=["']\s*["'][^>]*\/?>/g;
   const htmlSyntaxNoAltRegex = /<img(?![^>]*alt=)[^>]*\/?>/g;
-  let match;
-  while (
-    (match = mdSyntaxMissingAltRegex.exec(rawMarkdown)) !== null ||
-    (match = htmlSyntaxMissingAltRegex.exec(rawMarkdown)) !== null ||
-    (match = htmlSyntaxNoAltRegex.exec(rawMarkdown)) !== null
-  ) {
-    const imageUrl =
-      match[0].match(/\(([^)]+)\)/)?.[1] ||
-      match[0].match(/src=["']([^"']+)["']/)?.[1];
-    if (imageUrl) {
+  // Iterate a list of regexes; each scans independently over the cell content
+  const regexes = [
+    mdSyntaxMissingAltRegex,
+    htmlSyntaxMissingAltRegex,
+    htmlSyntaxNoAltRegex
+  ];
+
+  for (const regex of regexes) {
+    regex.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(rawMarkdown)) !== null) {
+      const imageUrl =
+        match[0].match(/\(([^)]+)\)/)?.[1] ||
+        match[0].match(/src=["']([^"']+)["']/)?.[1];
+      if (!imageUrl) {
+        continue;
+      }
+
+      const issueId = 'image-missing-alt';
+      const start = match.index ?? 0;
+      const end = start + match[0].length;
+
       let suggestedFix: string = '';
       try {
         const ocrResult = await getTextInImage(imageUrl, notebookPath);
         if (ocrResult.confidence > 40) {
           suggestedFix = ocrResult.text;
         }
-        console.log(ocrResult);
       } catch (error) {
         console.error(`Failed to process image ${imageUrl}:`, error);
       } finally {
-        const issueId = 'image-missing-alt';
-        const start = match.index ?? 0;
-        const end = start + match[0].length;
         notebookIssues.push({
           cellIndex,
           cellType: cellType as 'code' | 'markdown',

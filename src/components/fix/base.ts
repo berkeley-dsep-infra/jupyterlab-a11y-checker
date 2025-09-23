@@ -62,7 +62,7 @@ abstract class FixWidget extends Widget {
         composed: true
       } as any);
       // Dispatch from this widget's node so it bubbles up to the main panel
-      this.node.dispatchEvent(event);
+      //this.node.dispatchEvent(event);
       // Also dispatch directly on the main panel root for robustness
       const mainPanelEl = document.getElementById('a11y-sidebar');
       if (mainPanelEl) {

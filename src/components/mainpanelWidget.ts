@@ -337,7 +337,7 @@ export class MainPanelWidget extends Widget {
       }
     };
     this.node.addEventListener('notebookReanalyzed', handler as EventListener);
-    document.addEventListener('notebookReanalyzed', handler as EventListener);
+    //document.addEventListener('notebookReanalyzed', handler as EventListener);
   }
 
   private async loadSettings(settingRegistry: ISettingRegistry): Promise<void> {

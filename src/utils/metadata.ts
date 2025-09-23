@@ -18,6 +18,8 @@ export const issueToCategory = new Map<string, string>([
   ['heading-missing-h1', 'Headings'],
   ['heading-multiple-h1', 'Headings'],
   ['heading-duplicate', 'Headings'],
+  ['heading-duplicate-h2', 'Headings'],
+  ['heading-duplicate-h1-h2', 'Headings'],
   ['heading-wrong-order', 'Headings'],
   ['heading-empty', 'Headings'],
 

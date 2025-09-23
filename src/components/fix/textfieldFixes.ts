@@ -37,8 +37,8 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
 
     // Try to parse deterministic offsets from metadata.issueId (format: cell-{idx}-image-missing-alt-o{start}-{end})
     const offsets = getIssueOffsets(this.issue, entireCellContent.length);
-    let offsetStart: number | null = offsets?.offsetStart ?? null;
-    let offsetEnd: number | null = offsets?.offsetEnd ?? null;
+    const offsetStart: number | null = offsets?.offsetStart ?? null;
+    const offsetEnd: number | null = offsets?.offsetEnd ?? null;
 
     // Offsets are already validated in getIssueOffsets
 

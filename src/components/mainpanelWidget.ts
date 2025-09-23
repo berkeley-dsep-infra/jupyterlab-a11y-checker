@@ -280,7 +280,8 @@ export class MainPanelWidget extends Widget {
         const incomingIssues = newIssues as ICellIssue[];
         const issuesByCategory = new Map<string, ICellIssue[]>();
         incomingIssues.forEach(issue => {
-          const categoryName = issueToCategory.get(issue.violationId) || 'Other';
+          const categoryName =
+            issueToCategory.get(issue.violationId) || 'Other';
           if (!issuesByCategory.has(categoryName)) {
             issuesByCategory.set(categoryName, []);
           }

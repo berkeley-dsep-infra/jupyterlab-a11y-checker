@@ -47,7 +47,8 @@ abstract class FixWidget extends Widget {
       return;
     }
     // Find cell index within the notebook (TODO: Include cellIndex at the first place)
-    const cellIndex = (this.cell as any).parent?.widgets.indexOf(this.cell) ?? -1;
+    const cellIndex =
+      (this.cell as any).parent?.widgets.indexOf(this.cell) ?? -1;
     if (cellIndex < 0) {
       return;
     }

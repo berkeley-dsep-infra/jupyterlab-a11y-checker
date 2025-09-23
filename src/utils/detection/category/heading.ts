@@ -171,9 +171,7 @@ export async function analyzeHeadingHierarchy(
             level,
             content: text,
             html: rawHeading,
-            // @ts-ignore store offsets ad-hoc for metadata emission below
             offsetStart: start,
-            // @ts-ignore
             offsetEnd: end
           } as any);
         }

@@ -6,7 +6,10 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 // import { NotebookPanel } from '@jupyterlab/notebook';
 import { DropdownFixWidget } from './base';
-import { analyzeHeadingHierarchy, detectHeadingOneIssue } from '../../utils/detection/category/heading';
+import {
+  analyzeHeadingHierarchy,
+  detectHeadingOneIssue
+} from '../../utils/detection/category/heading';
 export class TableHeaderFixWidget extends DropdownFixWidget {
   protected getDescription(): string {
     return 'Choose which row or column should be used as the header:';
@@ -116,10 +119,7 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
       return table.outerHTML;
     };
 
-    const newContent = entireCellContent.replace(
-      target,
-      processTable(target)
-    );
+    const newContent = entireCellContent.replace(target, processTable(target));
     this.cell.model.sharedModel.setSource(newContent);
     this.removeIssueWidget();
 
@@ -247,7 +247,8 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
         replacedSlice = `${'#'.repeat(this.selectedLevel)} ${headingText}${trailingNewline}`;
       } else {
         // HTML heading
-        const inner = originalSlice.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/i)?.[1] || '';
+        const inner =
+          originalSlice.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/i)?.[1] || '';
         replacedSlice = `<h${this.selectedLevel}>${inner}</h${this.selectedLevel}>`;
       }
 
@@ -439,19 +440,15 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
       return;
     }
     setTimeout(async () => {
-      const headingHierarchyIssues = await analyzeHeadingHierarchy(
-        notebookPanel
-      );
+      const headingHierarchyIssues =
+        await analyzeHeadingHierarchy(notebookPanel);
       const headingOneIssues = await detectHeadingOneIssue(
         '',
         0,
         'markdown',
         notebookPanel.content.widgets
       );
-      const allHeadingIssues = [
-        ...headingHierarchyIssues,
-        ...headingOneIssues
-      ];
+      const allHeadingIssues = [...headingHierarchyIssues, ...headingOneIssues];
       const mainPanel = document
         .querySelector('.a11y-panel')
         ?.closest('.lm-Widget');

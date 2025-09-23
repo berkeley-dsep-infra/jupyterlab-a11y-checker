@@ -6,7 +6,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CellIssueWidget } from './issueWidget';
 
 import { ICellIssue } from '../utils/types';
-import { ModelSettings } from '../utils/ai-utils';
+import { IModelSettings } from '../utils/ai-utils';
 import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
 import { analyzeCellsAccessibility } from '../utils/detection/base';
@@ -15,8 +15,8 @@ import { analyzeTableIssues } from '../utils/detection/category/table';
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;
   private currentNotebook: NotebookPanel | null = null;
-  private languageModelSettings: ModelSettings;
-  private visionModelSettings: ModelSettings;
+  private languageModelSettings: IModelSettings;
+  private visionModelSettings: IModelSettings;
 
   constructor(settingRegistry?: ISettingRegistry) {
     super();
@@ -212,11 +212,13 @@ export class MainPanelWidget extends Widget {
     });
 
     // Add event listener for notebookReanalyzed event
-    this.node.addEventListener('notebookReanalyzed', async (event: Event) => {
+    // Listen on both the panel node and document to ensure we catch bubbled events
+    const handler = async (event: Event) => {
       const customEvent = event as CustomEvent;
       const newIssues = customEvent.detail.issues;
       const isHeadingUpdate = customEvent.detail.isHeadingUpdate;
       const isTableUpdate = customEvent.detail.isTableUpdate;
+      const isCellUpdate = customEvent.detail.isCellUpdate;
 
       if (isHeadingUpdate) {
         // Find the Headings category section
@@ -273,13 +275,77 @@ export class MainPanelWidget extends Widget {
             });
           }
         }
+      } else if (isCellUpdate) {
+        // Single-cell update: replace only issues from impacted cell(s) per category
+        const incomingIssues = newIssues as ICellIssue[];
+        const issuesByCategory = new Map<string, ICellIssue[]>();
+        incomingIssues.forEach(issue => {
+          const categoryName =
+            issueToCategory.get(issue.violationId) || 'Other';
+          if (!issuesByCategory.has(categoryName)) {
+            issuesByCategory.set(categoryName, []);
+          }
+          issuesByCategory.get(categoryName)!.push(issue);
+        });
+
+        for (const [categoryName, categoryIssues] of issuesByCategory) {
+          // Find or create the category section
+          let categoryEl = Array.from(
+            this.node.querySelectorAll('.category-title')
+          )
+            .find(title => title.textContent === categoryName)
+            ?.closest('.category') as HTMLElement | undefined | null;
+
+          if (!categoryEl) {
+            categoryEl = document.createElement('div');
+            categoryEl.classList.add('category');
+            categoryEl.innerHTML = `
+              <h2 class="category-title">${categoryName}</h2>
+              <hr>
+              <div class="issues-list"></div>
+            `;
+            const container = this.node.querySelector(
+              '.issues-container'
+            ) as HTMLElement;
+            container.appendChild(categoryEl);
+          }
+
+          const issuesList = categoryEl.querySelector(
+            '.issues-list'
+          ) as HTMLElement;
+
+          // Remove existing widgets for impacted cell indices only
+          const impacted = new Set(categoryIssues.map(i => i.cellIndex));
+          Array.from(issuesList.children).forEach(child => {
+            const el = child as HTMLElement;
+            const idxAttr = el.getAttribute('data-cell-index');
+            if (idxAttr && impacted.has(parseInt(idxAttr))) {
+              el.remove();
+            }
+          });
+
+          // Append new issues for this category
+          categoryIssues.forEach(issue => {
+            const issueWidget = new CellIssueWidget(
+              issue,
+              this.currentNotebook!.content.widgets[issue.cellIndex],
+              this.aiEnabled,
+              this
+            );
+            issuesList.appendChild(issueWidget.node);
+          });
+        }
       }
-    });
+    };
+    this.node.addEventListener('notebookReanalyzed', handler as EventListener);
+    //document.addEventListener('notebookReanalyzed', handler as EventListener);
   }
 
   private async loadSettings(settingRegistry: ISettingRegistry): Promise<void> {
     try {
-      const settings = await settingRegistry.load('jupyterlab-a11y-checker:plugin');
+      const settings = await settingRegistry.load(
+        'jupyterlab-a11y-checker:plugin'
+      );
 
       if (settings.get('languageModel').composite) {
         const langModel = settings.get('languageModel').composite as any;
@@ -303,11 +369,11 @@ export class MainPanelWidget extends Widget {
     }
   }
 
-  getLanguageModelSettings(): ModelSettings {
+  getLanguageModelSettings(): IModelSettings {
     return this.languageModelSettings;
   }
 
-  getVisionModelSettings(): ModelSettings {
+  getVisionModelSettings(): IModelSettings {
     return this.visionModelSettings;
   }
 

@@ -1,31 +1,34 @@
-# jupyterlab-a11y-checker
+# Jupyterlab-a11y-checker
 
-jupyterlab-a11y-checker is a JupyterLab extension performs accessibility checks on Jupyter Notebooks (on JupyterHub), leveraging the [axe-core engine](https://github.com/dequelabs/axe-core) and custom detection algorithms to align with WCAG 2.0 AA guidelines. It enables authors to identify accessibility issues in their notebooks and provides actionable suggestions to fix them.
+Jupyterlab-a11y-checker is a JupyterLab extension performs accessibility checks on Jupyter Notebooks (on JupyterHub), leveraging custom detection algorithms to align with WCAG 2.0 AA guidelines. It enables authors to identify accessibility issues in their notebooks and provides actionable suggestions to fix them.
 
 ## Tool Description
 
 ### Issue Detection
-While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a well-known [study](https://dl.acm.org/doi/pdf/10.1145/3597638.3608417). We utilize the [axe-core](https://github.com/dequelabs/axe-core) engine as well as custom detection algorithms. The issues the extension can detect are listed in [Issue Descriptions](./doc/rules.md).
+
+While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a well-known [study](https://arxiv.org/pdf/2308.03241). The issues the extension can detect are listed in [Issue Descriptions](./doc/rules.md).
 
 ### Fix Interfaces
+
 We provide a user interface tailored to each issue, such as a text field for adding alt-text, a dropdown for fixing header issues, etc. The fix interfaces are listed in [Fix Interface Descriptions](./doc/fix-interfaces.md).
 
 ### AI Functionality
+
 To simplify the remediation process, we integrate a Large Language Model (LLM) for generating recommendations. Using Ollama's mistral model, all processing is done locally on JupyterHub, ensuring user data privacy (details on this implementation will be shared in future releases).
 
 ![On JupyterLab, this extension is detecting accessibility issues. On the left panel, there is a sample Jupyter Notebook, while on the right side, this extension is displaying image and heading related issues.](doc/README_IMG.png)
 
-
 ## Getting Started
 
 ### Installing
+
 You can install the extension directly via pip:
 
 ```bash
 pip install jupyterlab-a11y-checker
 ```
-Find the package on PyPI [here](https://pypi.org/project/jupyterlab-a11y-checker/).
 
+Find the package on PyPI [here](https://pypi.org/project/jupyterlab-a11y-checker/).
 
 ### Contributing
 
@@ -74,6 +77,7 @@ jupyter lab #this will open a local server of jupyterlab with all current extens
 ```
 
 #### Pip Distribution
+
 ```bash
 pip install twine
 
@@ -102,15 +106,17 @@ pip uninstall jupyterlab_a11y_checker
 - Build the Jupyter Lab extension with the latest changes
 
 ```bash
-jlpm 
+jlpm
 jlpm build
 jupyter lab build
 ```
+
 - Package the extension as a wheel file (.whl)
 
 ```bash
 python -m build
 ```
+
 .whl file gets generated in the `dist/` directory
 
 - Copy the .whl file to the server where JupyterHub is installed (or include it in a Dockerfile if using Docker)
@@ -145,4 +151,3 @@ folder is located. Then you can remove the symlink named `jupyterlab-a11y-checke
 | Balaji Alwar | Project Lead       | [@balajialg](https://github.com/balajialg) |
 | Ryan Lovett | Volunteer (Jupyter expert)      | [@ryanlovett]([https://github.com/balajialg](https://github.com/ryanlovett)) |
 | Joe Feria Galicia | Volunteer (a11y expert)       | NA |
-

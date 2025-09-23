@@ -1,23 +1,32 @@
-import { ICellIssue } from '../../utils';
-import { getImageAltSuggestion, getTableCaptionSuggestion, ModelSettings } from '../../utils';
+import { ICellIssue, getIssueOffsets, replaceSlice } from '../../utils';
+import {
+  getImageAltSuggestion,
+  getTableCaptionSuggestion,
+  IModelSettings
+} from '../../utils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { TextFieldFixWidget } from './base';
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
-  private visionSettings: ModelSettings;
+  private visionSettings: IModelSettings;
 
   protected getDescription(): string {
     return 'Add or update alt text for the image:';
   }
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, visionSettings: ModelSettings) {
+  constructor(
+    issue: ICellIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean,
+    visionSettings: IModelSettings
+  ) {
     super(issue, cell, aiEnabled);
     this.visionSettings = visionSettings;
   }
 
-  applyTextToCell(providedAltText: string): void {
+  async applyTextToCell(providedAltText: string): Promise<void> {
     if (providedAltText === '') {
       console.log('Empty alt text, returning');
       return;
@@ -26,44 +35,62 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
     const entireCellContent = this.cell.model.sharedModel.getSource();
     const target = this.issue.issueContentRaw;
 
+    // Try to parse deterministic offsets from metadata.issueId (format: cell-{idx}-image-missing-alt-o{start}-{end})
+    const offsets = getIssueOffsets(this.issue, entireCellContent.length);
+    const offsetStart: number | null = offsets?.offsetStart ?? null;
+    const offsetEnd: number | null = offsets?.offsetEnd ?? null;
+
+    // Offsets are already validated in getIssueOffsets
+
     // Handle HTML image tags
-    const handleHtmlImage = (): string => {
+    const handleHtmlImage = (imageText: string): string => {
       // Alt attribute exists but is empty
-      if (target.includes('alt=""') || target.includes("alt=''")) {
-        return entireCellContent.replace(
-          target,
-          target.replace(/alt=["']\s*["']/, `alt="${providedAltText}"`)
-        );
+      if (imageText.includes('alt=""') || imageText.includes("alt=''")) {
+        return imageText.replace(/alt=["']\s*["']/, `alt="${providedAltText}"`);
       }
       // Alt attribute does not exist
-      else {
-        return entireCellContent.replace(
-          target,
-          target.replace(/>$/, ` alt="${providedAltText}">`)
-        );
-      }
+      return imageText.replace(/\s*\/?>(?=$)/, ` alt="${providedAltText}"$&`);
     };
 
     // Handle markdown images
-    const handleMarkdownImage = (): string => {
-      return entireCellContent.replace(
-        target,
-        target.replace(/!\[\]/, `![${providedAltText}]`)
-      );
+    const handleMarkdownImage = (imageText: string): string => {
+      return imageText.replace(/!\[\]/, `![${providedAltText}]`);
     };
 
     let newContent = entireCellContent;
 
-    if (target.startsWith('<img')) {
-      newContent = handleHtmlImage();
-    } else if (target.startsWith('![')) {
-      newContent = handleMarkdownImage();
+    if (offsetStart !== null && offsetEnd !== null) {
+      const originalSlice = entireCellContent.slice(offsetStart, offsetEnd);
+      let replacedSlice = originalSlice;
+      if (originalSlice.startsWith('<img')) {
+        replacedSlice = handleHtmlImage(originalSlice);
+      } else if (originalSlice.startsWith('![')) {
+        replacedSlice = handleMarkdownImage(originalSlice);
+      }
+      newContent = replaceSlice(
+        entireCellContent,
+        offsetStart,
+        offsetEnd,
+        replacedSlice
+      );
+    } else {
+      // Fallback to previous behavior using the captured target
+      if (target.startsWith('<img')) {
+        newContent = entireCellContent.replace(target, handleHtmlImage(target));
+      } else if (target.startsWith('![')) {
+        newContent = entireCellContent.replace(
+          target,
+          handleMarkdownImage(target)
+        );
+      }
     }
 
     this.cell.model.sharedModel.setSource(newContent);
 
     // Remove the issue widget
     this.removeIssueWidget();
+
+    await this.reanalyzeCellAndDispatch();
   }
 
   async displayAISuggestions(): Promise<void> {
@@ -131,18 +158,23 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
 }
 
 export class TableCaptionFixWidget extends TextFieldFixWidget {
-  private languageSettings: ModelSettings;
+  private languageSettings: IModelSettings;
 
   protected getDescription(): string {
     return 'Add or update the caption for the table:';
   }
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, languageSettings: ModelSettings) {
+  constructor(
+    issue: ICellIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean,
+    languageSettings: IModelSettings
+  ) {
     super(issue, cell, aiEnabled);
     this.languageSettings = languageSettings;
   }
 
-  applyTextToCell(providedCaption: string): void {
+  async applyTextToCell(providedCaption: string): Promise<void> {
     if (providedCaption === '') {
       console.log('Empty caption text, returning');
       return;
@@ -151,15 +183,15 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
     const entireCellContent = this.cell.model.sharedModel.getSource();
     const target = this.issue.issueContentRaw;
 
-    const handleHtmlTable = (): string => {
+    const handleHtmlTable = (tableHtml: string): string => {
       // Check if table already has a caption
-      if (target.includes('<caption>')) {
-        return entireCellContent.replace(
+      if (tableHtml.includes('<caption>')) {
+        return tableHtml.replace(
           /<caption>.*?<\/caption>/,
           `<caption>${providedCaption}</caption>`
         );
       } else {
-        return entireCellContent.replace(
+        return tableHtml.replace(
           /<table[^>]*>/,
           `$&\n  <caption>${providedCaption}</caption>`
         );
@@ -169,13 +201,29 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
     let newContent = entireCellContent;
 
     if (target.includes('<table')) {
-      newContent = handleHtmlTable();
+      const offsets = getIssueOffsets(this.issue, entireCellContent.length);
+      if (offsets) {
+        const { offsetStart, offsetEnd } = offsets;
+        const originalSlice = entireCellContent.slice(offsetStart, offsetEnd);
+        const replacedSlice = handleHtmlTable(originalSlice);
+        newContent = replaceSlice(
+          entireCellContent,
+          offsetStart,
+          offsetEnd,
+          replacedSlice
+        );
+      } else {
+        // Fallback to previous behavior
+        newContent = entireCellContent.replace(target, handleHtmlTable(target));
+      }
     }
 
     this.cell.model.sharedModel.setSource(newContent);
 
     // Remove the issue widget
     this.removeIssueWidget();
+
+    await this.reanalyzeCellAndDispatch();
   }
 
   async displayAISuggestions(): Promise<void> {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ICellIssue } from './types';
 
-export interface ModelSettings {
+export interface IModelSettings {
   baseUrl: string;
   apiKey: string;
   model: string;
@@ -41,7 +41,7 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
       // Draw the image on canvas
       ctx.drawImage(img, 0, 0);
 
-      // Convert to JPEG base64 (quality 95% like in your Python example)
+      // Convert to JPEG base64 (quality 95% like in the Python example)
       const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.95);
 
       // Extract just the base64 part (remove "data:image/jpeg;base64,")
@@ -62,7 +62,7 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
 export async function getImageAltSuggestion(
   issue: ICellIssue,
   imageData: string,
-  visionSettings: ModelSettings,
+  visionSettings: IModelSettings
 ): Promise<string> {
   let prompt =
     'Read the provided image and respond with a short description of the image, without any explanation. Avoid using the word "image" in the description.';
@@ -70,8 +70,9 @@ export async function getImageAltSuggestion(
 
   // New River implementation - using OpenAI Chat Completions API format
   console.log('visionSettings', visionSettings);
+  console.log('imageData', imageData);
   try {
-    const imageUrl = imageData.startsWith("data:image")
+    const imageUrl = imageData.startsWith('data:image')
       ? imageData
       : `data:image/jpeg;base64,${await fetchImageAsBase64(imageData)}`;
 
@@ -79,18 +80,19 @@ export async function getImageAltSuggestion(
       model: visionSettings.model,
       messages: [
         {
-          role: "system",
-          content: "You are a helpful assistant that generates alt text for images."
+          role: 'system',
+          content:
+            'You are a helpful assistant that generates alt text for images.'
         },
         {
-          role: "user",
+          role: 'user',
           content: [
             {
-              type: "text",
+              type: 'text',
               text: prompt
             },
             {
-              type: "image_url",
+              type: 'image_url',
               image_url: {
                 url: imageUrl
               }
@@ -102,15 +104,20 @@ export async function getImageAltSuggestion(
     });
 
     console.log('Sending request to:', visionSettings.baseUrl);
+    console.log('Body:', body);
     const response = await axios.post(visionSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${visionSettings.apiKey}`
+        Authorization: `Bearer ${visionSettings.apiKey}`
       }
     });
 
     // Parse response using OpenAI Chat Completions format
-    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {
+    if (
+      response.data.choices &&
+      response.data.choices[0] &&
+      response.data.choices[0].message
+    ) {
       const responseText = response.data.choices[0].message.content;
       return responseText ? responseText.trim() : 'No content in response';
     } else {
@@ -125,9 +132,9 @@ export async function getImageAltSuggestion(
 
 export async function getTableCaptionSuggestion(
   issue: ICellIssue,
-  languageSettings: ModelSettings
+  languageSettings: IModelSettings
 ): Promise<string> {
-  const prompt = `Given this HTML table, please respond with a short description of the table, without any explanation. Here's the table:
+  const prompt = `Given this HTML table, please provide a caption for the table to be served as a title or heading for the table. Avoid using the word "table" in the caption. Here's the table:
     ${issue.issueContentRaw}`;
 
   // New River implementation - using OpenAI Chat Completions API format
@@ -136,11 +143,12 @@ export async function getTableCaptionSuggestion(
       model: languageSettings.model,
       messages: [
         {
-          role: "system",
-          content: "You are a helpful assistant that generates captions for HTML tables."
+          role: 'system',
+          content:
+            'You are a helpful assistant that generates captions for HTML tables.'
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt
         }
       ],
@@ -151,12 +159,16 @@ export async function getTableCaptionSuggestion(
     const response = await axios.post(languageSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${languageSettings.apiKey}`
+        Authorization: `Bearer ${languageSettings.apiKey}`
       }
     });
 
     // Parse response using OpenAI Chat Completions format
-    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {
+    if (
+      response.data.choices &&
+      response.data.choices[0] &&
+      response.data.choices[0].message
+    ) {
       const responseText = response.data.choices[0].message.content;
       return responseText ? responseText.trim() : 'No content in response';
     } else {

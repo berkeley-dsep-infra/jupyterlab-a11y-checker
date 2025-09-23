@@ -1,6 +1,9 @@
 import { Widget } from '@lumino/widgets';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ICellIssue } from '../../utils/types';
+import { NotebookPanel } from '@jupyterlab/notebook';
+import { analyzeCellIssues } from '../../utils/detection/base';
+// Intentionally keep base free of category-specific analysis. Widgets can override.
 
 abstract class FixWidget extends Widget {
   protected issue: ICellIssue;
@@ -35,6 +38,44 @@ abstract class FixWidget extends Widget {
     setTimeout(() => {
       this.cell.node.style.backgroundColor = '';
     }, 1000);
+  }
+
+  // Re-run content-based detectors for this cell only and dispatch an update
+  protected async reanalyzeCellAndDispatch(): Promise<void> {
+    const notebookPanel = this.cell.parent?.parent as NotebookPanel;
+    if (!notebookPanel) {
+      return;
+    }
+    // Find cell index within the notebook (TODO: Include cellIndex at the first place)
+    const cellIndex =
+      (this.cell as any).parent?.widgets.indexOf(this.cell) ?? -1;
+    if (cellIndex < 0) {
+      return;
+    }
+
+    setTimeout(async () => {
+      console.log('[FixWidget] Reanalyzing cell', cellIndex);
+      const issues = await analyzeCellIssues(notebookPanel, cellIndex);
+      console.log('[FixWidget] Cell reanalysis found issues:', issues.length);
+      const event = new CustomEvent('notebookReanalyzed', {
+        detail: { issues, isCellUpdate: true },
+        bubbles: true,
+        composed: true
+      } as any);
+      // Dispatch from this widget's node so it bubbles up to the main panel
+      //this.node.dispatchEvent(event);
+      // Also dispatch directly on the main panel root for robustness
+      const mainPanelEl = document.getElementById('a11y-sidebar');
+      if (mainPanelEl) {
+        mainPanelEl.dispatchEvent(event);
+      }
+    }, 100);
+  }
+
+  // Generic notebook reanalysis hook. By default, just reanalyze this cell.
+  // Widgets with notebook-wide effects (e.g., headings) should override.
+  protected async reanalyzeNotebookAndDispatch(): Promise<void> {
+    await this.reanalyzeCellAndDispatch();
   }
 }
 

@@ -15,7 +15,6 @@ export async function detectHeadingOneIssue(
 
   // Find the first heading in the notebook
   let firstHeadingFound = false;
-  let firstHeadingContent = '';
 
   // Check if first cell is a code cell
   if (cells.length > 0 && cells[0].model.type === 'code') {
@@ -38,24 +37,49 @@ export async function detectHeadingOneIssue(
       continue;
     }
 
-    // Parse markdown to HTML
-    tempDiv.innerHTML = await marked.parse(content);
-    const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    // Use marked tokens to find the first heading and offsets in source
+    const tokens: any[] = marked.lexer(content) as any[];
+    let searchStart = 0;
+    let foundFirst = false;
+    for (const token of tokens) {
+      let level: number | null = null;
+      let rawHeading = '';
 
-    if (headings.length > 0) {
-      firstHeadingFound = true;
-      firstHeadingContent = headings[0].outerHTML;
-
-      // Check if first heading is not h1
-      const level = parseInt(headings[0].tagName[1]);
-      if (level !== 1) {
-        notebookIssues.push({
-          cellIndex: i,
-          cellType: 'markdown',
-          violationId: 'heading-missing-h1',
-          issueContentRaw: firstHeadingContent
-        });
+      if ((token as any).type === 'heading') {
+        level = (token as any).depth;
+        rawHeading = (token as any).raw || '';
+      } else if ((token as any).type === 'html') {
+        const rawHtml = (token as any).raw || '';
+        const m = rawHtml.match(/<h([1-6])[^>]*>[\s\S]*?<\/h\1>/i);
+        if (m) {
+          level = parseInt(m[1], 10);
+          rawHeading = m[0];
+        }
       }
+
+      if (level !== null) {
+        const start = content.indexOf(rawHeading, searchStart);
+        if (start === -1) {
+          continue;
+        }
+        const end = start + rawHeading.length;
+        searchStart = end;
+
+        firstHeadingFound = true;
+
+        if (level !== 1) {
+          notebookIssues.push({
+            cellIndex: i,
+            cellType: 'markdown',
+            violationId: 'heading-missing-h1',
+            issueContentRaw: rawHeading
+          });
+        }
+        foundFirst = true;
+        break;
+      }
+    }
+    if (foundFirst) {
       break;
     }
   }
@@ -104,23 +128,54 @@ export async function analyzeHeadingHierarchy(
         continue;
       }
 
-      // Parse markdown to HTML
-      tempDiv.innerHTML = await marked.parse(content);
+      // Tokenize markdown and map tokens to source offsets for headings
+      const tokens: any[] = marked.lexer(content) as any[];
+      let searchStart = 0;
+      for (const token of tokens) {
+        let level: number | null = null;
+        let rawHeading = '';
+        let text = '';
 
-      // Find all headings in the cell
-      const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        if ((token as any).type === 'heading') {
+          level = (token as any).depth;
+          rawHeading = (token as any).raw || '';
+          text = (token as any).text || '';
+        } else if ((token as any).type === 'html') {
+          const rawHtml = (token as any).raw || '';
+          const m = rawHtml.match(/<h([1-6])[^>]*>[\s\S]*?<\/h\1>/i);
+          if (m) {
+            level = parseInt(m[1], 10);
+            rawHeading = m[0];
+            text = rawHeading.replace(/<[^>]+>/g, '');
+          }
+        }
 
-      headings.forEach(heading => {
-        const level = parseInt(heading.tagName[1]);
-        const text = heading.textContent || '';
+        if (level !== null) {
+          // Bug Check: Is the rendered h1 really h1? (Markdown Setext-heading) -> Can be improved.
+          if (
+            level === 1 &&
+            ((text || '').match(/(?<!\\)\$\$/g) || []).length === 1
+          ) {
+            continue;
+          }
 
-        headingStructure.push({
-          cellIndex: i,
-          level,
-          content: text,
-          html: heading.outerHTML
-        });
-      });
+          const start = content.indexOf(rawHeading, searchStart);
+          if (start === -1) {
+            continue;
+          }
+          const end = start + rawHeading.length;
+          searchStart = end;
+
+          headingStructure.push({
+            cellIndex: i,
+            level,
+            content: text,
+            html: rawHeading,
+            offsetStart: start,
+            offsetEnd: end
+          } as any);
+        }
+      }
     }
 
     // Track headings by level to detect duplicates
@@ -163,7 +218,9 @@ export async function analyzeHeadingHierarchy(
           metadata: {
             headingStructure: headingStructure.filter(
               h => h.level === 1 || h.level === 2
-            )
+            ),
+            offsetStart: (heading as any).offsetStart,
+            offsetEnd: (heading as any).offsetEnd
           }
         });
       });
@@ -183,7 +240,9 @@ export async function analyzeHeadingHierarchy(
             metadata: {
               headingStructure: headingStructure.filter(
                 h => h.level === 1 || h.level === 2
-              )
+              ),
+              offsetStart: (heading as any).offsetStart,
+              offsetEnd: (heading as any).offsetEnd
             }
           });
         });
@@ -204,7 +263,9 @@ export async function analyzeHeadingHierarchy(
             metadata: {
               headingStructure: headingStructure.filter(
                 h => h.level === 1 || h.level === 2
-              )
+              ),
+              offsetStart: (heading as any).offsetStart,
+              offsetEnd: (heading as any).offsetEnd
             }
           });
         });
@@ -222,7 +283,11 @@ export async function analyzeHeadingHierarchy(
           cellIndex: current.cellIndex,
           cellType: 'markdown',
           violationId: 'heading-empty',
-          issueContentRaw: current.html
+          issueContentRaw: current.html,
+          metadata: {
+            offsetStart: (current as any).offsetStart,
+            offsetEnd: (current as any).offsetEnd
+          }
         });
       }
 
@@ -243,7 +308,9 @@ export async function analyzeHeadingHierarchy(
           violationId: 'heading-wrong-order',
           issueContentRaw: current.html,
           metadata: {
-            previousHeadingLevel: previous.level
+            previousHeadingLevel: previous.level,
+            offsetStart: (current as any).offsetStart,
+            offsetEnd: (current as any).offsetEnd
           }
         });
       }

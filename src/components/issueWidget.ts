@@ -21,7 +21,12 @@ export class CellIssueWidget extends Widget {
   private aiEnabled: boolean = false; // TODO: Create a higher order component to handle this
   private mainPanel: MainPanelWidget;
 
-  constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean, mainPanel: MainPanelWidget) {
+  constructor(
+    issue: ICellIssue,
+    cell: Cell<ICellModel>,
+    aiEnabled: boolean,
+    mainPanel: MainPanelWidget
+  ) {
     super();
     this.issue = issue;
     this.cell = cell;
@@ -37,6 +42,9 @@ export class CellIssueWidget extends Widget {
     }
 
     this.addClass('issue-widget');
+    // Tag widget with identifiers so the panel can selectively update
+    this.node.setAttribute('data-cell-index', String(issue.cellIndex));
+    this.node.setAttribute('data-violation-id', issue.violationId);
     this.node.innerHTML = `
       <button class="issue-header-button">
           <h3 class="issue-header"> ${issueInformation?.title || issue.violationId}</h3>
@@ -95,9 +103,12 @@ export class CellIssueWidget extends Widget {
     });
 
     // Show suggest button initially if AI is enabled
-    const mainPanelElement = document.getElementById('a11y-sidebar') as HTMLElement;
+    const mainPanelElement = document.getElementById(
+      'a11y-sidebar'
+    ) as HTMLElement;
     if (mainPanelElement) {
-      const aiToggleButton = mainPanelElement.querySelector('.ai-control-button');
+      const aiToggleButton =
+        mainPanelElement.querySelector('.ai-control-button');
       if (aiToggleButton && aiToggleButton.textContent?.includes('Enabled')) {
         this.aiEnabled = true;
       } else {

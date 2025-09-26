@@ -295,6 +295,14 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
     if (input) {
       input.placeholder = 'Input h1 heading text...';
     }
+
+    // Always disable AI suggestion for missing H1 heading
+    const suggestButton = this.node.querySelector(
+      '.suggest-button'
+    ) as HTMLButtonElement;
+    if (suggestButton) {
+      suggestButton.remove();
+    }
   }
 
   protected removeIssueWidget(): void {

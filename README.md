@@ -10,7 +10,7 @@ Here's how the extension looks like:
 
 ### Issue Detection
 
-While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a well-known [study](https://arxiv.org/pdf/2308.03241). To address them, we implement custom detection logic for the issues listed in [Rule Description](./doc/rules.md). In addition, we integrate axe-core to detect other standard accessibility issues beyond these main issues, which are listed in [here](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md).
+While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a study on Jupyter Notebooks, [Notably Inaccessible — Data Driven Understanding of Data Science Notebook (In)Accessibility](https://arxiv.org/pdf/2308.03241). To address them, we implement custom detection logic for the issues listed in [Rule Description](./doc/rules.md). In addition, we integrate axe-core to detect other standard accessibility issues beyond these main issues, which are listed in [Axe Rule Description](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md).
 
 ### Issue Resolution
 
@@ -30,7 +30,7 @@ You can install the extension directly via pip:
 pip install jupyterlab-a11y-checker
 ```
 
-Find the package on PyPI [here](https://pypi.org/project/jupyterlab-a11y-checker/).
+Find the package on PyPI. [Link to PyPI Package](https://pypi.org/project/jupyterlab-a11y-checker/).
 
 ### Contributing
 

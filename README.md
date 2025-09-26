@@ -1,22 +1,24 @@
-# Jupyterlab-a11y-checker
+# jupyterlab-a11y-checker
 
-Jupyterlab-a11y-checker is a JupyterLab extension performs accessibility checks on Jupyter Notebooks (on JupyterHub), leveraging custom detection algorithms to align with WCAG 2.0 AA guidelines. It enables authors to identify accessibility issues in their notebooks and provides actionable suggestions to fix them.
+jupyterLab-a11y-checker is a JupyterLab extension that helps authors detect and fix accessibility issues in Jupyter Notebooks, aligning with WCAG 2.0 AA guidelines. It enables authors to identify accessibility issues in their notebooks and provides actionable suggestions to fix them. It combines the strengths of [axe-core](https://github.com/dequelabs/axe-core), a widely used accessibility engine, with custom notebook-specific detection algorithms that address issues axe cannot reliably cover in JupyterLab.
+
+Here's how the extension looks like:
+
+![On JupyterLab, this extension is detecting accessibility issues. On the left panel, there is a sample Jupyter Notebook, while on the right side, this extension is displaying image and heading related issues.](doc/README_IMG.png)
 
 ## Tool Description
 
 ### Issue Detection
 
-While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a well-known [study](https://arxiv.org/pdf/2308.03241). The issues the extension can detect are listed in [Issue Descriptions](./doc/rules.md).
+While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a well-known [study](https://arxiv.org/pdf/2308.03241). To address them, we implement custom detection logic for the issues listed in [Rule Description](./doc/rules.md). In addition, we integrate axe-core to detect other standard accessibility issues beyond these main issues, which are listed in [here](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md).
 
-### Fix Interfaces
+### Issue Resolution
 
-We provide a user interface tailored to each issue, such as a text field for adding alt-text, a dropdown for fixing header issues, etc. The fix interfaces are listed in [Fix Interface Descriptions](./doc/fix-interfaces.md).
+We provide a user interface tailored to each issue, such as a text field for adding alt-text, a dropdown for fixing header issues, etc. The fix interfaces are listed in [Fix Interface Description](./doc/fix-interfaces.md).
 
-### AI Functionality
+#### AI Assistance
 
-To simplify the remediation process, we integrate a Large Language Model (LLM) for generating recommendations. Using Ollama's mistral model, all processing is done locally on JupyterHub, ensuring user data privacy (details on this implementation will be shared in future releases).
-
-![On JupyterLab, this extension is detecting accessibility issues. On the left panel, there is a sample Jupyter Notebook, while on the right side, this extension is displaying image and heading related issues.](doc/README_IMG.png)
+To simplify the remediation process, we integrate both a Large Language Model (LLM) and a Vision-Language Model (VLM) to generate accessibility recommendations within several fix interfaces. Users can configure these models by providing their API endpoint, API key, and model name in: ```Settings > Settings Editor > A11y Checker Settings```.
 
 ## Getting Started
 

@@ -1,5 +1,5 @@
 import { NotebookPanel } from '@jupyterlab/notebook';
-// import axe from 'axe-core';
+import axe from 'axe-core';
 import { marked } from 'marked';
 import { ICellIssue } from '../types';
 import {
@@ -24,9 +24,15 @@ export async function analyzeCellsAccessibility(
   const tempDiv = document.createElement('div');
   document.body.appendChild(tempDiv);
 
-  // const axeConfig: axe.RunOptions = {
-  //   runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
-  // };
+  const axeConfig: axe.RunOptions = {
+    runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
+    rules: {
+      'image-alt': { enabled: false },
+      'empty-heading': { enabled: false },
+      'heading-order': { enabled: false },
+      'page-has-heading-one': { enabled: false }
+    }
+  };
 
   try {
     // First, analyze heading hierarchy across the notebook
@@ -47,23 +53,22 @@ export async function analyzeCellsAccessibility(
         if (rawMarkdown.trim()) {
           tempDiv.innerHTML = await marked.parse(rawMarkdown);
 
-          // TODO: Currently disabled axe
-          // const results = await axe.run(tempDiv, axeConfig);
-          // const violations = results.violations;
+          const results = await axe.run(tempDiv, axeConfig);
+          const violations = results.violations;
 
-          // // Can have multiple violations in a single cell
-          // if (violations.length > 0) {
-          //   violations.forEach(violation => {
-          //     violation.nodes.forEach(node => {
-          //       notebookIssues.push({
-          //         cellIndex: i,
-          //         cellType: cellType,
-          //         violationId: violation.id,
-          //         issueContentRaw: node.html
-          //       });
-          //     });
-          //   });
-          // }
+          // Can have multiple violations in a single cell
+          if (violations.length > 0) {
+            violations.forEach(violation => {
+              violation.nodes.forEach(node => {
+                notebookIssues.push({
+                  cellIndex: i,
+                  cellType: cellType,
+                  violationId: violation.id,
+                  issueContentRaw: node.html
+                });
+              });
+            });
+          }
 
           // Add custom image issue detection
           const folderPath = panel.context.path.substring(

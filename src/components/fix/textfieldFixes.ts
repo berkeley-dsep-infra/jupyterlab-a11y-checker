@@ -28,7 +28,6 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
 
   async applyTextToCell(providedAltText: string): Promise<void> {
     if (providedAltText === '') {
-      console.log('Empty alt text, returning');
       return;
     }
 
@@ -94,7 +93,6 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
   }
 
   async displayAISuggestions(): Promise<void> {
-    console.log('Getting AI suggestions');
     const altTextInput = this.node.querySelector(
       '.jp-a11y-input'
     ) as HTMLInputElement;
@@ -176,7 +174,6 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
 
   async applyTextToCell(providedCaption: string): Promise<void> {
     if (providedCaption === '') {
-      console.log('Empty caption text, returning');
       return;
     }
 
@@ -227,7 +224,6 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
   }
 
   async displayAISuggestions(): Promise<void> {
-    console.log('Getting AI suggestions for table caption');
     const captionInput = this.node.querySelector(
       '.jp-a11y-input'
     ) as HTMLInputElement;
@@ -331,7 +327,6 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
 
   applyTextToCell(providedHeading: string): void {
     if (providedHeading === '') {
-      console.log('Empty heading text, returning');
       return;
     }
 
@@ -359,7 +354,6 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
   }
 
   async displayAISuggestions(): Promise<void> {
-    console.log('Getting AI suggestions for heading');
     const headingInput = this.node.querySelector(
       '.jp-a11y-input'
     ) as HTMLInputElement;

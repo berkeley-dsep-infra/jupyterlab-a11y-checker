@@ -131,7 +131,6 @@ export class CellIssueWidget extends Widget {
       );
       fixWidgetContainer.appendChild(textFieldFixWidget.node);
     } else if (this.issue.violationId === 'table-missing-caption') {
-      console.log('Table caption issue');
       const tableCaptionFixWidget = new TableCaptionFixWidget(
         this.issue,
         this.cell,

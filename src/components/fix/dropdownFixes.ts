@@ -183,7 +183,6 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     // Setup apply button handler
     if (this.applyButton) {
       this.applyButton.addEventListener('click', async () => {
-        console.log('Apply button clicked');
         if (this.selectedLevel) {
           this.applyDropdownSelection(`h${this.selectedLevel}`);
           await this.reanalyzeNotebookAndDispatch();
@@ -222,13 +221,10 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
   }
 
   applyDropdownSelection(selectedValue: string): void {
-    console.log('applyDropdownSelection called with:', selectedValue);
     if (!this.selectedLevel) {
-      console.log('No level selected');
       return;
     }
 
-    console.log('Applying heading level change to:', this.selectedLevel);
     const entireCellContent = this.cell.model.sharedModel.getSource();
     const target = this.issue.issueContentRaw;
     let newContent = entireCellContent;
@@ -278,11 +274,9 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     }
 
     if (newContent !== entireCellContent) {
-      console.log('Updating cell content');
       this.cell.model.sharedModel.setSource(newContent);
       this.removeIssueWidget();
     } else {
-      console.log('No changes made to content');
     }
   }
 
@@ -293,11 +287,9 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     // If metadata doesn't have previous level, try to find the closest previous heading
     if (this.previousLevel === undefined) {
       this.previousLevel = this.findClosestPreviousHeading(issue.cellIndex);
-      console.log('Found closest previous heading level:', this.previousLevel);
     }
 
-    console.log('Current level set to:', this._currentLevel);
-    console.log('Previous level:', this.previousLevel);
+
 
     // Update the dropdown text explicitly after initialization
     if (this.dropdownText) {
@@ -307,7 +299,6 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     // Force update dropdown content after initialization
     if (this.dropdownContent) {
       const validLevels = this.getValidHeadingLevels();
-      console.log('Populating dropdown with levels:', Array.from(validLevels));
       this.dropdownContent.innerHTML = Array.from(validLevels)
         .sort((a, b) => a - b)
         .map(
@@ -335,23 +326,17 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
 
   // Static helper method to parse heading level
   private static parseHeadingLevel(rawContent: string): number {
-    console.log('Raw content:', rawContent);
-
     // Try HTML heading pattern first
     const htmlMatch = rawContent.match(/<h([1-6])[^>]*>/i);
     if (htmlMatch) {
-      console.log('HTML match found:', htmlMatch);
       const level = parseInt(htmlMatch[1]);
-      console.log('Current level set to:', level);
       return level;
     }
 
     // Try Markdown heading pattern - match # followed by space
     const mdMatch = rawContent.match(/^(#{1,6})\s+/m);
     if (mdMatch) {
-      console.log('Markdown match found:', mdMatch);
       const level = mdMatch[1].length;
-      console.log('Current level set to:', level);
       return level;
     }
 
@@ -395,7 +380,6 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     if (this.previousLevel !== undefined) {
       // Special case: if previous heading is h1, current heading must be h2
       if (this.previousLevel === 1) {
-        console.log('Previous heading is h1, only allowing h2 as option');
         return validLevels;
       }
 
@@ -421,13 +405,7 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
         }
       }
 
-      console.log(
-        'Valid heading levels based on previous level:',
-        this.previousLevel,
-        Array.from(validLevels)
-      );
     } else {
-      console.log('No previous level found, defaulting to h2 option');
     }
 
     return validLevels;

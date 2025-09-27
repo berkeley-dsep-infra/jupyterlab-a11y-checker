@@ -69,8 +69,6 @@ export async function getImageAltSuggestion(
   prompt += `Content: \n${issue.issueContentRaw}\n\n`;
 
   // New River implementation - using OpenAI Chat Completions API format
-  console.log('visionSettings', visionSettings);
-  console.log('imageData', imageData);
   try {
     const imageUrl = imageData.startsWith('data:image')
       ? imageData
@@ -103,8 +101,7 @@ export async function getImageAltSuggestion(
       max_tokens: 150
     });
 
-    console.log('Sending request to:', visionSettings.baseUrl);
-    console.log('Body:', body);
+
     const response = await axios.post(visionSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',
@@ -155,7 +152,7 @@ export async function getTableCaptionSuggestion(
       max_tokens: 150
     });
 
-    console.log('Sending request to:', languageSettings.baseUrl);
+
     const response = await axios.post(languageSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',

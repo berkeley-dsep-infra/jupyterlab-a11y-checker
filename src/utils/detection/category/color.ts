@@ -45,7 +45,6 @@ async function getAttachmentDataUrl(
 ): Promise<string | null> {
   try {
     // Extract filename from attachment ID
-    console.log('Looking for attachment:', attachmentId, 'in cell:', cellIndex);
 
     if (!panel.model) {
       console.warn('No notebook model available');
@@ -67,7 +66,6 @@ async function getAttachmentDataUrl(
         cellData.attachments &&
         cellData.attachments[attachmentId]
       ) {
-        console.log('Found attachment in cell widget');
         const data = cellData.attachments[attachmentId];
 
         // Get the base64 data
@@ -154,7 +152,6 @@ async function getColorContrastInImage(
 
         // Recognize text blocks with PSM 11
         const result = await worker.recognize(canvas, {}, { blocks: true });
-        console.log('result', result);
         if (result.data.confidence < 40) {
           // We can't analyze the image, so we return the default values
           resolve({
@@ -242,7 +239,7 @@ async function getColorContrastInImage(
         // Terminate the worker
         await worker.terminate();
 
-        console.log('Contrast:', minContrast);
+
 
         resolve({
           contrast: minContrast,
@@ -300,9 +297,6 @@ async function getColorContrastInImage(
 
           // Calculate contrast ratio
           contrast = calculateContrast(fgColor, bgColor);
-          console.log(
-            `Image contrast: ${contrast.toFixed(2)}:1 (${fgColor} vs ${bgColor})`
-          );
         }
 
         // Determine if the contrast meets WCAG standards (4.5:1 for normal text)

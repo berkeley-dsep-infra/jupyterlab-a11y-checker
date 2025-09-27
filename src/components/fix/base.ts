@@ -54,9 +54,7 @@ abstract class FixWidget extends Widget {
     }
 
     setTimeout(async () => {
-      console.log('[FixWidget] Reanalyzing cell', cellIndex);
       const issues = await analyzeCellIssues(notebookPanel, cellIndex);
-      console.log('[FixWidget] Cell reanalysis found issues:', issues.length);
       const event = new CustomEvent('notebookReanalyzed', {
         detail: { issues, isCellUpdate: true },
         bubbles: true,

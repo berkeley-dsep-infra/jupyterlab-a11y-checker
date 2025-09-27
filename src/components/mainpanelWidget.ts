@@ -149,6 +149,31 @@ export class MainPanelWidget extends Widget {
           this.currentNotebook
         );
 
+        // Log a human-readable summary for troubleshooting
+        try {
+          const total = notebookIssues.length;
+
+          const byViolation = notebookIssues.reduce((acc: Record<string, number>, issue) => {
+            acc[issue.violationId] = (acc[issue.violationId] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+          const cellsAffected = Array.from(new Set(notebookIssues.map(i => i.cellIndex))).length;
+
+          const lines: string[] = [];
+          lines.push('A11Y Analysis Summary');
+          lines.push(`- Total issues: ${total}`);
+          lines.push(`- Cells affected: ${cellsAffected}`);
+
+          const allViolations = Object.entries(byViolation)
+            .sort((a, b) => b[1] - a[1])
+            .map(([v, c]) => `  - ${v}: ${c}`);
+          if (allViolations.length) {
+            lines.push('- Violations:');
+            lines.push(...allViolations);
+          }
+          console.log(lines.join('\n'));
+        } catch { }
+
         if (notebookIssues.length === 0) {
           issuesContainer.innerHTML =
             '<div class="no-issues">No issues found</div>';

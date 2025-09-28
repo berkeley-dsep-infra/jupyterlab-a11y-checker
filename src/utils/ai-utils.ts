@@ -101,7 +101,6 @@ export async function getImageAltSuggestion(
       max_tokens: 150
     });
 
-
     const response = await axios.post(visionSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +150,6 @@ export async function getTableCaptionSuggestion(
       ],
       max_tokens: 150
     });
-
 
     const response = await axios.post(languageSettings.baseUrl, body, {
       headers: {

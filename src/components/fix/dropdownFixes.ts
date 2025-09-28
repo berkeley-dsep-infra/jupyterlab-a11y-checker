@@ -276,7 +276,6 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     if (newContent !== entireCellContent) {
       this.cell.model.sharedModel.setSource(newContent);
       this.removeIssueWidget();
-    } else {
     }
   }
 
@@ -288,8 +287,6 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     if (this.previousLevel === undefined) {
       this.previousLevel = this.findClosestPreviousHeading(issue.cellIndex);
     }
-
-
 
     // Update the dropdown text explicitly after initialization
     if (this.dropdownText) {
@@ -404,8 +401,6 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
           validLevels.add(prevLevel);
         }
       }
-
-    } else {
     }
 
     return validLevels;

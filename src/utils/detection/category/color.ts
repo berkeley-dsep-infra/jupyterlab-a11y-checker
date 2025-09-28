@@ -239,8 +239,6 @@ async function getColorContrastInImage(
         // Terminate the worker
         await worker.terminate();
 
-
-
         resolve({
           contrast: minContrast,
           isAccessible,

@@ -16,8 +16,6 @@ const extension: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell,
     settingRegistry: ISettingRegistry
   ) => {
-
-
     const panel = new MainPanelWidget(settingRegistry);
 
     labShell.add(panel, 'right');

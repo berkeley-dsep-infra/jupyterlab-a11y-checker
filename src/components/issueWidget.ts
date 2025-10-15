@@ -68,6 +68,10 @@ export class CellIssueWidget extends Widget {
                   <div>Learn more</div>
               </button>
           </div>
+          <div class="offending-content-block">
+              <div class="offending-title">Original content:</div>
+              <pre class="offending-snippet" style="white-space: pre-wrap; max-height: 200px; overflow: auto; background: var(--jp-layout-color2); padding: 8px; border-radius: 4px; border: 1px solid var(--jp-border-color2);"></pre>
+          </div>
           <div class="fix-widget-container"></div>
       </div>
     `;
@@ -102,6 +106,14 @@ export class CellIssueWidget extends Widget {
           detailedDescription.style.display === 'none' ? 'block' : 'none';
       }
     });
+
+    // Populate offending content as plain text (not rendered)
+    const offendingSnippet = this.node.querySelector(
+      '.offending-snippet'
+    ) as HTMLElement;
+    if (offendingSnippet) {
+      offendingSnippet.textContent = `${this.issue.issueContentRaw || ''}`;
+    }
 
     // Show suggest button initially if AI is enabled
     const mainPanelElement = document.getElementById(

@@ -9,6 +9,7 @@ import {
 import { detectImageIssuesInCell } from './category';
 import { detectTableIssuesInCell } from './category';
 import { detectColorIssuesInCell } from './category';
+import { detectLinkIssuesInCell } from './category';
 
 export async function analyzeCellsAccessibility(
   panel: NotebookPanel
@@ -101,6 +102,11 @@ export async function analyzeCellsAccessibility(
               panel // Pass panel for attachment handling
             ))
           );
+
+          // Link Issues
+          notebookIssues.push(
+            ...detectLinkIssuesInCell(rawMarkdown, i, cellType)
+          );
         }
       } else if (cellType === 'code') {
         const codeInput = cell.node.querySelector('.jp-InputArea-editor');
@@ -167,6 +173,15 @@ export async function analyzeCellIssues(
       folderPath,
       panel
     ))
+  );
+
+  // Links
+  issues.push(
+    ...detectLinkIssuesInCell(
+      rawMarkdown,
+      cellIndex,
+      cellType
+    )
   );
 
   return issues;

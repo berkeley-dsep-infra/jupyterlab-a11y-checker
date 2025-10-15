@@ -7,7 +7,8 @@ import {
   TableHeaderFixWidget,
   HeadingOneFixWidget,
   HeadingOrderFixWidget,
-  TableScopeFixWidget
+  TableScopeFixWidget,
+  LinkTextFixWidget
 } from './fix';
 
 import { issueToDescription } from '../utils/metadata';
@@ -166,6 +167,13 @@ export class CellIssueWidget extends Widget {
         this.aiEnabled
       );
       fixWidgetContainer.appendChild(tableScopeFixWidget.node);
+    } else if (this.issue.violationId === 'link-discernible-text') {
+      const linkTextFixWidget = new LinkTextFixWidget(
+        this.issue,
+        this.cell,
+        this.aiEnabled
+      );
+      fixWidgetContainer.appendChild(linkTextFixWidget.node);
     }
   }
 

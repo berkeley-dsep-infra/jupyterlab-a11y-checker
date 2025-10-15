@@ -37,3 +37,11 @@
 | --- | ---------------------------- | ------------- |
 | 4a  | color-insufficient-cc-normal | None.         |
 | 4b  | color-insufficient-cc-large  | None.         |
+
+---
+
+## Link
+
+| No. | Rule ID               | Fix Interface                                  |
+| --- | --------------------- | ---------------------------------------------- |
+| 5a  | link-discernible-text | A text field to update link text or aria-label |

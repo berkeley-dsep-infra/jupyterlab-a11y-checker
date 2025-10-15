@@ -35,6 +35,7 @@ export const issueToCategory = new Map<string, string>([
   // TODO: Lists
 
   // TODO: Links
+  , ['link-discernible-text', 'Links']
 
   // TODO: Other
 ]);
@@ -172,6 +173,18 @@ export const issueToDescription = new Map<string, IIssueInformation>([
   // TODO: Lists
 
   // TODO: Links
+  , [
+    'link-discernible-text',
+    {
+      title: 'Link Text Not Descriptive',
+      description:
+        'Links must have discernible, descriptive text (or aria-label) that conveys purpose without relying on surrounding context.',
+      detailedDescription:
+        'Avoid vague phrases like "click here" or bare URLs. Provide concise, meaningful link text that describes the destination. This helps all users, including screen reader users, understand link purpose.',
+      descriptionUrl:
+        'https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context.html'
+    }
+  ]
 
   // TODO: Other
 ]);

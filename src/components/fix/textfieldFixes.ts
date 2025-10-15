@@ -400,3 +400,60 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
     }
   }
 }
+
+export class LinkTextFixWidget extends TextFieldFixWidget {
+  protected getDescription(): string {
+    return 'Update the link text or aria-label:';
+  }
+
+  applyTextToCell(providedText: string): void {
+    if (providedText === '') {
+      return;
+    }
+
+    const entireCellContent = this.cell.model.sharedModel.getSource();
+    const offsets = getIssueOffsets(this.issue, entireCellContent.length);
+    const offsetStart: number | null = offsets?.offsetStart ?? null;
+    const offsetEnd: number | null = offsets?.offsetEnd ?? null;
+
+    let newContent = entireCellContent;
+
+    const replaceMarkdownLinkText = (full: string): string => {
+      return full.replace(/\[[^\]]*\]/, `[${providedText}]`);
+    };
+
+    const replaceHtmlLinkTextOrAria = (full: string): string => {
+      if (/aria-label=/.test(full)) {
+        return full.replace(/aria-label=["'].*?["']/i, `aria-label="${providedText}"`);
+      }
+      return full.replace(/(<a\b[^>]*>)([\s\S]*?)(<\/a>)/i, (_m, pre, _inner, post) => `${pre}${providedText}${post}`);
+    };
+
+    if (offsetStart !== null && offsetEnd !== null) {
+      const originalSlice = entireCellContent.slice(offsetStart, offsetEnd);
+      let replacedSlice = originalSlice;
+      if (originalSlice.trim().startsWith('<a')) {
+        replacedSlice = replaceHtmlLinkTextOrAria(originalSlice);
+      } else if (originalSlice.trim().startsWith('[')) {
+        replacedSlice = replaceMarkdownLinkText(originalSlice);
+      }
+      newContent = replaceSlice(entireCellContent, offsetStart, offsetEnd, replacedSlice);
+    } else {
+      const target = this.issue.issueContentRaw;
+      if (target.trim().startsWith('<a')) {
+        newContent = entireCellContent.replace(target, replaceHtmlLinkTextOrAria(target));
+      } else if (target.trim().startsWith('[')) {
+        newContent = entireCellContent.replace(target, replaceMarkdownLinkText(target));
+      }
+    }
+
+    this.cell.model.sharedModel.setSource(newContent);
+    this.removeIssueWidget();
+    void this.reanalyzeCellAndDispatch();
+  }
+
+  async displayAISuggestions(): Promise<void> {
+    // Not implemented for links today
+    return;
+  }
+}

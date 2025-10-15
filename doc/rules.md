@@ -41,8 +41,9 @@
 ---
 
 ## Link
-
-TBD
+| No. | Rule ID                | Description                                                     | WCAG       |
+| --- | ---------------------- | --------------------------------------------------------------- | ---------- |
+| 5a  | link-discernible-text  | Ensure link text is descriptive (or aria-label is descriptive) | WCAG 2.4.4 |
 
 ## List
 

@@ -44,4 +44,4 @@
 
 | No. | Rule ID               | Fix Interface                                  |
 | --- | --------------------- | ---------------------------------------------- |
-| 5a  | link-discernible-text | A text field to update link text or aria-label |
+| 5a  | link-discernible-text | A text field to update link text or aria-label. |

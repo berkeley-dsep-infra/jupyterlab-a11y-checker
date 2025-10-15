@@ -27,14 +27,11 @@ export function detectLinkIssuesInCell(
   cellType: string
 ): ICellIssue[] {
   const issues: ICellIssue[] = [];
-  let mdMatches = 0;
-  let htmlMatches = 0;
 
   // Markdown links: [text](url)
   const mdLink = /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/g;
   let match: RegExpExecArray | null;
   while ((match = mdLink.exec(rawMarkdown)) !== null) {
-    mdMatches++;
     const full = match[0];
     const text = (match[1] || '').trim();
     const start = match.index ?? 0;
@@ -58,7 +55,6 @@ export function detectLinkIssuesInCell(
   // HTML links: <a ...>text</a>
   const htmlLink = /<a\b[^>]*>\s*([\s\S]*?)\s*<\/a>/gi;
   while ((match = htmlLink.exec(rawMarkdown)) !== null) {
-    htmlMatches++;
     const full = match[0];
     const inner = (match[1] || '').replace(/<[^>]*>/g, '').trim();
     const tagStart = match.index ?? 0;

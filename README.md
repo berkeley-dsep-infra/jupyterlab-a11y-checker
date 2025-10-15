@@ -143,19 +143,16 @@ command. To find its location, you can run `jupyter labextension list` to figure
 folder is located. Then you can remove the symlink named `jupyterlab-a11y-checker` within that folder.
 
 ## Acknowledgements
+
 Fix the hackmd file for me
-
-
 
 ## Acknowledgements
 
-
-
-| Name              | Role                 |  GitHub Handle   |
-| ----------------- | -------------------------- | ---|
-| Chanbin Park      | Student Developer | @chanbinski |
-| Vivian Liu        | Student Developer   | @vzliu         |       
-| Shreyas Rana      | Student Developer   | @ranashreyas    |
-| Balaji Alwar      | Project Lead        | @balajialg |
-| Ryan Lovett       | Volunteer (Jupyter expert) | @ryanlovett |
-| Joe Feria Galicia | Volunteer (a11y expert)    | NA     |                                                            
+| Name              | Role                       | GitHub Handle |
+| ----------------- | -------------------------- | ------------- |
+| Chanbin Park      | Student Developer          | @chanbinski   |
+| Vivian Liu        | Student Developer          | @vzliu        |
+| Shreyas Rana      | Student Developer          | @ranashreyas  |
+| Balaji Alwar      | Project Lead               | @balajialg    |
+| Ryan Lovett       | Volunteer (Jupyter expert) | @ryanlovett   |
+| Joe Feria Galicia | Volunteer (a11y expert)    | NA            |

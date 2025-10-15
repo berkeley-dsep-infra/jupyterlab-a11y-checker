@@ -176,13 +176,7 @@ export async function analyzeCellIssues(
   );
 
   // Links
-  issues.push(
-    ...detectLinkIssuesInCell(
-      rawMarkdown,
-      cellIndex,
-      cellType
-    )
-  );
+  issues.push(...detectLinkIssuesInCell(rawMarkdown, cellIndex, cellType));
 
   return issues;
 }

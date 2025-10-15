@@ -1,12 +1,6 @@
 import { ICellIssue } from '../../types';
 
-const VAGUE_PHRASES = [
-  'click',
-  'here',
-  'link',
-  'more',
-  'read'
-];
+const VAGUE_PHRASES = ['click', 'here', 'link', 'more', 'read'];
 const MIN_DESCRIPTIVE_CHARS = 20;
 
 function isUrlLike(text: string): boolean {
@@ -21,8 +15,10 @@ function containsVaguePhrase(text: string): boolean {
 
 function extractAttr(tag: string, attr: string): string | null {
   // Match attr='...' or attr="..."
-  const m = new RegExp(attr + "=['\"][^'\"]+['\"]", 'i').exec(tag);
-  return m ? (m[0].split('=')[1].replace(/^['\"]/, '').replace(/['\"]$/, '')) : null;
+  const m = new RegExp(attr + '=[\'"][^\'"]+[\'"]', 'i').exec(tag);
+  return m
+    ? m[0].split('=')[1].replace(/^['"]/, '').replace(/['"]$/, '')
+    : null;
 }
 
 export function detectLinkIssuesInCell(
@@ -33,8 +29,6 @@ export function detectLinkIssuesInCell(
   const issues: ICellIssue[] = [];
   let mdMatches = 0;
   let htmlMatches = 0;
-  // Log start of scan for this cell
-  console.log(`[a11y/link] scanning cell ${cellIndex}`);
 
   // Markdown links: [text](url)
   const mdLink = /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/g;
@@ -58,9 +52,6 @@ export function detectLinkIssuesInCell(
           offsetEnd: end
         }
       });
-      try {
-        console.log(`[a11y/link] flagged (md): "${text}" @ ${start}-${end}`);
-      } catch { }
     }
   }
 
@@ -77,7 +68,7 @@ export function detectLinkIssuesInCell(
     const openingTagMatch = /<a\b[^>]*>/i.exec(full);
     const openingTag = openingTagMatch ? openingTagMatch[0] : '';
     const aria = extractAttr(openingTag, 'aria-label');
-    const label = (aria && aria.trim()) ? aria.trim() : inner;
+    const label = aria && aria.trim() ? aria.trim() : inner;
 
     const violation = shouldFlag(label);
     if (violation) {
@@ -92,21 +83,17 @@ export function detectLinkIssuesInCell(
           offsetEnd: tagEnd
         }
       });
-      try {
-        console.log(`[a11y/link] flagged (html): "${label}" @ ${tagStart}-${tagEnd}`);
-      } catch { }
     }
   }
 
-  try {
-    console.log(`[a11y/link] cell ${cellIndex}: mdMatches=${mdMatches}, htmlMatches=${htmlMatches}, flagged=${issues.length}`);
-  } catch { }
   return issues;
 }
 
 function shouldFlag(text: string): boolean {
   // Flag if entire text is a URL
-  if (isUrlLike(text)) return true;
+  if (isUrlLike(text)) {
+    return true;
+  }
   // AND condition: vague phrase present AND too short
   const tooShort = text.trim().length < MIN_DESCRIPTIVE_CHARS;
   const hasVague = containsVaguePhrase(text);

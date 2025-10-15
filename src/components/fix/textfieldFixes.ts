@@ -424,9 +424,15 @@ export class LinkTextFixWidget extends TextFieldFixWidget {
 
     const replaceHtmlLinkTextOrAria = (full: string): string => {
       if (/aria-label=/.test(full)) {
-        return full.replace(/aria-label=["'].*?["']/i, `aria-label="${providedText}"`);
+        return full.replace(
+          /aria-label=["'].*?["']/i,
+          `aria-label="${providedText}"`
+        );
       }
-      return full.replace(/(<a\b[^>]*>)([\s\S]*?)(<\/a>)/i, (_m, pre, _inner, post) => `${pre}${providedText}${post}`);
+      return full.replace(
+        /(<a\b[^>]*>)([\s\S]*?)(<\/a>)/i,
+        (_m, pre, _inner, post) => `${pre}${providedText}${post}`
+      );
     };
 
     if (offsetStart !== null && offsetEnd !== null) {
@@ -437,13 +443,24 @@ export class LinkTextFixWidget extends TextFieldFixWidget {
       } else if (originalSlice.trim().startsWith('[')) {
         replacedSlice = replaceMarkdownLinkText(originalSlice);
       }
-      newContent = replaceSlice(entireCellContent, offsetStart, offsetEnd, replacedSlice);
+      newContent = replaceSlice(
+        entireCellContent,
+        offsetStart,
+        offsetEnd,
+        replacedSlice
+      );
     } else {
       const target = this.issue.issueContentRaw;
       if (target.trim().startsWith('<a')) {
-        newContent = entireCellContent.replace(target, replaceHtmlLinkTextOrAria(target));
+        newContent = entireCellContent.replace(
+          target,
+          replaceHtmlLinkTextOrAria(target)
+        );
       } else if (target.trim().startsWith('[')) {
-        newContent = entireCellContent.replace(target, replaceMarkdownLinkText(target));
+        newContent = entireCellContent.replace(
+          target,
+          replaceMarkdownLinkText(target)
+        );
       }
     }
 

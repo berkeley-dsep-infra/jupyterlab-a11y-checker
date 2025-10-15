@@ -30,12 +30,11 @@ export const issueToCategory = new Map<string, string>([
 
   // TODO: 4. Color
   ['color-insufficient-cc-normal', 'Color'],
-  ['color-insufficient-cc-large', 'Color']
-
+  ['color-insufficient-cc-large', 'Color'],
   // TODO: Lists
 
   // TODO: Links
-  , ['link-discernible-text', 'Links']
+  ['link-discernible-text', 'Links']
 
   // TODO: Other
 ]);
@@ -168,12 +167,11 @@ export const issueToDescription = new Map<string, IIssueInformation>([
         'Large text must have sufficient contrast with its background to be readable. For large text (18pt or 14pt bold), the contrast ratio should be at least 3:1. This ensures that users with visual impairments can read the content',
       descriptionUrl: 'https://dequeuniversity.com/rules/axe/3.5/color-contrast'
     }
-  ]
-
+  ],
   // TODO: Lists
 
   // TODO: Links
-  , [
+  [
     'link-discernible-text',
     {
       title: 'Link Text Not Descriptive',

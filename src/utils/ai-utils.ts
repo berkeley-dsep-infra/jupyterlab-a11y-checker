@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { http } from './http';
 import { ICellIssue } from './types';
 
 export interface IModelSettings {
@@ -13,8 +13,8 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
    * Similar to the Python convert_to_jpeg_base64 function in your notebook.
    */
 
-  const response = await axios.get(imageUrl, { responseType: 'blob' });
-  const imageBlob = response.data;
+  const response = await http.get(imageUrl, { responseType: 'blob' });
+  const imageBlob = response.data as Blob;
 
   return new Promise<string>((resolve, reject) => {
     const img = new Image();
@@ -101,7 +101,7 @@ export async function getImageAltSuggestion(
       max_tokens: 150
     });
 
-    const response = await axios.post(visionSettings.baseUrl, body, {
+    const response = await http.post(visionSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${visionSettings.apiKey}`
@@ -151,7 +151,7 @@ export async function getTableCaptionSuggestion(
       max_tokens: 150
     });
 
-    const response = await axios.post(languageSettings.baseUrl, body, {
+    const response = await http.post(languageSettings.baseUrl, body, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${languageSettings.apiKey}`

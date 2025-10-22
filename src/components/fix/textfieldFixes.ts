@@ -429,6 +429,12 @@ export class LinkTextFixWidget extends TextFieldFixWidget {
           `aria-label="${providedText}"`
         );
       }
+      // If there is no aria-label and no visible inner text, add aria-label
+      const innerText = (full.replace(/<a\b[^>]*>/i, '').replace(/<\/a>/i, '') || '').replace(/<[^>]*>/g, '').trim();
+      if (innerText.length === 0) {
+        return full.replace(/<a\b([^>]*)>/i, (_m, attrs) => `<a${attrs} aria-label="${providedText}">`);
+      }
+      // Otherwise, replace inner text
       return full.replace(
         /(<a\b[^>]*>)([\s\S]*?)(<\/a>)/i,
         (_m, pre, _inner, post) => `${pre}${providedText}${post}`

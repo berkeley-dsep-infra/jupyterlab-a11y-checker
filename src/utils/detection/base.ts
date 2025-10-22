@@ -31,7 +31,8 @@ export async function analyzeCellsAccessibility(
       'image-alt': { enabled: false },
       'empty-heading': { enabled: false },
       'heading-order': { enabled: false },
-      'page-has-heading-one': { enabled: false }
+      'page-has-heading-one': { enabled: false },
+      'link-name': { enabled: false }
     }
   };
 

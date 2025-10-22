@@ -66,6 +66,24 @@ export function detectLinkIssuesInCell(
     const aria = extractAttr(openingTag, 'aria-label');
     const label = aria && aria.trim() ? aria.trim() : inner;
 
+    // Explicitly flag anchors with no discernible text and no aria-label
+    const hasAria = !!(aria && aria.trim());
+    const hasInnerText = inner.length > 0;
+    if (!hasAria && !hasInnerText) {
+      issues.push({
+        cellIndex,
+        cellType: cellType as 'code' | 'markdown',
+        violationId: 'link-discernible-text',
+        issueContentRaw: full,
+        metadata: {
+          issueId: `cell-${cellIndex}-link-discernible-text-o${tagStart}-${tagEnd}`,
+          offsetStart: tagStart,
+          offsetEnd: tagEnd
+        }
+      });
+      continue;
+    }
+
     const violation = shouldFlag(label);
     if (violation) {
       issues.push({

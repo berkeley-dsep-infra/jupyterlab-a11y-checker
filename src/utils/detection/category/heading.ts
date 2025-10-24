@@ -13,86 +13,41 @@ export async function detectHeadingOneIssue(
   const notebookIssues: ICellIssue[] = [];
   const tempDiv = document.createElement('div');
 
-  // Find the first heading in the notebook
-  let firstHeadingFound = false;
-
-  // Check if first cell is a code cell
-  if (cells.length > 0 && cells[0].model.type === 'code') {
-    notebookIssues.push({
-      cellIndex: 0,
-      cellType: 'code',
-      violationId: 'heading-missing-h1',
-      issueContentRaw: ''
-    });
+  // If there are no cells, nothing to report
+  if (!cells.length) {
+    tempDiv.remove();
+    return notebookIssues;
   }
 
-  for (let i = 0; i < cells.length; i++) {
-    const cell = cells[i];
-    if (cell.model.type !== 'markdown') {
-      continue;
-    }
-
-    const content = cell.model.sharedModel.getSource();
-    if (!content.trim()) {
-      continue;
-    }
-
-    // Use marked tokens to find the first heading and offsets in source
+  // Check if the first cell begins with an H1 (the only case where we do NOT flag)
+  const firstCell = cells[0];
+  let firstCellStartsWithH1 = false;
+  if (firstCell.model.type === 'markdown') {
+    const content = firstCell.model.sharedModel.getSource();
     const tokens: any[] = marked.lexer(content) as any[];
-    let searchStart = 0;
-    let foundFirst = false;
-    for (const token of tokens) {
-      let level: number | null = null;
-      let rawHeading = '';
-
-      if ((token as any).type === 'heading') {
-        level = (token as any).depth;
-        rawHeading = (token as any).raw || '';
-      } else if ((token as any).type === 'html') {
-        const rawHtml = (token as any).raw || '';
-        const m = rawHtml.match(/<h([1-6])[^>]*>[\s\S]*?<\/h\1>/i);
-        if (m) {
-          level = parseInt(m[1], 10);
-          rawHeading = m[0];
-        }
-      }
-
-      if (level !== null) {
-        const start = content.indexOf(rawHeading, searchStart);
-        if (start === -1) {
-          continue;
-        }
-        const end = start + rawHeading.length;
-        searchStart = end;
-
-        firstHeadingFound = true;
-
-        if (level !== 1) {
-          notebookIssues.push({
-            cellIndex: i,
-            cellType: 'markdown',
-            violationId: 'heading-missing-h1',
-            issueContentRaw: rawHeading
-          });
-        }
-        foundFirst = true;
-        break;
-      }
-    }
-    if (foundFirst) {
-      break;
+    const firstToken: any = tokens.find(
+      (t: any) => t && t.type !== 'space' && (t.raw || '').trim().length > 0
+    );
+    if (firstToken && firstToken.type === 'heading' && firstToken.depth === 1) {
+      firstCellStartsWithH1 = true;
+    } else if (firstToken && firstToken.type === 'html') {
+      const rawHtml = firstToken.raw || '';
+      firstCellStartsWithH1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.test(rawHtml);
     }
   }
 
-  // If no headings found at all, suggest adding h1 at the top
-  if (!firstHeadingFound) {
-    notebookIssues.push({
-      cellIndex: 0,
-      cellType: 'markdown',
-      violationId: 'heading-missing-h1',
-      issueContentRaw: ''
-    });
+  if (firstCellStartsWithH1) {
+    tempDiv.remove();
+    return notebookIssues;
   }
+
+  // Emit a single top-level issue at the beginning and return
+  notebookIssues.push({
+    cellIndex: 0,
+    cellType: firstCell.model.type as 'markdown' | 'code',
+    violationId: 'heading-missing-h1',
+    issueContentRaw: ''
+  });
 
   tempDiv.remove();
   return notebookIssues;

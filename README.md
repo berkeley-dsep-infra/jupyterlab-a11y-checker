@@ -154,5 +154,5 @@ Fix the hackmd file for me
 | Vivian Liu        | Student Developer          | @vzliu        |
 | Shreyas Rana      | Student Developer          | @ranashreyas  |
 | Balaji Alwar      | Project Lead               | @balajialg    |
-| Ryan Lovett       | Volunteer (Jupyter expert) | @ryanlovett   |
+| Ryan Lovett       | Volunteer (Jupyter Consultant) | @ryanlovett   |
 | Joe Feria Galicia | Volunteer (a11y expert)    | NA            |

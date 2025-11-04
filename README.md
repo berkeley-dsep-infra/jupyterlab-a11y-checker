@@ -148,11 +148,11 @@ Fix the hackmd file for me
 
 ## Acknowledgements
 
-| Name              | Role                       | GitHub Handle |
-| ----------------- | -------------------------- | ------------- |
-| Chanbin Park      | Student Developer          | @chanbinski   |
-| Vivian Liu        | Student Developer          | @vzliu        |
-| Shreyas Rana      | Student Developer          | @ranashreyas  |
-| Balaji Alwar      | Project Lead               | @balajialg    |
+| Name              | Role                           | GitHub Handle |
+| ----------------- | ------------------------------ | ------------- |
+| Chanbin Park      | Student Developer              | @chanbinski   |
+| Vivian Liu        | Student Developer              | @vzliu        |
+| Shreyas Rana      | Student Developer              | @ranashreyas  |
+| Balaji Alwar      | Project Lead                   | @balajialg    |
 | Ryan Lovett       | Volunteer (Jupyter Consultant) | @ryanlovett   |
-| Joe Feria Galicia | Volunteer (a11y expert)    | NA            |
+| Joe Feria Galicia | Volunteer (a11y expert)        | NA            |

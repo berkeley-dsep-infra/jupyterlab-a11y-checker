@@ -1,5 +1,7 @@
 # jupyterlab-a11y-checker
 
+[![jupyterlab-a11y-checker](https://marketplace.orbrx.io/api/badge/jupyterlab-a11y-checker?metric=downloads&leftColor=%23555&rightColor=%23F37620&style=flat)](https://marketplace.orbrx.io/extensions/jupyterlab-a11y-checker)
+
 jupyterLab-a11y-checker is a JupyterLab extension that helps authors detect and fix accessibility issues in Jupyter Notebooks, aligning with WCAG 2.1 AA guidelines. It enables authors to identify accessibility issues in their notebooks and provides actionable suggestions to fix them. It combines the strengths of [axe-core](https://github.com/dequelabs/axe-core), a widely used accessibility engine, with custom notebook-specific detection algorithms that address issues axe cannot reliably cover in JupyterLab.
 
 Here's how the extension looks like:

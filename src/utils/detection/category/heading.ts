@@ -1,14 +1,11 @@
-import { Cell } from '@jupyterlab/cells';
-import { ICellModel } from '@jupyterlab/cells';
-import { NotebookPanel } from '@jupyterlab/notebook';
 import { marked } from 'marked';
-import { ICellIssue } from '../../types';
+import { IGeneralCell, ICellIssue } from '../../types';
 
 export async function detectHeadingOneIssue(
   rawMarkdown: string,
   cellIndex: number,
   cellType: string,
-  cells: readonly Cell<ICellModel>[]
+  cells: IGeneralCell[]
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
   const tempDiv = document.createElement('div');
@@ -22,8 +19,8 @@ export async function detectHeadingOneIssue(
   // Check if the first cell begins with an H1 (the only case where we do NOT flag)
   const firstCell = cells[0];
   let firstCellStartsWithH1 = false;
-  if (firstCell.model.type === 'markdown') {
-    const content = firstCell.model.sharedModel.getSource();
+  if (firstCell.type === 'markdown') {
+    const content = firstCell.source;
     const tokens: any[] = marked.lexer(content) as any[];
     const firstToken: any = tokens.find(
       (t: any) => t && t.type !== 'space' && (t.raw || '').trim().length > 0
@@ -44,7 +41,7 @@ export async function detectHeadingOneIssue(
   // Emit a single top-level issue at the beginning and return
   notebookIssues.push({
     cellIndex: 0,
-    cellType: firstCell.model.type as 'markdown' | 'code',
+    cellType: firstCell.type as 'markdown' | 'code',
     violationId: 'heading-missing-h1',
     issueContentRaw: ''
   });
@@ -54,10 +51,9 @@ export async function detectHeadingOneIssue(
 }
 
 export async function analyzeHeadingHierarchy(
-  panel: NotebookPanel
+  cells: IGeneralCell[]
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
-  const cells = panel.content.widgets;
   const tempDiv = document.createElement('div');
   document.body.appendChild(tempDiv);
 
@@ -74,11 +70,11 @@ export async function analyzeHeadingHierarchy(
     // First pass: collect all headings
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
-      if (!cell || !cell.model || cell.model.type !== 'markdown') {
+      if (!cell || cell.type !== 'markdown') {
         continue;
       }
 
-      const content = cell.model.sharedModel.getSource();
+      const content = cell.source;
       if (!content.trim()) {
         continue;
       }

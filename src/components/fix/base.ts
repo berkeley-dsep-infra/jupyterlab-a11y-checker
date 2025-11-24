@@ -3,6 +3,7 @@ import { Cell, ICellModel } from '@jupyterlab/cells';
 import { ICellIssue } from '../../utils/types';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { analyzeCellIssues } from '../../utils/detection/base';
+import { notebookToGeneralCells } from '../../utils/adapter';
 // Intentionally keep base free of category-specific analysis. Widgets can override.
 
 abstract class FixWidget extends Widget {
@@ -54,7 +55,13 @@ abstract class FixWidget extends Widget {
     }
 
     setTimeout(async () => {
-      const issues = await analyzeCellIssues(notebookPanel, cellIndex);
+      const accessibleCells = notebookToGeneralCells(notebookPanel);
+      const targetCell = accessibleCells[cellIndex];
+      const issues = await analyzeCellIssues(
+        targetCell,
+        document,
+        notebookPanel.context.path
+      );
       const event = new CustomEvent('notebookReanalyzed', {
         detail: { issues, isCellUpdate: true },
         bubbles: true,

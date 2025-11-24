@@ -1,7 +1,6 @@
-import { NotebookPanel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
 import Tesseract, { PSM } from 'tesseract.js';
-import { ICellIssue } from '../../types';
+import { IGeneralCell, ICellIssue } from '../../types';
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -31,83 +30,34 @@ function calculateContrast(
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-/**
- * Extract image data from a JupyterLab attachment
- * @param attachmentId The ID of the attachment (e.g., 'c6533816-e12f-47fb-8896-af4065f8a12f.png')
- * @param panel The notebook panel containing the attachment
- * @param cellIndex The index of the cell containing the attachment
- * @returns Data URL for the image or null if not found
- */
-async function getAttachmentDataUrl(
-  attachmentId: string,
-  panel: NotebookPanel,
-  cellIndex: number
-): Promise<string | null> {
-  try {
-    // Extract filename from attachment ID
-
-    if (!panel.model) {
-      console.warn('No notebook model available');
-      return null;
-    }
-
-    const cell = panel.content.widgets[cellIndex];
-
-    if (!cell || !cell.model) {
-      console.warn(`Cell at index ${cellIndex} is not available`);
-      return null;
-    }
-
-    try {
-      // Access the cell data directly
-      const cellData = cell.model.toJSON() as any;
-      if (
-        cellData &&
-        cellData.attachments &&
-        cellData.attachments[attachmentId]
-      ) {
-        const data = cellData.attachments[attachmentId];
-
-        // Get the base64 data
-        if (data && typeof data === 'object') {
-          for (const mimetype in data) {
-            if (mimetype.startsWith('image/')) {
-              const base64 = data[mimetype];
-              if (typeof base64 === 'string') {
-                return `data:${mimetype};base64,${base64}`;
-              }
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.error('Error accessing cell widget data:', e);
-    }
-    return null;
-  } catch (error) {
-    console.error('Error extracting attachment:', error);
-    return null;
-  }
-}
-
 async function getColorContrastInImage(
   imagePath: string,
   currentDirectoryPath: string,
-  panel?: NotebookPanel,
-  cellIndex?: number
+  attachments?: IGeneralCell['attachments']
 ): Promise<{ contrast: number; isAccessible: boolean; hasLargeText: boolean }> {
   // Determine the source for the image
   let imageSource: string;
 
   // Check if this is a JupyterLab attachment
   if (imagePath.startsWith('attachment:')) {
-    if (!panel || cellIndex === undefined) {
-      throw new Error(
-        'NotebookPanel and cellIndex required for attachment images'
-      );
+    if (!attachments) {
+      throw new Error('Attachments required for attachment images');
     }
     const attachmentId = imagePath.substring('attachment:'.length);
-    const dataUrl = await getAttachmentDataUrl(attachmentId, panel, cellIndex);
+    const data = attachments[attachmentId];
+    let dataUrl: string | null = null;
+
+    if (data) {
+      for (const mimetype in data) {
+        if (mimetype.startsWith('image/')) {
+          const base64 = data[mimetype];
+          if (typeof base64 === 'string') {
+            dataUrl = `data:${mimetype};base64,${base64}`;
+            break;
+          }
+        }
+      }
+    }
 
     if (!dataUrl) {
       throw new Error(`Could not load attachment: ${attachmentId}`);
@@ -320,7 +270,7 @@ export async function detectColorIssuesInCell(
   cellIndex: number,
   cellType: string,
   notebookPath: string,
-  panel?: NotebookPanel
+  attachments?: IGeneralCell['attachments']
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
@@ -344,12 +294,7 @@ export async function detectColorIssuesInCell(
       try {
         // getColorContrastInImage will handle both regular images and attachments
         const { contrast, isAccessible, hasLargeText } =
-          await getColorContrastInImage(
-            imageUrl,
-            notebookPath,
-            panel,
-            cellIndex
-          );
+          await getColorContrastInImage(imageUrl, notebookPath, attachments);
         if (!isAccessible) {
           if (hasLargeText) {
             notebookIssues.push({

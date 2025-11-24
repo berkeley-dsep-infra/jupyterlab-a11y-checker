@@ -7,6 +7,8 @@ import { ILabShell } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { MainPanelWidget } from './components/mainpanelWidget';
 import { analyzeCellsAccessibility } from './utils/detection/base';
+import { IGeneralCell } from './utils/types';
+import { notebookToGeneralCells } from './utils/adapter';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-a11y-checker:plugin',
@@ -34,7 +36,14 @@ const extension: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         const current = labShell.currentWidget;
         if (current instanceof NotebookPanel) {
-          return await analyzeCellsAccessibility(current);
+          const accessibleCells: IGeneralCell[] =
+            notebookToGeneralCells(current);
+
+          return await analyzeCellsAccessibility(
+            accessibleCells,
+            document,
+            current.context.path
+          );
         }
         return [];
       }

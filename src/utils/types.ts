@@ -12,6 +12,13 @@ export interface ICellIssue {
   suggestedFix?: string;
 }
 
+export interface IGeneralCell {
+  cellIndex: number;
+  type: 'markdown' | 'code' | 'raw';
+  source: string;
+  attachments?: { [key: string]: { [mimeType: string]: string } };
+}
+
 export interface IIssueInformation {
   title: string;
   description: string;

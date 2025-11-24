@@ -4,12 +4,13 @@ import { getIssueOffsets, replaceSlice } from '../../utils';
 import { analyzeTableIssues } from '../../utils/detection/category/table';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { Cell, ICellModel } from '@jupyterlab/cells';
-// import { NotebookPanel } from '@jupyterlab/notebook';
 import { DropdownFixWidget } from './base';
 import {
   analyzeHeadingHierarchy,
   detectHeadingOneIssue
 } from '../../utils/detection/category/heading';
+import { notebookToGeneralCells } from '../../utils/adapter';
+
 export class TableHeaderFixWidget extends DropdownFixWidget {
   protected getDescription(): string {
     return 'Choose which row or column should be used as the header:';
@@ -128,9 +129,10 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
       if (this.cell.parent?.parent) {
         try {
           // Only analyze table issues
-          const tableIssues = await analyzeTableIssues(
+          const accessibleCells = notebookToGeneralCells(
             this.cell.parent.parent as NotebookPanel
           );
+          const tableIssues = await analyzeTableIssues(accessibleCells);
 
           // Find the main panel widget
           const mainPanel = document
@@ -413,13 +415,14 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
       return;
     }
     setTimeout(async () => {
+      const accessibleCells = notebookToGeneralCells(notebookPanel);
       const headingHierarchyIssues =
-        await analyzeHeadingHierarchy(notebookPanel);
+        await analyzeHeadingHierarchy(accessibleCells);
       const headingOneIssues = await detectHeadingOneIssue(
         '',
         0,
         'markdown',
-        notebookPanel.content.widgets
+        accessibleCells
       );
       const allHeadingIssues = [...headingHierarchyIssues, ...headingOneIssues];
       const mainPanel = document

@@ -1,7 +1,6 @@
-import { NotebookPanel } from '@jupyterlab/notebook';
 import axe from 'axe-core';
 import { marked } from 'marked';
-import { ICellIssue } from '../types';
+import { ICellIssue, IGeneralCell } from '../types';
 import {
   detectHeadingOneIssue,
   analyzeHeadingHierarchy
@@ -12,18 +11,19 @@ import { detectColorIssuesInCell } from './category';
 import { detectLinkIssuesInCell } from './category';
 
 export async function analyzeCellsAccessibility(
-  panel: NotebookPanel
+  cells: IGeneralCell[],
+  documentContext: Document,
+  notebookPath: string = ''
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
-  const cells = panel.content.widgets;
 
   // Add heading one check
   notebookIssues.push(
     ...(await detectHeadingOneIssue('', 0, 'markdown', cells))
   );
 
-  const tempDiv = document.createElement('div');
-  document.body.appendChild(tempDiv);
+  const tempDiv = documentContext.createElement('div');
+  documentContext.body.appendChild(tempDiv);
 
   const axeConfig: axe.RunOptions = {
     runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
@@ -38,20 +38,20 @@ export async function analyzeCellsAccessibility(
 
   try {
     // First, analyze heading hierarchy across the notebook
-    const headingIssues = await analyzeHeadingHierarchy(panel);
+    const headingIssues = await analyzeHeadingHierarchy(cells);
     notebookIssues.push(...headingIssues);
 
     // Then analyze individual cells for other issues
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
-      if (!cell || !cell.model) {
+      if (!cell) {
         console.warn(`Skipping cell ${i}: Invalid cell or model`);
         continue;
       }
 
-      const cellType = cell.model.type;
+      const cellType = cell.type;
       if (cellType === 'markdown') {
-        const rawMarkdown = cell.model.sharedModel.getSource();
+        const rawMarkdown = cell.source;
         if (rawMarkdown.trim()) {
           tempDiv.innerHTML = await marked.parse(rawMarkdown);
 
@@ -72,19 +72,13 @@ export async function analyzeCellsAccessibility(
             });
           }
 
-          // Add custom image issue detection
-          const folderPath = panel.context.path.substring(
-            0,
-            panel.context.path.lastIndexOf('/')
-          );
-
           // Image Issues
           notebookIssues.push(
             ...(await detectImageIssuesInCell(
               rawMarkdown,
               i,
               cellType,
-              folderPath
+              notebookPath
             ))
           );
 
@@ -99,8 +93,8 @@ export async function analyzeCellsAccessibility(
               rawMarkdown,
               i,
               cellType,
-              folderPath,
-              panel // Pass panel for attachment handling
+              notebookPath,
+              cell.attachments
             ))
           );
 
@@ -110,11 +104,7 @@ export async function analyzeCellsAccessibility(
           );
         }
       } else if (cellType === 'code') {
-        const codeInput = cell.node.querySelector('.jp-InputArea-editor');
-        const codeOutput = cell.node.querySelector('.jp-OutputArea');
-        if (codeInput || codeOutput) {
-          // We would have to feed this into a language model to get the suggested fix.
-        }
+        // Code cell analysis not implemented yet
       }
     }
   } finally {
@@ -127,57 +117,50 @@ export async function analyzeCellsAccessibility(
 // Analyze a single cell (content-based categories only). Headings are excluded
 // because heading structure depends on the entire notebook.
 export async function analyzeCellIssues(
-  panel: NotebookPanel,
-  cellIndex: number
+  cell: IGeneralCell,
+  documentContext: Document,
+  notebookPath: string = ''
 ): Promise<ICellIssue[]> {
   const issues: ICellIssue[] = [];
-  const cells = panel.content.widgets;
-  const cell = cells[cellIndex];
-  if (!cell || !cell.model) {
-    return issues;
-  }
 
-  const cellType = cell.model.type;
+  const cellType = cell.type;
   if (cellType !== 'markdown') {
     return issues;
   }
 
-  const rawMarkdown = cell.model.sharedModel.getSource();
+  const rawMarkdown = cell.source;
   if (!rawMarkdown.trim()) {
     return issues;
   }
-
-  const folderPath = panel.context.path.substring(
-    0,
-    panel.context.path.lastIndexOf('/')
-  );
 
   // Images
   issues.push(
     ...(await detectImageIssuesInCell(
       rawMarkdown,
-      cellIndex,
+      cell.cellIndex,
       cellType,
-      folderPath
+      notebookPath
     ))
   );
 
   // Tables
-  issues.push(...detectTableIssuesInCell(rawMarkdown, cellIndex, cellType));
+  issues.push(
+    ...detectTableIssuesInCell(rawMarkdown, cell.cellIndex, cellType)
+  );
 
   // Color
   issues.push(
     ...(await detectColorIssuesInCell(
       rawMarkdown,
-      cellIndex,
+      cell.cellIndex,
       cellType,
-      folderPath,
-      panel
+      notebookPath,
+      cell.attachments
     ))
   );
 
   // Links
-  issues.push(...detectLinkIssuesInCell(rawMarkdown, cellIndex, cellType));
+  issues.push(...detectLinkIssuesInCell(rawMarkdown, cell.cellIndex, cellType));
 
   return issues;
 }

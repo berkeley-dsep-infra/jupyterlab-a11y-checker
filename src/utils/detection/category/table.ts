@@ -1,5 +1,4 @@
-import { ICellIssue } from '../../types';
-import { NotebookPanel } from '@jupyterlab/notebook';
+import { IGeneralCell, ICellIssue } from '../../types';
 
 export function detectTableIssuesInCell(
   rawMarkdown: string,
@@ -84,18 +83,17 @@ export function detectTableIssuesInCell(
 }
 
 export async function analyzeTableIssues(
-  panel: NotebookPanel
+  cells: IGeneralCell[]
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
-  const cells = panel.content.widgets;
 
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
-    if (!cell || !cell.model || cell.model.type !== 'markdown') {
+    if (!cell || cell.type !== 'markdown') {
       continue;
     }
 
-    const content = cell.model.sharedModel.getSource();
+    const content = cell.source;
     if (!content.trim()) {
       continue;
     }

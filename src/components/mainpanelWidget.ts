@@ -11,6 +11,7 @@ import { issueToCategory, issueCategoryNames } from '../utils/metadata';
 
 import { analyzeCellsAccessibility } from '../utils/detection/base';
 import { analyzeTableIssues } from '../utils/detection/category/table';
+import { notebookToGeneralCells } from '../utils/adapter';
 
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;
@@ -144,9 +145,14 @@ export class MainPanelWidget extends Widget {
       analyzeControlButton.disabled = true;
 
       try {
+        // Convert widgets to accessible cells
+        const accessibleCells = notebookToGeneralCells(this.currentNotebook);
+
         // Identify issues
         const notebookIssues: ICellIssue[] = await analyzeCellsAccessibility(
-          this.currentNotebook
+          accessibleCells,
+          document,
+          this.currentNotebook.context.path
         );
 
         // Log a human-readable summary for troubleshooting
@@ -293,7 +299,10 @@ export class MainPanelWidget extends Widget {
             issuesList.innerHTML = '';
 
             // Reanalyze table issues
-            const tableIssues = await analyzeTableIssues(this.currentNotebook!);
+            const accessibleCells = notebookToGeneralCells(
+              this.currentNotebook!
+            );
+            const tableIssues = await analyzeTableIssues(accessibleCells);
 
             // Add new table issues to this section
             tableIssues.forEach((issue: ICellIssue) => {

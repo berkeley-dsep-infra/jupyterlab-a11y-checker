@@ -11,10 +11,10 @@ import {
   LinkTextFixWidget
 } from './fix';
 
-import { issueToDescription } from '../utils/metadata';
+import { issueToDescription } from '../../core/utils/metadata.js';
 
-import { ICellIssue } from '../utils/types';
-import { MainPanelWidget } from './mainpanelWidget';
+import { ICellIssue } from '../../core/types.js';
+import { MainPanelWidget } from './mainpanelWidget.js';
 
 export class CellIssueWidget extends Widget {
   private issue: ICellIssue;

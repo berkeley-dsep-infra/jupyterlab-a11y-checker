@@ -1,4 +1,4 @@
-import { ICellIssue } from './types';
+import { ICellIssue } from '../types.js';
 
 export interface IIssueOffsets {
   offsetStart: number;

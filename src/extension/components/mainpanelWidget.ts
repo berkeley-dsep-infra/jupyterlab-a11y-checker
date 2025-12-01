@@ -2,16 +2,21 @@ import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { BrowserImageProcessor } from '../image-processor.js';
 
-import { CellIssueWidget } from './issueWidget';
+import { PageConfig } from '@jupyterlab/coreutils';
+import { CellIssueWidget } from './issueWidget.js';
 
-import { ICellIssue } from '../utils/types';
-import { IModelSettings } from '../utils/ai-utils';
-import { issueToCategory, issueCategoryNames } from '../utils/metadata';
+import { ICellIssue } from '../../core/types.js';
+import { IModelSettings } from '../../core/utils/ai-utils.js';
+import {
+  issueToCategory,
+  issueCategoryNames
+} from '../../core/utils/metadata.js';
 
-import { analyzeCellsAccessibility } from '../utils/detection/base';
-import { analyzeTableIssues } from '../utils/detection/category/table';
-import { notebookToGeneralCells } from '../utils/adapter';
+import { analyzeCellsAccessibility } from '../../core/detection/base.js';
+import { analyzeTableIssues } from '../../core/detection/category/table.js';
+import { notebookToGeneralCells } from '../adapter.js';
 
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;
@@ -152,6 +157,8 @@ export class MainPanelWidget extends Widget {
         const notebookIssues: ICellIssue[] = await analyzeCellsAccessibility(
           accessibleCells,
           document,
+          PageConfig.getBaseUrl(),
+          new BrowserImageProcessor(),
           this.currentNotebook.context.path
         );
 

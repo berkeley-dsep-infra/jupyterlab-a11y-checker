@@ -34,6 +34,32 @@ pip install jupyterlab-a11y-checker
 
 Find the package on PyPI. [Link to PyPI Package](https://pypi.org/project/jupyterlab-a11y-checker/).
 
+### CLI Usage
+
+If you need to run checks offline or in CI, the repository now ships a CLI that uses the same detection logic as the extension.
+
+1. Build the library to populate `lib/cli/index.js`:
+
+   ```bash
+   npm run clean:lib && npm run build:lib
+   ```
+
+2. Optionally link it so the `jupyterlab-a11y-check` command is available system-wide:
+
+   ```bash
+   npm link
+   jupyterlab-a11y-check test_notebooks/Demo.ipynb
+   ```
+
+   (Undo with `npm unlink` when done.)
+
+3. To produce only the LLM-friendly JSON summary (no human-friendly log), run:
+   ```bash
+   jupyterlab-a11y-check -llm test_notebooks/Demo.ipynb
+   ```
+
+The CLI output matches what the extension returns, so you can pipe the JSON directly into downstream LLM/automation workflows.
+
 ### Contributing
 
 We’re building this tool for the community, and we’d love your help! Whether it’s adding new accessibility checks, or refining the fix suggestions, your contributions can help this project make a broader impact.

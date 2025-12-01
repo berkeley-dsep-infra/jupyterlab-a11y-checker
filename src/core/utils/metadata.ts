@@ -1,4 +1,4 @@
-import { IIssueInformation } from './types';
+import { IIssueInformation } from '../types.js';
 
 export const issueCategoryNames = [
   'Images',

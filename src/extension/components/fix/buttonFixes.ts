@@ -1,7 +1,7 @@
 // In src/components/fix/buttonFixes.ts
 
-import { ButtonFixWidget } from './base';
-import { getIssueOffsets, replaceSlice } from '../../utils';
+import { ButtonFixWidget } from './base.js';
+import { getIssueOffsets, replaceSlice } from '../../../core/utils/edit.js';
 
 export class TableScopeFixWidget extends ButtonFixWidget {
   protected getDescription(): string {

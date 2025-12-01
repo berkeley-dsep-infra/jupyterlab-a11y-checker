@@ -1,20 +1,56 @@
-import { PageConfig } from '@jupyterlab/coreutils';
 import Tesseract from 'tesseract.js';
-import { ICellIssue } from '../../types.js';
+import { ICellIssue, IImageProcessor, IGeneralCell } from '../../types.js';
 
 async function getTextInImage(
   imagePath: string,
-  currentDirectoryPath: string
+  currentDirectoryPath: string,
+  baseUrl: string,
+  imageProcessor: IImageProcessor,
+  attachments?: IGeneralCell['attachments']
 ): Promise<{ text: string; confidence: number }> {
   const worker = await Tesseract.createWorker('eng');
   try {
-    const pathForTesseract = imagePath.startsWith('http')
-      ? imagePath
-      : `${PageConfig.getBaseUrl()}files/${currentDirectoryPath}/${imagePath}`;
+    let imageSource: string;
+
+    // Check if this is a JupyterLab attachment
+    if (imagePath.startsWith('attachment:')) {
+      if (!attachments) {
+        throw new Error('Attachments required for attachment images');
+      }
+      const attachmentId = imagePath.substring('attachment:'.length);
+      const data = attachments[attachmentId];
+      let dataUrl: string | null = null;
+
+      if (data) {
+        for (const mimetype in data) {
+          if (mimetype.startsWith('image/')) {
+            const base64 = data[mimetype];
+            if (typeof base64 === 'string') {
+              dataUrl = `data:${mimetype};base64,${base64}`;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!dataUrl) {
+        throw new Error(`Could not load attachment: ${attachmentId}`);
+      }
+      imageSource = dataUrl;
+    } else {
+      imageSource = imagePath.startsWith('http')
+        ? imagePath
+        : baseUrl
+        ? `${baseUrl}files/${currentDirectoryPath}/${imagePath}`
+        : `${currentDirectoryPath}/${imagePath}`; // Simple join for CLI
+    }
+
+    // Load image using the processor (handles Browser vs Node differences)
+    const img = await imageProcessor.loadImage(imageSource);
 
     const {
       data: { text, confidence }
-    } = await worker.recognize(pathForTesseract);
+    } = await worker.recognize(img);
 
     if (!text) {
       throw new Error('No text found in the image');
@@ -29,7 +65,10 @@ export async function detectImageIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
   cellType: string,
-  notebookPath: string
+  notebookPath: string,
+  baseUrl: string,
+  imageProcessor: IImageProcessor,
+  attachments?: IGeneralCell['attachments']
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
@@ -63,9 +102,19 @@ export async function detectImageIssuesInCell(
 
       let suggestedFix: string = '';
       try {
-        const ocrResult = await getTextInImage(imageUrl, notebookPath);
-        if (ocrResult.confidence > 40) {
-          suggestedFix = ocrResult.text;
+        // Only run OCR if baseUrl is provided (Extension mode)
+        // In CLI mode (baseUrl is empty), we skip OCR to avoid Tesseract/Canvas issues
+        if (baseUrl) {
+          const ocrResult = await getTextInImage(
+            imageUrl,
+            notebookPath,
+            baseUrl,
+            imageProcessor,
+            attachments
+          );
+          if (ocrResult.confidence > 40) {
+            suggestedFix = ocrResult.text;
+          }
         }
       } catch (error) {
         console.error(`Failed to process image ${imageUrl}:`, error);

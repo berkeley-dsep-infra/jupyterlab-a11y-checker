@@ -25,3 +25,8 @@ export interface IIssueInformation {
   detailedDescription: string;
   descriptionUrl?: string;
 }
+
+export interface IImageProcessor {
+  loadImage(src: string): Promise<any>;
+  createCanvas(width: number, height: number): any;
+}

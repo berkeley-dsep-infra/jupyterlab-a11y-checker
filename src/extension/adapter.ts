@@ -1,5 +1,5 @@
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { IGeneralCell } from './types';
+import { IGeneralCell } from '../core/types.js';
 
 /**
  * Converts JupyterLab NotebookPanel widgets into an environment-agnostic array of accessible cells.

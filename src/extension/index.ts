@@ -5,10 +5,13 @@ import {
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ILabShell } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { MainPanelWidget } from './components/mainpanelWidget';
-import { analyzeCellsAccessibility } from './utils/detection/base';
-import { IGeneralCell } from './utils/types';
-import { notebookToGeneralCells } from './utils/adapter';
+import { MainPanelWidget } from './components/mainpanelWidget.js';
+import { analyzeCellsAccessibility } from '../core/detection/base.js';
+import { buildLLMReport } from '../core/utils/issueFormatter.js';
+import { IGeneralCell } from '../core/types.js';
+import { notebookToGeneralCells } from './adapter.js';
+import { PageConfig } from '@jupyterlab/coreutils';
+import { BrowserImageProcessor } from './image-processor.js';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-a11y-checker:plugin',
@@ -39,11 +42,14 @@ const extension: JupyterFrontEndPlugin<void> = {
           const accessibleCells: IGeneralCell[] =
             notebookToGeneralCells(current);
 
-          return await analyzeCellsAccessibility(
+          const issues = await analyzeCellsAccessibility(
             accessibleCells,
             document,
+            PageConfig.getBaseUrl(),
+            new BrowserImageProcessor(),
             current.context.path
           );
+          return buildLLMReport(issues);
         }
         return [];
       }

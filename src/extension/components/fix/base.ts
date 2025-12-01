@@ -1,10 +1,12 @@
 import { Widget } from '@lumino/widgets';
 import { Cell, ICellModel } from '@jupyterlab/cells';
-import { ICellIssue } from '../../utils/types';
+import { ICellIssue } from '../../../core/types.js';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { analyzeCellIssues } from '../../utils/detection/base';
-import { notebookToGeneralCells } from '../../utils/adapter';
+import { analyzeCellIssues } from '../../../core/detection/base.js';
+import { notebookToGeneralCells } from '../../adapter.js';
+import { PageConfig } from '@jupyterlab/coreutils';
 // Intentionally keep base free of category-specific analysis. Widgets can override.
+import { BrowserImageProcessor } from '../../image-processor.js';
 
 abstract class FixWidget extends Widget {
   protected issue: ICellIssue;
@@ -60,6 +62,8 @@ abstract class FixWidget extends Widget {
       const issues = await analyzeCellIssues(
         targetCell,
         document,
+        PageConfig.getBaseUrl(),
+        new BrowserImageProcessor(),
         notebookPanel.context.path
       );
       const event = new CustomEvent('notebookReanalyzed', {

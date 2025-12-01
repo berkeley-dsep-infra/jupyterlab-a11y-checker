@@ -1,6 +1,6 @@
 import axe from 'axe-core';
 import { marked } from 'marked';
-import { ICellIssue, IGeneralCell } from '../types.js';
+import { ICellIssue, IGeneralCell, IImageProcessor } from '../types.js';
 import {
   detectHeadingOneIssue,
   analyzeHeadingHierarchy
@@ -13,6 +13,8 @@ import { detectLinkIssuesInCell } from './category/index.js';
 export async function analyzeCellsAccessibility(
   cells: IGeneralCell[],
   documentContext: Document,
+  baseUrl: string,
+  imageProcessor: IImageProcessor,
   notebookPath: string = ''
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
@@ -78,7 +80,10 @@ export async function analyzeCellsAccessibility(
               rawMarkdown,
               i,
               cellType,
-              notebookPath
+              notebookPath,
+              baseUrl,
+              imageProcessor,
+              cell.attachments
             ))
           );
 
@@ -94,6 +99,8 @@ export async function analyzeCellsAccessibility(
               i,
               cellType,
               notebookPath,
+              baseUrl,
+              imageProcessor,
               cell.attachments
             ))
           );
@@ -119,6 +126,8 @@ export async function analyzeCellsAccessibility(
 export async function analyzeCellIssues(
   cell: IGeneralCell,
   documentContext: Document,
+  baseUrl: string,
+  imageProcessor: IImageProcessor,
   notebookPath: string = ''
 ): Promise<ICellIssue[]> {
   const issues: ICellIssue[] = [];
@@ -139,7 +148,10 @@ export async function analyzeCellIssues(
       rawMarkdown,
       cell.cellIndex,
       cellType,
-      notebookPath
+      notebookPath,
+      baseUrl,
+      imageProcessor,
+      cell.attachments
     ))
   );
 
@@ -155,6 +167,8 @@ export async function analyzeCellIssues(
       cell.cellIndex,
       cellType,
       notebookPath,
+      baseUrl,
+      imageProcessor,
       cell.attachments
     ))
   );
@@ -167,11 +181,11 @@ export async function analyzeCellIssues(
 
 /**
  * CLI-specific analysis function.
- * Runs only text-based checks that do not require a DOM or Canvas.
- * Excludes: axe-core, image OCR, image color contrast.
+ * Excludes: axe-core (requires DOM)
  */
 export async function analyzeCellsAccessibilityCLI(
-  cells: IGeneralCell[]
+  cells: IGeneralCell[],
+  imageProcessor: IImageProcessor
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
@@ -184,16 +198,44 @@ export async function analyzeCellsAccessibilityCLI(
   const headingIssues = await analyzeHeadingHierarchy(cells);
   notebookIssues.push(...headingIssues);
 
-  // 3. Per-cell checks (Tables, Links only)
+  // 3. Per-cell checks
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
     if (cell.type === 'markdown' && cell.source.trim()) {
       const rawMarkdown = cell.source;
 
+      // Image Issues
+      notebookIssues.push(
+        ...(await detectImageIssuesInCell(
+          rawMarkdown,
+          i,
+          cell.type,
+          '', // notebookPath
+          '', // baseUrl
+          imageProcessor,
+          cell.attachments
+        ))
+      );
+
       // Table Issues
       notebookIssues.push(
         ...detectTableIssuesInCell(rawMarkdown, i, cell.type)
       );
+
+      // Color Issues
+      /*
+      notebookIssues.push(
+        ...(await detectColorIssuesInCell(
+          rawMarkdown,
+          i,
+          cell.type,
+          '', // notebookPath
+          '', // baseUrl
+          imageProcessor,
+          cell.attachments
+        ))
+      );
+      */
 
       // Link Issues
       notebookIssues.push(...detectLinkIssuesInCell(rawMarkdown, i, cell.type));

@@ -1,15 +1,15 @@
-import { ICellIssue } from '../../utils/types';
-import { getIssueOffsets, replaceSlice } from '../../utils';
+import { ICellIssue } from '../../../core/types.js';
+import { getIssueOffsets, replaceSlice } from '../../../core/utils/edit.js';
 // Keep imports minimal; reanalysis now handled by base class helpers
-import { analyzeTableIssues } from '../../utils/detection/category/table';
+import { analyzeTableIssues } from '../../../core/detection/category/table.js';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { Cell, ICellModel } from '@jupyterlab/cells';
-import { DropdownFixWidget } from './base';
+import { DropdownFixWidget } from './base.js';
 import {
   analyzeHeadingHierarchy,
   detectHeadingOneIssue
-} from '../../utils/detection/category/heading';
-import { notebookToGeneralCells } from '../../utils/adapter';
+} from '../../../core/detection/category/heading.js';
+import { notebookToGeneralCells } from '../../adapter.js';
 
 export class TableHeaderFixWidget extends DropdownFixWidget {
   protected getDescription(): string {

@@ -1,13 +1,14 @@
-import { ICellIssue, getIssueOffsets, replaceSlice } from '../../utils';
+import { ICellIssue } from '../../../core/types.js';
+import { getIssueOffsets, replaceSlice } from '../../../core/utils/edit.js';
 import {
   getImageAltSuggestion,
   getTableCaptionSuggestion,
   IModelSettings
-} from '../../utils';
+} from '../../../core/utils/ai-utils.js';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { TextFieldFixWidget } from './base';
+import { TextFieldFixWidget } from './base.js';
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
   private visionSettings: IModelSettings;

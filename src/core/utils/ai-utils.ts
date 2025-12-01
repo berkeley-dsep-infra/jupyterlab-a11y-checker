@@ -1,5 +1,5 @@
-import { http } from './http';
-import { ICellIssue } from './types';
+import { http } from './http.js';
+import { ICellIssue } from '../types.js';
 
 export interface IModelSettings {
   baseUrl: string;

@@ -1,14 +1,14 @@
 import axe from 'axe-core';
 import { marked } from 'marked';
-import { ICellIssue, IGeneralCell } from '../types';
+import { ICellIssue, IGeneralCell } from '../types.js';
 import {
   detectHeadingOneIssue,
   analyzeHeadingHierarchy
-} from './category/heading';
-import { detectImageIssuesInCell } from './category';
-import { detectTableIssuesInCell } from './category';
-import { detectColorIssuesInCell } from './category';
-import { detectLinkIssuesInCell } from './category';
+} from './category/heading.js';
+import { detectImageIssuesInCell } from './category/index.js';
+import { detectTableIssuesInCell } from './category/index.js';
+import { detectColorIssuesInCell } from './category/index.js';
+import { detectLinkIssuesInCell } from './category/index.js';
 
 export async function analyzeCellsAccessibility(
   cells: IGeneralCell[],
@@ -163,4 +163,42 @@ export async function analyzeCellIssues(
   issues.push(...detectLinkIssuesInCell(rawMarkdown, cell.cellIndex, cellType));
 
   return issues;
+}
+
+/**
+ * CLI-specific analysis function.
+ * Runs only text-based checks that do not require a DOM or Canvas.
+ * Excludes: axe-core, image OCR, image color contrast.
+ */
+export async function analyzeCellsAccessibilityCLI(
+  cells: IGeneralCell[]
+): Promise<ICellIssue[]> {
+  const notebookIssues: ICellIssue[] = [];
+
+  // 1. Heading One Check
+  notebookIssues.push(
+    ...(await detectHeadingOneIssue('', 0, 'markdown', cells))
+  );
+
+  // 2. Heading Hierarchy
+  const headingIssues = await analyzeHeadingHierarchy(cells);
+  notebookIssues.push(...headingIssues);
+
+  // 3. Per-cell checks (Tables, Links only)
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    if (cell.type === 'markdown' && cell.source.trim()) {
+      const rawMarkdown = cell.source;
+
+      // Table Issues
+      notebookIssues.push(
+        ...detectTableIssuesInCell(rawMarkdown, i, cell.type)
+      );
+
+      // Link Issues
+      notebookIssues.push(...detectLinkIssuesInCell(rawMarkdown, i, cell.type));
+    }
+  }
+
+  return notebookIssues;
 }

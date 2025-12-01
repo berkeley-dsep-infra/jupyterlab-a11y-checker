@@ -1,6 +1,6 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import Tesseract, { PSM } from 'tesseract.js';
-import { IGeneralCell, ICellIssue } from '../../types';
+import { IGeneralCell, ICellIssue } from '../../types.js';
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const r = parseInt(hex.slice(1, 3), 16);

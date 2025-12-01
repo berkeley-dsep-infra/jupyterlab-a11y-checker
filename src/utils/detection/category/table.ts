@@ -1,4 +1,4 @@
-import { IGeneralCell, ICellIssue } from '../../types';
+import { IGeneralCell, ICellIssue } from '../../types.js';
 
 export function detectTableIssuesInCell(
   rawMarkdown: string,
@@ -45,37 +45,37 @@ export function detectTableIssuesInCell(
   }
 
   // Check for tables with th tags but missing scope attributes
+  // Use regex instead of DOMParser for CLI compatibility
   const tableWithThRegex = /<table[^>]*>[\s\S]*?<\/table>/gi;
   while ((match = tableWithThRegex.exec(rawMarkdown)) !== null) {
     const tableHtml = match[0];
     const start = match.index ?? 0;
     const end = start + match[0].length;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(tableHtml, 'text/html');
-    const table = doc.querySelector('table');
 
-    if (table) {
-      const thElements = table.querySelectorAll('th');
-      let hasMissingScope = false;
+    // Find all th tags within this table
+    const thRegex = /<th\b([^>]*)>/gi;
+    let thMatch;
+    let hasMissingScope = false;
 
-      thElements.forEach(th => {
-        if (!th.hasAttribute('scope')) {
-          hasMissingScope = true;
+    while ((thMatch = thRegex.exec(tableHtml)) !== null) {
+      const attributes = thMatch[1];
+      if (!attributes.toLowerCase().includes('scope=')) {
+        hasMissingScope = true;
+        break; // Found one, flag the table
+      }
+    }
+
+    if (hasMissingScope) {
+      notebookIssues.push({
+        cellIndex,
+        cellType: cellType as 'code' | 'markdown',
+        violationId: 'table-missing-scope',
+        issueContentRaw: tableHtml,
+        metadata: {
+          offsetStart: start,
+          offsetEnd: end
         }
       });
-
-      if (hasMissingScope) {
-        notebookIssues.push({
-          cellIndex,
-          cellType: cellType as 'code' | 'markdown',
-          violationId: 'table-missing-scope',
-          issueContentRaw: tableHtml,
-          metadata: {
-            offsetStart: start,
-            offsetEnd: end
-          }
-        });
-      }
     }
   }
 

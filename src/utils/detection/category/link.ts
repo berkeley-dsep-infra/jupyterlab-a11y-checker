@@ -1,4 +1,4 @@
-import { ICellIssue } from '../../types';
+import { ICellIssue } from '../../types.js';
 
 const VAGUE_PHRASES = ['click', 'here', 'link', 'more', 'read'];
 const MIN_DESCRIPTIVE_CHARS = 20;

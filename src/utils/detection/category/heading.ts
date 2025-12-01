@@ -1,5 +1,5 @@
 import { marked } from 'marked';
-import { IGeneralCell, ICellIssue } from '../../types';
+import { IGeneralCell, ICellIssue } from '../../types.js';
 
 export async function detectHeadingOneIssue(
   rawMarkdown: string,
@@ -8,11 +8,9 @@ export async function detectHeadingOneIssue(
   cells: IGeneralCell[]
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
-  const tempDiv = document.createElement('div');
 
   // If there are no cells, nothing to report
   if (!cells.length) {
-    tempDiv.remove();
     return notebookIssues;
   }
 
@@ -34,7 +32,6 @@ export async function detectHeadingOneIssue(
   }
 
   if (firstCellStartsWithH1) {
-    tempDiv.remove();
     return notebookIssues;
   }
 
@@ -46,7 +43,6 @@ export async function detectHeadingOneIssue(
     issueContentRaw: ''
   });
 
-  tempDiv.remove();
   return notebookIssues;
 }
 
@@ -54,8 +50,6 @@ export async function analyzeHeadingHierarchy(
   cells: IGeneralCell[]
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
-  const tempDiv = document.createElement('div');
-  document.body.appendChild(tempDiv);
 
   try {
     // Create a complete heading structure that maps cell index to heading level and content
@@ -268,8 +262,6 @@ export async function analyzeHeadingHierarchy(
     }
   } catch (error) {
     console.error('Error in heading hierarchy analysis:', error);
-  } finally {
-    tempDiv.remove();
   }
 
   return notebookIssues;

@@ -1,6 +1,6 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import Tesseract from 'tesseract.js';
-import { ICellIssue } from '../../types';
+import { ICellIssue } from '../../types.js';
 
 async function getTextInImage(
   imagePath: string,

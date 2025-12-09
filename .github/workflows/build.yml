@@ -36,9 +36,12 @@ jobs:
         run: npm run build -w packages/core
 
       - name: Build the extension
-        working-directory: packages/extension
+        env:
+          HUSKY: 0
         run: |
           set -eux
+          npm run build -w packages/extension
+          cd packages/extension
           python -m pip install .[test]
 
           jupyter labextension list

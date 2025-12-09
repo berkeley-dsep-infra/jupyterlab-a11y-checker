@@ -46,6 +46,23 @@ Find the package on PyPI. [Link to PyPI Package](https://pypi.org/project/jupyte
 
 If you need to run checks offline or in CI, the repository now ships a CLI that uses the same detection logic as the extension.
 
+#### Running via NPM (Recommended)
+
+You can run the accessibility checker directly on your notebooks without installing anything using `npx`:
+
+```bash
+npx @jupyterlab-a11y-checker/cli notebook.ipynb
+```
+
+**Options:**
+
+- `[files...]`: One or more paths to `.ipynb` files.
+- `-llm`: Output a JSON summary suitable for LLM processing (no human-friendly logs).
+
+#### Running from Source
+
+If you are developing locally or want to run from the checked-out repository:
+
 1. Build the packages:
 
    ```bash
@@ -58,18 +75,40 @@ If you need to run checks offline or in CI, the repository now ships a CLI that 
    ./packages/cli/dist/index.js test_notebooks/demo.ipynb
    ```
 
-   You can also check multiple files at once:
+### GitHub Action Usage
 
-   ```bash
-   ./packages/cli/dist/index.js test_notebooks/demo.ipynb test_notebooks/image-basic-tests.ipynb
-   ```
+You can use this tool directly in your GitHub Workflows to check notebooks automatically on every push.
 
-3. To produce only the LLM-friendly JSON summary (no human-friendly log), run:
-   ```bash
-   ./packages/cli/dist/index.js -llm test_notebooks/demo.ipynb
-   ```
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - uses: berkeley-dsep-infra/jupyterlab-a11y-checker@refactor
+    with:
+      files: "notebooks/*.ipynb"
+```
 
-The CLI output matches what the extension returns, so you can pipe the JSON directly into downstream LLM/automation workflows.
+### Checking Only Changed Files
+
+To save time, you can configure the workflow to only check notebooks that have changed in the current PR:
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
+
+  - name: Get changed files
+    id: changed-files
+    uses: tj-actions/changed-files@v44
+    with:
+      files: "**/*.ipynb"
+
+  - name: Check changed notebooks
+    if: steps.changed-files.outputs.any_changed == 'true'
+    uses: berkeley-dsep-infra/jupyterlab-a11y-checker@main
+    with:
+      files: ${{ steps.changed-files.outputs.all_changed_files }}
+```
 
 ### Contributing
 

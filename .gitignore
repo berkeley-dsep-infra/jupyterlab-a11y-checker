@@ -32,6 +32,8 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+!packages/cli/dist/
+!packages/cli/dist/index.js
 downloads/
 eggs/
 .eggs/

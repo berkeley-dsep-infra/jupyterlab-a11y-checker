@@ -1,0 +1,14 @@
+name: 'CLI for jupyterlab-a11y-checker'
+description: 'Check Jupyter notebooks for accessibility issues using the CLI'
+author: 'Chanbin Park'
+inputs:
+  files:
+    description: 'Space-separated paths to notebook files to check (e.g. "notebooks/*.ipynb")'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run A11y Checker CLI
+      run: node ${{ github.action_path }}/packages/cli/dist/index.js ${{ inputs.files }}
+      shell: bash

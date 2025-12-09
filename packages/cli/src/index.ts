@@ -146,7 +146,12 @@ program
         );
         console.log(
           chalk.blue(
-            "Want to fix the issues? Check out the extension at https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker",
+            "Want to fix the issues? Install the JupyterLab extension at https://pypi.org/project/jupyterlab-a11y-checker/",
+          ),
+        );
+        console.log(
+          chalk.blue(
+            "Affiliated with Berkeley? Use the extension at https://a11y.datahub.berkeley.edu/",
           ),
         );
       }

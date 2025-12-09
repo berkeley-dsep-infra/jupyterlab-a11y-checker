@@ -41,8 +41,8 @@ async function getTextInImage(
       imageSource = imagePath.startsWith('http')
         ? imagePath
         : baseUrl
-        ? `${baseUrl}files/${currentDirectoryPath}/${imagePath}`
-        : `${currentDirectoryPath}/${imagePath}`; // Simple join for CLI
+          ? `${baseUrl}files/${currentDirectoryPath}/${imagePath}`
+          : `${currentDirectoryPath}/${imagePath}`; // Simple join for CLI
     }
 
     // Load image using the processor (handles Browser vs Node differences)

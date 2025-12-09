@@ -8,6 +8,7 @@ import { rawIpynbToGeneralCells } from '../core/parsers.js';
 import { analyzeCellsAccessibilityCLI } from '../core/detection/base.js';
 import { ICellIssue } from '../core/types.js';
 import { buildLLMReport } from '../core/utils/issueFormatter.js';
+import { getRuleDescription } from './ruleDescriptions.js';
 import { NodeImageProcessor } from './image-processor.js';
 
 const program = new Command();
@@ -62,9 +63,22 @@ program
           const group = issuesByViolation[violationId];
           console.log(
             chalk.bold.underline(
-              `\nViolation: ${violationId} (${group.length})`
+              `\n${group.length} ${group.length === 1 ? 'violation' : 'violations'} found for ${violationId}:`
             )
           );
+
+          const ruleMeta = getRuleDescription(violationId);
+          if (ruleMeta?.description) {
+            console.log(
+              chalk.cyan(`    Description: ${ruleMeta.description}`)
+            );
+          }
+          if (ruleMeta?.wcag) {
+            console.log(
+              chalk.gray(`    WCAG Reference: ${ruleMeta.wcag}`)
+            );
+          }
+
           group.forEach(issue => {
             console.log(`  - Cell ${issue.cellIndex} (${issue.cellType}):`);
             if (issue.customDescription) {
@@ -74,16 +88,35 @@ program
               ? issue.issueContentRaw.trim().replace(/\s+/g, ' ')
               : '';
             console.log(
-              `    Content: "${snippet.substring(0, 80)}${
-                snippet.length > 80 ? '...' : ''
+              `    Content: "${snippet.substring(0, 80)}${snippet.length > 80 ? '...' : ''
               }"`
             );
           });
         });
 
-        console.log(chalk.cyan('\nLLM-friendly summary:'));
+        console.log(
+          chalk.gray(
+            '\nInvoke the -llm flag for an LLM-friendly summary of the issues.'
+          )
+        );
+        console.log(
+          chalk.blue(
+            'Learn more about the issues? Check out issue descriptions at https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker/blob/main/doc/rules.md'
+          )
+        );
+        console.log(
+          chalk.blue(
+            'Want to fix the issues? Check out the extension at https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker'
+          )
+        );
+        console.log(
+          chalk.blue(
+            'Affiliated with Berkeley? Use the extension at https://a11y.datahub.berkeley.edu'
+          )
+        );
+      } else {
+        console.log(JSON.stringify(llmReport, null, 2));
       }
-      console.log(JSON.stringify(llmReport, null, 2));
 
       // Exit with 1 if issues found, so CI pipelines fail
       process.exit(1);

@@ -44,25 +44,16 @@ npx @jupyterlab-a11y-checker/cli path/to/your_notebook.ipynb
 
 ### GitHub Action Usage
 
-You can use this tool directly in your GitHub Workflows to check notebooks automatically on every push. Here is a sample workflow you can integrate in your GitHub Actions to check notebooks that have changed in the current PR:
+You can use this tool directly in your GitHub Workflows to check notebooks automatically on every push. Here is a sample workflow to check all notebooks in your repository:
 
 ```yaml
 steps:
   - uses: actions/checkout@v4
-    with:
-      fetch-depth: 0
 
-  - name: Get changed files
-    id: changed-files
-    uses: tj-actions/changed-files@v44
-    with:
-      files: "**/*.ipynb"
-
-  - name: Scan changed notebooks
-    if: steps.changed-files.outputs.any_changed == 'true'
+  - name: Scan notebooks for accessibility issues
     uses: berkeley-dsep-infra/jupyterlab-a11y-checker@main
     with:
-      files: ${{ steps.changed-files.outputs.all_changed_files }}
+      files: "**/*.ipynb"
 ```
 
 ## Getting Started

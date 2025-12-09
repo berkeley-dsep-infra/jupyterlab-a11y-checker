@@ -3,12 +3,19 @@ description: 'Check Jupyter notebooks for accessibility issues using the CLI'
 author: 'Chanbin Park'
 inputs:
   files:
-    description: 'Space-separated paths to notebook files to check (e.g. "notebooks/*.ipynb")'
+    description: 'Glob pattern or space-separated paths to notebook files to check (e.g. "**/*.ipynb")'
     required: true
 
 runs:
   using: 'composite'
   steps:
     - name: Run A11y Checker CLI
-      run: node ${{ github.action_path }}/packages/cli/dist/index.js ${{ inputs.files }}
+      run: |
+        shopt -s globstar nullglob
+        files=(${{ inputs.files }})
+        if [ ${#files[@]} -eq 0 ]; then
+          echo "No files matching pattern: ${{ inputs.files }}"
+          exit 0
+        fi
+        node ${{ github.action_path }}/packages/cli/dist/index.js "${files[@]}"
       shell: bash

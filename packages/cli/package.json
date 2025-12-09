@@ -1,5 +1,5 @@
 {
-    "name": "@berkeley-dsep-infra/a11y-checker-cli",
+    "name": "@jupyterlab-a11y-checker/cli",
     "version": "0.1.0",
     "description": "CLI for JupyterLab A11y Checker",
     "bin": {

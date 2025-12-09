@@ -22,14 +22,6 @@ We provide a user interface tailored to each issue, such as a text field for add
 
 To simplify the remediation process, we integrate both a Large Language Model (LLM) and a Vision-Language Model (VLM) to generate accessibility recommendations within several fix interfaces. Users can configure these models by providing their API endpoint, API key, and model name in: `Settings > Settings Editor > A11y Checker Settings`.
 
-## Project Structure
-
-This project is organized as a monorepo using NPM Workspaces:
-
-- **`packages/core`**: Contains the core accessibility analysis logic, parsers, and utilities. This package is shared between the CLI and the Extension.
-- **`packages/cli`**: The command-line interface tool. It bundles the core logic to run independently of JupyterLab.
-- **`packages/extension`**: The JupyterLab extension. It uses the core package to provide real-time accessibility checking within the notebook interface.
-
 ## Getting Started
 
 ### Installing
@@ -46,27 +38,24 @@ Find the package on PyPI. [Link to PyPI Package](https://pypi.org/project/jupyte
 
 If you need to run checks offline or in CI, the repository now ships a CLI that uses the same detection logic as the extension.
 
-1. Build the packages:
+1. Build the library to populate `lib/cli/index.js`:
 
    ```bash
-   npm run build -w packages/cli
+   npm run clean:lib && npm run build:lib
    ```
 
-2. Run the CLI directly:
+2. Optionally link it so the `jupyterlab-a11y-check` command is available system-wide:
 
    ```bash
-   ./packages/cli/dist/index.js test_notebooks/demo.ipynb
+   npm link
+   jupyterlab-a11y-check test_notebooks/Demo.ipynb
    ```
 
-   You can also check multiple files at once:
-
-   ```bash
-   ./packages/cli/dist/index.js test_notebooks/demo.ipynb test_notebooks/image-basic-tests.ipynb
-   ```
+   (Undo with `npm unlink` when done.)
 
 3. To produce only the LLM-friendly JSON summary (no human-friendly log), run:
    ```bash
-   ./packages/cli/dist/index.js -llm test_notebooks/demo.ipynb
+   jupyterlab-a11y-check -llm test_notebooks/Demo.ipynb
    ```
 
 The CLI output matches what the extension returns, so you can pipe the JSON directly into downstream LLM/automation workflows.
@@ -81,29 +70,25 @@ We’re building this tool for the community, and we’d love your help! Whether
 # Create an environment using anaconda navigator: <env-name>
 
 conda activate <env-name>
-pip install cookiecutter
+pip install cookie cutter
 python -m pip install jupyterlab notebook --pre
 mamba install -c conda-forge nodejs=18
 node -v #to check version
 
 # <pull code>
+OR
+cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout 4.0
 
-# Install dependencies
-npm install
-
-# Build Core and Extension
-npm run build -w packages/core
-npm run build -w packages/extension
-
-# Install Extension
-pip install -e packages/extension
-jupyter labextension develop packages/extension --overwrite
-
-# Verify
-pip list
-jupyter labextension list
+jlpm
+jlpm run build
+jupyter labextension develop . --overwrite
+python -m pip install -e .
+pip list #to verify it has been installed in editable mode
+jupyter labextension list #to verify it has been installed
 
 jupyter lab --no-browser #run a jupyterlab server
+
+#Run jlpm run build, then jupyter lab --no-browser to test your code after each change
 ```
 
 #### Build from Temp Distribution
@@ -184,6 +169,10 @@ pip install /path/to/your-extension.whl
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
 folder is located. Then you can remove the symlink named `jupyterlab-a11y-checker` within that folder.
+
+## Acknowledgements
+
+Fix the hackmd file for me
 
 ## Acknowledgements
 

@@ -1,25 +1,27 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "composite": true,
-    "declaration": true,
-    "esModuleInterop": true,
-    "incremental": true,
-    "jsx": "react",
-    "lib": ["DOM", "ES2018", "ES2020.Intl"],
     "module": "esnext",
+    "target": "es2018",
     "moduleResolution": "node",
-    "noEmitOnError": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "preserveWatchOutput": true,
-    "resolveJsonModule": true,
-    "outDir": "lib",
-    "rootDir": "src",
-    "strict": true,
-    "strictNullChecks": true,
-    "skipLibCheck": true,
-    "target": "ES2018"
+    "esModuleInterop": true,
+    "declaration": true,
+    "composite": true,
+    "sourceMap": true,
+    "strict": false,
+    "paths": {
+      "@berkeley-dsep-infra/a11y-checker-core": ["./packages/core/src/index.ts"]
+    }
   },
-  "include": ["src/**/*"]
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/cli"
+    },
+    {
+      "path": "./packages/extension"
+    }
+  ]
 }

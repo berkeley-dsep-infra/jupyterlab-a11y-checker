@@ -1,0 +1,51 @@
+{
+  "title": "A11y Checker Settings",
+  "description": "Settings for the accessibility checker extension",
+  "type": "object",
+  "properties": {
+    "languageModel": {
+      "type": "object",
+      "title": "Language Model Settings",
+      "description": "Make sure to REFRESH the page after changing these settings.",
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "title": "API Endpoint",
+          "default": "https://litellm.river.berkeley.edu/v1/chat/completions"
+        },
+        "apiKey": {
+          "type": "string",
+          "title": "API Key",
+          "default": ""
+        },
+        "model": {
+          "type": "string",
+          "title": "Language Model",
+          "default": "TBD"
+        }
+      }
+    },
+    "visionModel": {
+      "type": "object",
+      "title": "Vision Model Settings",
+      "description": "Make sure to REFRESH the page after changing these settings.",
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "title": "API Endpoint",
+          "default": "https://litellm.river.berkeley.edu/v1/chat/completions"
+        },
+        "apiKey": {
+          "type": "string",
+          "title": "API Key",
+          "default": ""
+        },
+        "model": {
+          "type": "string",
+          "title": "Vision Model",
+          "default": "amazon.nova-pro-v1:0"
+        }
+      }
+    }
+  }
+}

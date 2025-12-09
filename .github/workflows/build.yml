@@ -25,11 +25,12 @@ jobs:
         run: python -m pip install -U "jupyterlab>=4.0.0,<5"
 
       - name: Lint the extension
-        working-directory: packages/extension
+        env:
+          HUSKY: 0
         run: |
           set -eux
           npm install
-          npm run lint:check
+          npm run lint -w packages/extension
 
       - name: Build the extension
         working-directory: packages/extension

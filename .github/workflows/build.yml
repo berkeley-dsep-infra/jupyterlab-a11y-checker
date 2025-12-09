@@ -28,8 +28,8 @@ jobs:
         working-directory: packages/extension
         run: |
           set -eux
-          jlpm
-          jlpm run lint:check
+          npm install
+          npm run lint:check
 
       - name: Build the extension
         working-directory: packages/extension

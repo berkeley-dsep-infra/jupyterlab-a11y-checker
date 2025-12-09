@@ -2,17 +2,22 @@
 
 [![jupyterlab-a11y-checker](https://marketplace.orbrx.io/api/badge/jupyterlab-a11y-checker?metric=downloads&leftColor=%23555&rightColor=%23F37620&style=flat)](https://marketplace.orbrx.io/extensions/jupyterlab-a11y-checker)
 
-jupyterLab-a11y-checker is a JupyterLab extension that helps authors detect and fix accessibility issues in Jupyter Notebooks, aligning with WCAG 2.1 AA guidelines. It enables authors to identify accessibility issues in their notebooks and provides actionable suggestions to fix them. It combines the strengths of [axe-core](https://github.com/dequelabs/axe-core), a widely used accessibility engine, with custom notebook-specific detection algorithms that address issues axe cannot reliably cover in JupyterLab.
+jupyterLab-a11y-checker is an acessibility engine for Jupyter Notebooks, assisting authors detect and fix accessibility issues, aligning with WCAG 2.1 AA guidelines. It combines the strengths of [axe-core](https://github.com/dequelabs/axe-core), a widely used accessibility engine, with custom notebook-specific detection algorithms that address issues axe cannot reliably cover in JupyterLab.
 
-Here's how the extension looks like:
+Users can use this tool in two ways:
 
-![On JupyterLab, this extension is detecting accessibility issues. On the left panel, there is a sample Jupyter Notebook, while on the right side, this extension is displaying image and heading related issues.](doc/README_IMG.png)
+1. As a JupyterLab extension. It not only provides accessibility scan results in real-time but also provides actionable suggestions to fix them.
+2. As a CLI tool. It can be ran independently of JupyterLab, for instance in GitHub Actions, to maintain accessible notebooks.
 
-## Tool Description
-
-### Issue Detection
+## Core Detection Engine
 
 While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a study on Jupyter Notebooks, [Notably Inaccessible — Data Driven Understanding of Data Science Notebook (In)Accessibility](https://arxiv.org/pdf/2308.03241). To address them, we implement custom detection logic for the issues listed in [Rule Description](./doc/rules.md). In addition, we integrate axe-core to detect other standard accessibility issues beyond these main issues, which are listed in [Axe Rule Description](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md).
+
+## JupyterLab Extension
+
+Here's a snapshot of the extension:
+
+![On JupyterLab, this extension is detecting accessibility issues. On the left panel, there is a sample Jupyter Notebook, while on the right side, this extension is displaying image and heading related issues.](doc/README_IMG.png)
 
 ### Issue Resolution
 
@@ -22,74 +27,24 @@ We provide a user interface tailored to each issue, such as a text field for add
 
 To simplify the remediation process, we integrate both a Large Language Model (LLM) and a Vision-Language Model (VLM) to generate accessibility recommendations within several fix interfaces. Users can configure these models by providing their API endpoint, API key, and model name in: `Settings > Settings Editor > A11y Checker Settings`.
 
-## Project Structure
+## CLI Tool
 
-This project is organized as a monorepo using NPM Workspaces:
-
-- **`packages/core`**: Contains the core accessibility analysis logic, parsers, and utilities. This package is shared between the CLI and the Extension.
-- **`packages/cli`**: The command-line interface tool. It bundles the core logic to run independently of JupyterLab.
-- **`packages/extension`**: The JupyterLab extension. It uses the core package to provide real-time accessibility checking within the notebook interface.
-
-## Getting Started
-
-### Installing
-
-You can install the extension directly via pip:
-
-```bash
-pip install jupyterlab-a11y-checker
-```
-
-Find the package on PyPI. [Link to PyPI Package](https://pypi.org/project/jupyterlab-a11y-checker/).
-
-### CLI Usage
-
-If you need to run checks offline or in CI, the repository now ships a CLI that uses the same detection logic as the extension.
-
-#### Running via NPM (Recommended)
+### Running via NPM
 
 You can run the accessibility checker directly on your notebooks without installing anything using `npx`:
 
 ```bash
-npx @jupyterlab-a11y-checker/cli notebook.ipynb
+npx @jupyterlab-a11y-checker/cli path/to/your_notebook.ipynb
 ```
 
 **Options:**
 
-- `[files...]`: One or more paths to `.ipynb` files.
+- `[files...]`: A space-separated list of paths to `.ipynb` files. You can also use glob patterns (e.g. `**/*.ipynb`) to check multiple files.
 - `-llm`: Output a JSON summary suitable for LLM processing (no human-friendly logs).
-
-#### Running from Source
-
-If you are developing locally or want to run from the checked-out repository:
-
-1. Build the packages:
-
-   ```bash
-   npm run build -w packages/cli
-   ```
-
-2. Run the CLI directly:
-
-   ```bash
-   ./packages/cli/dist/index.js test_notebooks/demo.ipynb
-   ```
 
 ### GitHub Action Usage
 
-You can use this tool directly in your GitHub Workflows to check notebooks automatically on every push.
-
-```yaml
-steps:
-  - uses: actions/checkout@v4
-  - uses: berkeley-dsep-infra/jupyterlab-a11y-checker@refactor
-    with:
-      files: "notebooks/*.ipynb"
-```
-
-### Checking Only Changed Files
-
-To save time, you can configure the workflow to only check notebooks that have changed in the current PR:
+You can use this tool directly in your GitHub Workflows to check notebooks automatically on every push. Here is a sample workflow you can integrate in your GitHub Actions to check notebooks that have changed in the current PR:
 
 ```yaml
 steps:
@@ -103,16 +58,34 @@ steps:
     with:
       files: "**/*.ipynb"
 
-  - name: Check changed notebooks
+  - name: Scan changed notebooks
     if: steps.changed-files.outputs.any_changed == 'true'
     uses: berkeley-dsep-infra/jupyterlab-a11y-checker@main
     with:
       files: ${{ steps.changed-files.outputs.all_changed_files }}
 ```
 
+## Getting Started
+
+### Installing
+
+You can install the extension directly via pip:
+
+```bash
+pip install jupyterlab-a11y-checker
+```
+
+Find the package on PyPI. [Link to PyPI Package](https://pypi.org/project/jupyterlab-a11y-checker/).
+
 ### Contributing
 
 We’re building this tool for the community, and we’d love your help! Whether it’s adding new accessibility checks, or refining the fix suggestions, your contributions can help this project make a broader impact.
+
+#### Project Structure
+
+- **`packages/core`**: Contains the core accessibility analysis logic, parsers, and utilities. This package is shared between the CLI and the Extension.
+- **`packages/cli`**: The command-line interface tool. It bundles the core logic to run independently of JupyterLab.
+- **`packages/extension`**: The JupyterLab extension. It uses the core package to provide real-time accessibility checking within the notebook interface.
 
 #### Build from Scratch
 
@@ -223,6 +196,22 @@ pip install /path/to/your-extension.whl
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
 folder is located. Then you can remove the symlink named `jupyterlab-a11y-checker` within that folder.
+
+#### Running CLI from Source
+
+If you are developing locally or want to run from the checked-out repository:
+
+1. Build the packages:
+
+   ```bash
+   npm run build -w packages/cli
+   ```
+
+2. Run the CLI directly:
+
+   ```bash
+   ./packages/cli/dist/index.js test_notebooks/demo.ipynb
+   ```
 
 ## Acknowledgements
 

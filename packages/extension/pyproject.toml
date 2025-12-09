@@ -69,6 +69,7 @@ version_cmd = "hatch version"
 before-build-npm = [
     "python -m pip install 'jupyterlab>=4.0.0,<5'",
     "npm install",
+    "npm run build -w packages/core",
     "npm run build:prod"
 ]
 before-build-python = ["npm run clean:all"]

@@ -32,6 +32,9 @@ jobs:
           npm install
           npm run lint -w packages/extension
 
+      - name: Build core package
+        run: npm run build -w packages/core
+
       - name: Build the extension
         working-directory: packages/extension
         run: |

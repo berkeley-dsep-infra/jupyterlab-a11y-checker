@@ -40,8 +40,20 @@ jobs:
           HUSKY: 0
         run: |
           set -eux
-          npm run build -w packages/extension
+          # Install yarn globally so jlpm can use it
+          npm install -g yarn
+          
           cd packages/extension
+          # Run yarn install to create yarn.lock that jlpm expects
+          yarn install
+          
+          # Build TypeScript
+          npm run build:lib
+          
+          # Build labextension (now jlpm should work)
+          jupyter labextension build --development True .
+          
+          # Install for testing
           python -m pip install .[test]
 
           jupyter labextension list

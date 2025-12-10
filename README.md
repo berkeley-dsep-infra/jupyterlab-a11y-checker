@@ -11,7 +11,7 @@ Users can use this tool in two ways:
 
 ## Core Detection Engine
 
-While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a study on Jupyter Notebooks, [Notably Inaccessible — Data Driven Understanding of Data Science Notebook (In)Accessibility](https://arxiv.org/pdf/2308.03241). To address them, we implement custom detection logic for the issues listed in [Rule Description](./doc/rules.md). In addition, we integrate axe-core to detect other standard accessibility issues beyond these main issues, which are listed in [Axe Rule Description](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md).
+While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a study on Jupyter Notebooks, [Notably Inaccessible — Data Driven Understanding of Data Science Notebook (In)Accessibility](https://arxiv.org/pdf/2308.03241). To address them, we implement custom detection logic for the issues listed in [Rule Description](./doc/rules.md). In addition, we integrate axe-core to detect other standard accessibility issues beyond these main issues, which are listed in [Axe Rule Description](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md). Currently, axe is supported in the extension but not in the CLI tool.
 
 ## JupyterLab Extension
 
@@ -44,7 +44,7 @@ npx @jupyterlab-a11y-checker/cli path/to/your_notebook.ipynb
 
 ### GitHub Action Usage
 
-You can use this tool directly in your GitHub Workflows to check notebooks automatically on every push. Here is a sample workflow to check all notebooks in your repository:
+You can use this tool directly in your GitHub Workflows to check notebooks automatically on every push. Here is a sample workflow to scan all notebooks in your repository:
 
 ```yaml
 steps:

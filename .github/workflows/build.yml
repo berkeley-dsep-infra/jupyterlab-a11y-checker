@@ -24,38 +24,23 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -U "jupyterlab>=4.0.0,<5"
 
+      - name: Install and build packages
+        env:
+          HUSKY: 0
+        run: |
+          set -eux
+          jlpm install
+          jlpm build
+
       - name: Lint the extension
-        env:
-          HUSKY: 0
+        working-directory: packages/extension
+        run: jlpm lint
+
+      - name: Test extension loads
+        working-directory: packages/extension
         run: |
           set -eux
-          npm install
-          npm run lint -w packages/extension
-
-      - name: Build core package
-        run: npm run build -w packages/core
-
-      - name: Build the extension
-        env:
-          HUSKY: 0
-        run: |
-          set -eux
-          # Install yarn globally so jlpm can use it
-          npm install -g yarn
-          
-          cd packages/extension
-          # Run yarn install to create yarn.lock that jlpm expects
-          yarn install
-          
-          # Build TypeScript
-          npm run build:lib
-          
-          # Build labextension (now jlpm should work)
-          jupyter labextension build --development True .
-          
-          # Install for testing
           python -m pip install .[test]
-
           jupyter labextension list
           jupyter labextension list 2>&1 | grep -ie "a11y-checker.*OK"
           python -m jupyterlab.browser_check
@@ -64,7 +49,6 @@ jobs:
         working-directory: packages/extension
         run: |
           set -eux
-
           pip install build
           python -m build
           pip uninstall -y "jupyterlab_a11y_checker" jupyterlab

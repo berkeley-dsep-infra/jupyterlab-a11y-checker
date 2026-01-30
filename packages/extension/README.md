@@ -41,17 +41,17 @@ If you need to run checks offline or in CI, the repository now ships a CLI that 
 1. Build the library to populate `lib/cli/index.js`:
 
    ```bash
-   npm run clean:lib && npm run build:lib
+   jlpm clean:lib && jlpm build:lib
    ```
 
 2. Optionally link it so the `jupyterlab-a11y-check` command is available system-wide:
 
    ```bash
-   npm link
+   jlpm link
    jupyterlab-a11y-check test_notebooks/Demo.ipynb
    ```
 
-   (Undo with `npm unlink` when done.)
+   (Undo with `jlpm unlink` when done.)
 
 3. To produce only the LLM-friendly JSON summary (no human-friendly log), run:
    ```bash

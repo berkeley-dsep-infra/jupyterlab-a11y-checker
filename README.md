@@ -92,11 +92,10 @@ node -v #to check version
 # <pull code>
 
 # Install dependencies
-npm install
+jlpm install
 
 # Build Core and Extension
-npm run build -w packages/core
-npm run build -w packages/extension
+jlpm build
 
 # Install Extension
 pip install -e packages/extension
@@ -195,7 +194,7 @@ If you are developing locally or want to run from the checked-out repository:
 1. Build the packages:
 
    ```bash
-   npm run build -w packages/cli
+   jlpm build
    ```
 
 2. Run the CLI directly:

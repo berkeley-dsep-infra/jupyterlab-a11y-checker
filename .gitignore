@@ -125,3 +125,7 @@ dmypy.json
 
 # Yarn cache
 .yarn/
+
+# Coding Assistant
+CLAUDE.md
+./claude

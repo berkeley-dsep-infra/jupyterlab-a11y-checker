@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "jlpm workspaces foreach -At run build",
-    "lint": "jlpm workspaces foreach -A run lint"
+    "build": "cd packages/core && jlpm build && cd ../cli && jlpm build && cd ../extension && jlpm build",
+    "lint": "cd packages/extension && jlpm lint"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.49.0",

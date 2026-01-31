@@ -129,3 +129,4 @@ dmypy.json
 # Coding Assistant
 CLAUDE.md
 ./claude
+yarn.lock

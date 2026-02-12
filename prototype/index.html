@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jupycheck – Jupyter Notebook Accessibility Scanner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg-primary: #fafafa;
+        --bg-secondary: #ffffff;
+        --bg-card: #ffffff;
+        --border: #e2e4e9;
+        --border-hover: #c9ccd1;
+        --text-primary: #000000;
+        --text-secondary: #5c5c5c;
+        --text-muted: #8c8c8c;
+        --accent: #f37626;
+        --accent-hover: #d4631c;
+        --accent-light: rgba(243, 118, 38, 0.08);
+        --green: #1e8e3e;
+        --green-bg: rgba(30, 142, 62, 0.08);
+        --red: #d93025;
+        --red-bg: rgba(217, 48, 37, 0.08);
+        --orange: #e37400;
+        --orange-bg: rgba(227, 116, 0, 0.08);
+        --purple: #7c3aed;
+        --shadow-sm: 2px 2px 0 0 #000;
+        --shadow-md: 3px 3px 0 0 #000;
+        --cat-images: #2563eb;
+        --cat-headings: #7c3aed;
+        --cat-tables: #0891b2;
+        --cat-color: #ea580c;
+        --cat-links: #4f46e5;
+        --cat-other: #6b7280;
+      }
+
+      body {
+        font-family:
+          "DM Sans",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Hide temp DOM elements created by axe-core analysis */
+      body > div:not(.topbar):not(.hero):not(.results-section):not(.footer) {
+        position: fixed !important;
+        left: -10000px !important;
+        top: -10000px !important;
+      }
+
+      /* ─── Top Bar ─── */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-secondary);
+      }
+
+      .topbar-brand {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .topbar-brand:hover {
+        color: var(--accent);
+      }
+
+      .github-link {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 0.35rem 0.7rem;
+        border-radius: 8px;
+        border: 2px solid var(--text-primary);
+        box-shadow: 2px 2px 0 0 #000;
+        transition: all 0.1s;
+      }
+
+      .star-count {
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .star-count:empty {
+        display: none;
+      }
+
+      .github-link:hover {
+        background: var(--accent-light);
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 0 #000;
+      }
+
+      /* ─── Hero Section ─── */
+      .hero {
+        text-align: center;
+        padding: 3.5rem 2rem 0;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .hero h1 {
+        font-size: 2.75rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+      }
+
+      .hero .subtitle {
+        font-size: 0.92rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        transition: opacity 0.2s;
+      }
+
+      /* ─── Input Area ─── */
+      .input-area {
+        background: var(--bg-card);
+        border: 3px solid var(--text-primary);
+        border-radius: 10px;
+        padding: 1.75rem 1.75rem 1.5rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 5px 5px 0 0 #000;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .input-row input[type="text"] {
+        flex: 1;
+        padding: 0.8rem 1.1rem;
+        background: var(--bg-secondary);
+        border: 2px solid var(--text-primary);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-family: inherit;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .input-row input[type="text"]::placeholder {
+        color: var(--text-muted);
+      }
+
+      .input-row input[type="text"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+      }
+
+      .scan-btn {
+        padding: 0.8rem 2rem;
+        border: 2px solid var(--accent-hover);
+        border-radius: 10px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.1s,
+          box-shadow 0.1s;
+        white-space: nowrap;
+        box-shadow: 3px 3px 0 0 var(--accent-hover);
+      }
+
+      .scan-btn:hover {
+        background: var(--accent-hover);
+      }
+
+      .scan-btn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 0 0 0 0 var(--accent-hover);
+      }
+
+      .scan-btn:disabled {
+        background: #c5c5c5;
+        color: #fff;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .scan-btn.stop {
+        background: var(--red);
+      }
+
+      .scan-btn.stop:hover {
+        background: #c62828;
+      }
+
+      /* ─── Checkbox options ─── */
+      .checkbox-row {
+        display: flex;
+        justify-content: flex-start;
+        gap: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        cursor: pointer;
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        user-select: none;
+      }
+
+      .checkbox-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+        cursor: pointer;
+        margin: 0;
+        border: 2px solid var(--text-primary);
+        border-radius: 3px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: var(--bg-secondary);
+        display: grid;
+        place-content: center;
+      }
+
+      .checkbox-label input[type="checkbox"]::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        transform: scale(0);
+        transition: transform 0.1s;
+        background: var(--accent);
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+      }
+
+      .checkbox-label input[type="checkbox"]:checked::before {
+        transform: scale(1);
+      }
+
+      .checkbox-label input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .checkbox-label input[type="checkbox"]:checked::before {
+        background: #fff;
+      }
+
+      /* ─── Collapsible sections ─── */
+      .token-section,
+      .upload-section {
+        margin: 0;
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition:
+          max-height 0.3s ease,
+          opacity 0.2s ease,
+          margin 0.3s ease;
+      }
+
+      .token-section.visible,
+      .upload-section.visible {
+        max-height: 200px;
+        opacity: 1;
+        margin-top: 0.75rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .token-section input[type="text"] {
+        width: 100%;
+        padding: 0.55rem 0.85rem;
+        background: var(--bg-secondary);
+        border: 2px solid var(--text-primary);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        font-family: inherit;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .token-section input[type="text"]::placeholder {
+        color: var(--text-muted);
+      }
+
+      .token-section input[type="text"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+      }
+
+      /* ─── Upload Area ─── */
+      .upload-area {
+        border: 2px dashed var(--text-primary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+
+      .upload-area:hover,
+      .upload-area.dragover {
+        border-color: var(--accent);
+        background: var(--accent-light);
+      }
+
+      .upload-area .upload-text {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+      }
+
+      .upload-area .upload-text strong {
+        color: var(--accent);
+      }
+
+      .upload-area .upload-hint {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        margin-top: 0.2rem;
+      }
+
+      .upload-area input[type="file"] {
+        display: none;
+      }
+
+      /* ─── Try Examples ─── */
+      .try-examples {
+        margin-top: 0.75rem;
+        text-align: left;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .try-examples a {
+        display: inline-block;
+        padding: 0.3rem 0.75rem;
+        border: 2px solid var(--text-primary);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 500;
+        transition: all 0.1s;
+        box-shadow: 2px 2px 0 0 #000;
+      }
+
+      .try-examples a:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-light);
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 0 #000;
+      }
+
+      .try-examples a:active {
+        transform: translate(1px, 1px);
+        box-shadow: 0 0 0 0 #000;
+      }
+
+      /* ─── Status & Progress ─── */
+      .status-area {
+        margin: 1.25rem 0 0;
+        text-align: center;
+      }
+
+      #status {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        min-height: 1.4em;
+      }
+
+      .progress-wrap {
+        display: none;
+        margin-top: 1.25rem;
+      }
+
+      .progress-wrap.active {
+        display: block;
+        margin-bottom: 1.5rem;
+      }
+
+      .progress-bar-bg {
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      /* ─── Results Section ─── */
+      .results-section {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1.5rem 2rem 0;
+        flex: 1;
+      }
+
+      /* ─── Section Labels ─── */
+      .section-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 0.6rem;
+      }
+
+      /* ─── Summary Bar ─── */
+      .summary-bar {
+        background: var(--bg-card);
+        border: 2px solid var(--text-primary);
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        box-shadow: 4px 4px 0 0 #000;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .summary-stat {
+        text-align: center;
+      }
+
+      .summary-stat .num {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+
+      .summary-stat .num.green {
+        color: var(--green);
+      }
+
+      .summary-stat .num.red {
+        color: var(--red);
+      }
+
+      .summary-stat .num.orange {
+        color: var(--orange);
+      }
+
+      .summary-stat .num-fraction {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+
+      .summary-stat .label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      /* ─── Action buttons (export + details toggle) ─── */
+      .summary-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-left: auto;
+      }
+
+      .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--text-primary);
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        font-size: 0.82rem;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.1s;
+        box-shadow: 2px 2px 0 0 #000;
+      }
+
+      .action-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-light);
+      }
+
+      .action-btn:active {
+        transform: translate(1px, 1px);
+        box-shadow: 0 0 0 0 #000;
+      }
+
+      .btn-icon {
+        display: inline-block;
+        font-size: 0.75rem;
+        line-height: 1;
+        transition: transform 0.2s;
+      }
+
+      .btn-icon.chevron-open {
+        transform: rotate(90deg);
+      }
+
+      /* ─── Export Dropdown ─── */
+      .export-dropdown {
+        position: relative;
+      }
+
+      .export-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        background: var(--bg-card);
+        border: 2px solid var(--text-primary);
+        border-radius: 8px;
+        box-shadow: 3px 3px 0 0 #000;
+        min-width: 160px;
+        z-index: 20;
+        overflow: hidden;
+      }
+
+      .export-menu.open {
+        display: block;
+      }
+
+      .export-menu-item {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: none;
+        background: none;
+        color: var(--text-primary);
+        font-size: 0.82rem;
+        font-family: inherit;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+
+      .export-menu-item:hover {
+        background: var(--accent-light);
+        color: var(--accent);
+      }
+
+      /* ─── Issue Chart ─── */
+      .chart-section {
+        background: var(--bg-card);
+        border: 2px solid var(--text-primary);
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.25rem;
+        box-shadow: 4px 4px 0 0 #000;
+        position: relative;
+      }
+
+      .chart-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .chart-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .chart-label {
+        flex: 0 0 200px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        text-align: right;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem;
+      }
+
+      .info-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        border: 1.5px solid var(--text-muted);
+        color: var(--text-muted);
+        font-size: 0.6rem;
+        font-weight: 700;
+        font-style: italic;
+        font-family: Georgia, serif;
+        flex-shrink: 0;
+        cursor: help;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+      }
+
+      .info-icon:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      /* ─── Info Popover ─── */
+      .chart-info-popover {
+        display: none;
+        position: absolute;
+        right: -10px;
+        top: 0;
+        transform: translateX(100%);
+        width: 280px;
+        background: var(--bg-card);
+        border: 2px solid var(--text-primary);
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        box-shadow: 3px 3px 0 0 #000;
+        z-index: 30;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: var(--text-secondary);
+      }
+
+      .chart-info-popover.visible {
+        display: block;
+      }
+
+      .chart-info-popover .popover-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.3rem;
+        font-size: 0.82rem;
+      }
+
+      .chart-info-popover .popover-wcag {
+        display: inline-block;
+        margin-top: 0.4rem;
+        padding: 0.1rem 0.45rem;
+        border-radius: 10px;
+        font-size: 0.68rem;
+        font-weight: 500;
+        border: 1.5px solid var(--border);
+        color: var(--text-muted);
+      }
+
+      .chart-bar-track {
+        flex: 1;
+        height: 24px;
+        background: var(--bg-primary);
+        border-radius: 6px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .chart-bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.4s ease;
+        min-width: 2px;
+      }
+
+      .chart-count {
+        flex: 0 0 40px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .chart-empty {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.88rem;
+        padding: 1.5rem 0;
+      }
+
+      /* ─── Details section (collapsible) ─── */
+      .details-section {
+        display: none;
+      }
+
+      .details-section.open {
+        display: block;
+      }
+
+      /* ─── Results Toolbar ─── */
+      .results-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .results-toolbar select,
+      .results-toolbar input[type="text"] {
+        padding: 0.4rem 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+
+      .results-toolbar select:focus,
+      .results-toolbar input[type="text"]:focus {
+        border-color: var(--accent);
+      }
+
+      .results-toolbar input[type="text"] {
+        flex: 1;
+        min-width: 150px;
+      }
+
+      .results-toolbar label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      /* ─── Notebook Cards ─── */
+      .notebook-card {
+        background: var(--bg-card);
+        border: 2px solid var(--text-primary);
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0.75rem;
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+        box-shadow: 3px 3px 0 0 #000;
+        border-left: 4px solid var(--border);
+      }
+
+      .notebook-card.card-fail {
+        border-left-color: var(--red);
+      }
+
+      .notebook-card.card-pass {
+        border-left-color: var(--green);
+      }
+
+      .notebook-card.card-warn {
+        border-left-color: var(--orange);
+      }
+
+      .notebook-card:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 0 #000;
+      }
+
+      .notebook-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .notebook-card-chevron {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        border: none;
+        background: none;
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        transition: transform 0.2s;
+        transform: rotate(0deg);
+      }
+
+      .notebook-card-chevron.open {
+        transform: rotate(90deg);
+      }
+
+      .notebook-card-body {
+        display: none;
+      }
+
+      .notebook-card-body.open {
+        display: block;
+      }
+
+      .notebook-card h3 {
+        font-size: 0.92rem;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+        color: var(--text-primary);
+        flex: 1;
+      }
+
+      .notebook-card h3 .path-prefix {
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+
+      .notebook-card h3 .notebook-link {
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+
+      .notebook-card h3 .notebook-link:hover {
+        color: var(--accent);
+        text-decoration: underline;
+      }
+
+      .notebook-card h3 .notebook-link .path-prefix {
+        color: var(--text-muted);
+      }
+
+      .notebook-card h3 .notebook-link:hover .path-prefix {
+        color: var(--accent);
+      }
+
+      .notebook-card.compact {
+        padding: 0.6rem 1rem;
+      }
+
+      .notebook-card.compact h3 {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.65rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        margin-left: auto;
+      }
+
+      .badge.pass {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+
+      .badge.fail {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+
+      .badge.warn {
+        background: var(--orange-bg);
+        color: var(--orange);
+      }
+
+      /* ─── Issue List ─── */
+      .issue-list {
+        list-style: none;
+        margin-top: 0.6rem;
+      }
+
+      .issue-row {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .issue-row:last-child {
+        border-bottom: none;
+      }
+
+      .issue-row-summary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0;
+        width: 100%;
+        font-size: 0.82rem;
+      }
+
+      .violation-id {
+        font-weight: 600;
+        color: var(--purple);
+        font-size: 0.78rem;
+      }
+
+      .wcag-pill {
+        display: inline-block;
+        padding: 0.1rem 0.4rem;
+        border-radius: 10px;
+        font-size: 0.68rem;
+        font-weight: 500;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        text-decoration: none;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+        white-space: nowrap;
+      }
+
+      .wcag-pill:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .issue-count {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+      }
+
+      .cell-ref {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        margin-left: auto;
+        font-family:
+          "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      }
+
+      /* ─── Clean Notebooks Toggle ─── */
+      .clean-summary-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 0;
+        cursor: pointer;
+        font-size: 0.82rem;
+        color: var(--green);
+        font-weight: 500;
+        user-select: none;
+      }
+
+      .clean-summary-toggle:hover {
+        text-decoration: underline;
+      }
+
+      .clean-notebooks-container {
+        display: none;
+      }
+
+      .clean-notebooks-container.open {
+        display: block;
+      }
+
+      /* ─── Footer ─── */
+      .footer {
+        text-align: center;
+        padding: 1rem;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        border-top: 1px solid var(--border);
+        margin-top: auto;
+      }
+
+      .footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* ─── Responsive ─── */
+      @media (max-width: 600px) {
+        .hero {
+          padding: 2rem 1.25rem 1.5rem;
+        }
+
+        .hero h1 {
+          font-size: 2rem;
+        }
+
+        .input-row {
+          flex-direction: column;
+        }
+
+        .scan-btn {
+          width: 100%;
+        }
+
+        .summary-bar {
+          gap: 1.25rem;
+        }
+
+        .results-section {
+          padding: 0 1rem;
+        }
+
+        .chart-label {
+          flex: 0 0 120px;
+          font-size: 0.7rem;
+        }
+
+        .chart-info-popover {
+          position: fixed;
+          right: 1rem;
+          left: 1rem;
+          top: auto;
+          bottom: 1rem;
+          transform: none;
+          width: auto;
+        }
+
+        .results-toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .checkbox-row {
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Top bar -->
+    <div class="topbar">
+      <a class="topbar-brand" href="/">Jupycheck</a>
+      <a
+        class="github-link"
+        href="https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"
+          />
+        </svg>
+        GitHub
+        <span class="star-count" id="starCount"></span>
+      </a>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>
+        How accessible is your<br /><strong style="color: var(--accent)"
+          >Jupyter Notebook?</strong
+        >
+      </h1>
+      <p class="subtitle">
+        Scan a GitHub repo with .ipynb files or uploaded notebooks.<br />
+        Analysis aligned with WCAG 2.1 AA guidelines.
+      </p>
+    </div>
+
+    <div class="results-section">
+      <div class="input-area">
+        <div class="input-row">
+          <input
+            type="text"
+            id="repoUrl"
+            placeholder="https://github.com/owner/repo"
+          />
+          <button class="scan-btn" id="scanBtn">Scan</button>
+        </div>
+
+        <div class="checkbox-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="checkPrivate" />
+            Private repo
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="checkUpload" />
+            Upload notebooks
+          </label>
+        </div>
+
+        <div class="token-section" id="tokenSection">
+          <input
+            type="text"
+            id="token"
+            placeholder="GitHub token (ghp_xxxx) for private repos or higher rate limits"
+          />
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-text">
+              <strong>Click to upload</strong> or drag &amp; drop
+            </div>
+            <div class="upload-hint">.ipynb files only</div>
+            <input type="file" id="fileInput" accept=".ipynb" multiple />
+          </div>
+        </div>
+
+        <div class="try-examples">
+          <span>Try:</span>
+          <a class="example-link" data-url="https://github.com/jupyter/notebook"
+            >jupyter/notebook</a
+          >
+          <a
+            class="example-link"
+            data-url="https://github.com/googlecolab/colabtools"
+            >googlecolab/colabtools</a
+          >
+        </div>
+      </div>
+
+      <div class="status-area">
+        <div id="status"></div>
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="results"></div>
+    </div>
+
+    <div class="footer">
+      Inspired by
+      <a href="https://gitingest.com" target="_blank" rel="noopener noreferrer"
+        >Gitingest</a
+      >, powered by
+      <a
+        href="https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker"
+        target="_blank"
+        rel="noopener noreferrer"
+        >jupyterlab-a11y-checker</a
+      >
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

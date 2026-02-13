@@ -2,10 +2,16 @@ import { marked } from "marked";
 import { IGeneralCell, ICellIssue } from "../../types.js";
 import { stripHtmlTags } from "../../utils/sanitize.js";
 
+interface HeadingEntry {
+  cellIndex: number;
+  level: number;
+  content: string;
+  html: string;
+  offsetStart: number;
+  offsetEnd: number;
+}
+
 export async function detectHeadingOneIssue(
-  rawMarkdown: string,
-  cellIndex: number,
-  cellType: string,
   cells: IGeneralCell[],
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
@@ -55,12 +61,7 @@ export async function analyzeHeadingHierarchy(
   try {
     // Create a complete heading structure that maps cell index to heading level and content
     // Use array to retain order of headings
-    const headingStructure: Array<{
-      cellIndex: number;
-      level: number;
-      content: string;
-      html: string;
-    }> = [];
+    const headingStructure: HeadingEntry[] = [];
 
     // First pass: collect all headings
     for (let i = 0; i < cells.length; i++) {
@@ -97,11 +98,10 @@ export async function analyzeHeadingHierarchy(
         }
 
         if (level !== null) {
-          // Bug Check: Is the rendered h1 really h1? (Markdown Setext-heading) -> Can be improved.
-          if (
-            level === 1 &&
-            ((text || "").match(/(?<!\\)\$\$/g) || []).length === 1
-          ) {
+          // Guard: skip headings whose text is *only* LaTeX delimiters (e.g. "$" or "$$")
+          // that marked may parse as a setext heading from a math block.
+          const trimmedText = (text || "").trim();
+          if (trimmedText === "$$" || trimmedText === "$") {
             continue;
           }
 
@@ -119,7 +119,7 @@ export async function analyzeHeadingHierarchy(
             html: rawHeading,
             offsetStart: start,
             offsetEnd: end,
-          } as any);
+          });
         }
       }
     }
@@ -165,8 +165,8 @@ export async function analyzeHeadingHierarchy(
             headingStructure: headingStructure.filter(
               (h) => h.level === 1 || h.level === 2,
             ),
-            offsetStart: (heading as any).offsetStart,
-            offsetEnd: (heading as any).offsetEnd,
+            offsetStart: heading.offsetStart,
+            offsetEnd: heading.offsetEnd,
           },
         });
       });
@@ -187,8 +187,8 @@ export async function analyzeHeadingHierarchy(
               headingStructure: headingStructure.filter(
                 (h) => h.level === 1 || h.level === 2,
               ),
-              offsetStart: (heading as any).offsetStart,
-              offsetEnd: (heading as any).offsetEnd,
+              offsetStart: heading.offsetStart,
+              offsetEnd: heading.offsetEnd,
             },
           });
         });
@@ -210,8 +210,8 @@ export async function analyzeHeadingHierarchy(
               headingStructure: headingStructure.filter(
                 (h) => h.level === 1 || h.level === 2,
               ),
-              offsetStart: (heading as any).offsetStart,
-              offsetEnd: (heading as any).offsetEnd,
+              offsetStart: heading.offsetStart,
+              offsetEnd: heading.offsetEnd,
             },
           });
         });
@@ -231,8 +231,8 @@ export async function analyzeHeadingHierarchy(
           violationId: "heading-empty",
           issueContentRaw: current.html,
           metadata: {
-            offsetStart: (current as any).offsetStart,
-            offsetEnd: (current as any).offsetEnd,
+            offsetStart: current.offsetStart,
+            offsetEnd: current.offsetEnd,
           },
         });
       }
@@ -255,8 +255,8 @@ export async function analyzeHeadingHierarchy(
           issueContentRaw: current.html,
           metadata: {
             previousHeadingLevel: previous.level,
-            offsetStart: (current as any).offsetStart,
-            offsetEnd: (current as any).offsetEnd,
+            offsetStart: current.offsetStart,
+            offsetEnd: current.offsetEnd,
           },
         });
       }

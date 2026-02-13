@@ -1,10 +1,10 @@
-import { IGeneralCell, ICellIssue } from "../../types.js";
-import { findAllHtmlTags } from "../../utils/sanitize.js";
+import { ICellIssue, IGeneralCell } from "../../types.js";
+import { findAllHtmlTags, stripHtmlComments } from "../../utils/sanitize.js";
 
 export function detectTableIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
-  cellType: string,
+  cellType: "code" | "markdown",
 ): ICellIssue[] {
   const notebookIssues: ICellIssue[] = [];
 
@@ -12,11 +12,14 @@ export function detectTableIssuesInCell(
   const tables = findAllHtmlTags(rawMarkdown, "table");
 
   for (const { match: tableHtml, start, end } of tables) {
+    // Strip HTML comments so that tags inside comments are not counted
+    const uncommented = stripHtmlComments(tableHtml);
+
     // Check for tables without <th> tags
-    if (!/<th[\s>]/i.test(tableHtml)) {
+    if (!/<th[\s>]/i.test(uncommented)) {
       notebookIssues.push({
         cellIndex,
-        cellType: cellType as "code" | "markdown",
+        cellType,
         violationId: "table-missing-header",
         issueContentRaw: tableHtml,
         metadata: {
@@ -27,10 +30,10 @@ export function detectTableIssuesInCell(
     }
 
     // Check for tables without <caption> tags
-    if (!/<caption[\s>]/i.test(tableHtml)) {
+    if (!/<caption[\s>]/i.test(uncommented)) {
       notebookIssues.push({
         cellIndex,
-        cellType: cellType as "code" | "markdown",
+        cellType,
         violationId: "table-missing-caption",
         issueContentRaw: tableHtml,
         metadata: {
@@ -45,9 +48,9 @@ export function detectTableIssuesInCell(
     let thMatch;
     let hasMissingScope = false;
 
-    while ((thMatch = thRegex.exec(tableHtml)) !== null) {
+    while ((thMatch = thRegex.exec(uncommented)) !== null) {
       const attributes = thMatch[1];
-      if (!attributes.toLowerCase().includes("scope=")) {
+      if (!/(?:^|\s)scope\s*=/i.test(attributes)) {
         hasMissingScope = true;
         break;
       }
@@ -56,7 +59,7 @@ export function detectTableIssuesInCell(
     if (hasMissingScope) {
       notebookIssues.push({
         cellIndex,
-        cellType: cellType as "code" | "markdown",
+        cellType,
         violationId: "table-missing-scope",
         issueContentRaw: tableHtml,
         metadata: {

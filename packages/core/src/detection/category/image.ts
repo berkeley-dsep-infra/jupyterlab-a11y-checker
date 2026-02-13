@@ -1,5 +1,6 @@
 import Tesseract from "tesseract.js";
 import { ICellIssue, IImageProcessor, IGeneralCell } from "../../types.js";
+import { findImgTags, extractImageUrl } from "../../utils/image-utils.js";
 
 async function getTextInImage(
   imagePath: string,
@@ -61,76 +62,10 @@ async function getTextInImage(
   }
 }
 
-/**
- * Find all <img ...> tags using indexOf-based scanning (no ReDoS).
- */
-function findImgTags(
-  html: string,
-): Array<{ tag: string; start: number; end: number }> {
-  const results: Array<{ tag: string; start: number; end: number }> = [];
-  const lower = html.toLowerCase();
-  let searchFrom = 0;
-  while (searchFrom < lower.length) {
-    const idx = lower.indexOf("<img", searchFrom);
-    if (idx === -1) {
-      break;
-    }
-    // Ensure it's actually an <img tag (next char must be space, >, /)
-    const charAfter = lower[idx + 4];
-    if (
-      charAfter !== undefined &&
-      charAfter !== ">" &&
-      charAfter !== " " &&
-      charAfter !== "\t" &&
-      charAfter !== "\n" &&
-      charAfter !== "\r" &&
-      charAfter !== "/"
-    ) {
-      searchFrom = idx + 1;
-      continue;
-    }
-    const closeIdx = html.indexOf(">", idx + 4);
-    if (closeIdx === -1) {
-      break;
-    }
-    const end = closeIdx + 1;
-    results.push({ tag: html.slice(idx, end), start: idx, end });
-    searchFrom = end;
-  }
-  return results;
-}
-
-/**
- * Extract image URL from a matched image string (markdown or HTML).
- */
-function extractImageUrl(imageStr: string): string | null {
-  // Markdown: ![...](url)
-  const parenOpen = imageStr.indexOf("(");
-  if (parenOpen !== -1) {
-    const parenClose = imageStr.indexOf(")", parenOpen + 1);
-    if (parenClose !== -1) {
-      return imageStr.slice(parenOpen + 1, parenClose).trim();
-    }
-  }
-  // HTML: src="url" or src='url'
-  const lower = imageStr.toLowerCase();
-  const srcIdx = lower.indexOf("src=");
-  if (srcIdx !== -1) {
-    const quote = imageStr[srcIdx + 4];
-    if (quote === '"' || quote === "'") {
-      const closeQuote = imageStr.indexOf(quote, srcIdx + 5);
-      if (closeQuote !== -1) {
-        return imageStr.slice(srcIdx + 5, closeQuote);
-      }
-    }
-  }
-  return null;
-}
-
 export async function detectImageIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
-  cellType: string,
+  cellType: "code" | "markdown",
   notebookPath: string,
   baseUrl: string,
   imageProcessor: IImageProcessor,
@@ -157,7 +92,9 @@ export async function detectImageIssuesInCell(
   const imgTags = findImgTags(rawMarkdown);
   for (const { tag, start, end } of imgTags) {
     // Check if alt attribute is present and non-empty
-    const hasNonEmptyAlt = /\balt\s*=\s*["'][^"']+["']/i.test(tag);
+    const hasNonEmptyAlt = /\balt\s*=\s*(?:["'][^"']+["']|[^\s>"']+)/i.test(
+      tag,
+    );
     if (!hasNonEmptyAlt) {
       missingAlt.push({ matchStr: tag, start, end });
     }
@@ -193,7 +130,7 @@ export async function detectImageIssuesInCell(
     } finally {
       notebookIssues.push({
         cellIndex,
-        cellType: cellType as "code" | "markdown",
+        cellType,
         violationId: issueId,
         issueContentRaw: matchStr,
         suggestedFix: suggestedFix,

@@ -39,6 +39,30 @@ export function escapeHtmlText(str: string): string {
 }
 
 /**
+ * Strips HTML comments (`<!-- ... -->`) from a string using indexOf scanning.
+ * Safe against ReDoS — no regex backtracking.
+ */
+export function stripHtmlComments(html: string): string {
+  let result = "";
+  let searchFrom = 0;
+  while (searchFrom < html.length) {
+    const openIdx = html.indexOf("<!--", searchFrom);
+    if (openIdx === -1) {
+      result += html.slice(searchFrom);
+      break;
+    }
+    result += html.slice(searchFrom, openIdx);
+    const closeIdx = html.indexOf("-->", openIdx + 4);
+    if (closeIdx === -1) {
+      // Unclosed comment — treat rest as comment
+      break;
+    }
+    searchFrom = closeIdx + 3;
+  }
+  return result;
+}
+
+/**
  * Finds all `<tagName>...</tagName>` blocks using indexOf-based linear scanning.
  * No regex backtracking — safe against ReDoS on malformed input.
  */

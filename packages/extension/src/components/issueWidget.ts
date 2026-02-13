@@ -42,11 +42,26 @@ export class CellIssueWidget extends Widget {
       issueInformation!.detailedDescription = issue.customDetailedDescription;
     }
 
+    const severity = issueInformation?.severity || 'violation';
+    const severityClass =
+      severity === 'violation'
+        ? 'severity-violation'
+        : 'severity-best-practice';
+    const severityLabel =
+      severity === 'violation' ? 'WCAG Violation' : 'Best Practice';
+
     this.addClass('issue-widget');
     // Tag widget with identifiers so the panel can selectively update
     this.node.setAttribute('data-cell-index', String(issue.cellIndex));
     this.node.setAttribute('data-violation-id', issue.violationId);
+    const axeBadge =
+      issue.detectedBy === 'axe-core'
+        ? '<span class="severity-badge detected-by-axe">axe-core</span>'
+        : '';
+
     this.node.innerHTML = `
+      <span class="severity-badge ${severityClass}">${severityLabel}</span>
+      ${axeBadge}
       <button class="issue-header-button">
           <h3 class="issue-header"> ${issueInformation?.title || issue.violationId}</h3>
           <span class="chevron material-icons">expand_more</span>

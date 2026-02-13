@@ -4,7 +4,10 @@ import {
   replaceSlice,
   getImageAltSuggestion,
   getTableCaptionSuggestion,
-  IModelSettings
+  IModelSettings,
+  escapeHtmlAttr,
+  escapeHtmlText,
+  stripHtmlTags
 } from '@berkeley-dsep-infra/a11y-checker-core';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
@@ -44,19 +47,17 @@ export class ImageAltFixWidget extends TextFieldFixWidget {
     // Offsets are already validated in getIssueOffsets
 
     // Handle HTML image tags
+    const safeAltText = escapeHtmlAttr(providedAltText);
     const handleHtmlImage = (imageText: string): string => {
       // Alt attribute exists but is empty
-      if (imageText.includes('alt=""') || imageText.includes("alt=''")) {
+      if (/alt\s*=\s*["']\s*["']/.test(imageText)) {
         return imageText.replace(
-          /alt=["']\s*["']/,
-          `alt = "${providedAltText}"`
+          /alt\s*=\s*["']\s*["']/,
+          `alt="${safeAltText}"`
         );
       }
-      // Alt attribute does not exist
-      return imageText.replace(
-        /\s*\/?>(?=$)/,
-        ` alt = "${providedAltText}"$ & `
-      );
+      // Alt attribute does not exist — $& re-inserts the matched closing > or />
+      return imageText.replace(/\s*\/?>$/, ` alt="${safeAltText}"$&`);
     };
 
     // Handle markdown images
@@ -188,17 +189,18 @@ export class TableCaptionFixWidget extends TextFieldFixWidget {
     const entireCellContent = this.cell.model.sharedModel.getSource();
     const target = this.issue.issueContentRaw;
 
+    const safeCaption = escapeHtmlText(providedCaption);
     const handleHtmlTable = (tableHtml: string): string => {
       // Check if table already has a caption
       if (tableHtml.includes('<caption>')) {
         return tableHtml.replace(
           /<caption>.*?<\/caption>/,
-          `< caption > ${providedCaption} </caption>`
+          `<caption>${safeCaption}</caption>`
         );
       } else {
         return tableHtml.replace(
           /<table[^>]*>/,
-          `$&\n  <caption>${providedCaption}</caption>`
+          `$&\n  <caption>${safeCaption}</caption>`
         );
       }
     };
@@ -430,23 +432,22 @@ export class LinkTextFixWidget extends TextFieldFixWidget {
       return full.replace(/\[[^\]]*\]/, `[${providedText}]`);
     };
 
+    const safeProvidedText = escapeHtmlAttr(providedText);
     const replaceHtmlLinkTextOrAria = (full: string): string => {
       if (/aria-label=/.test(full)) {
         return full.replace(
           /aria-label=["'].*?["']/i,
-          `aria-label="${providedText}"`
+          `aria-label="${safeProvidedText}"`
         );
       }
       // If there is no aria-label and no visible inner text, add aria-label
-      const innerText = (
+      const innerText = stripHtmlTags(
         full.replace(/<a\b[^>]*>/i, '').replace(/<\/a>/i, '') || ''
-      )
-        .replace(/<[^>]*>/g, '')
-        .trim();
+      ).trim();
       if (innerText.length === 0) {
         return full.replace(
           /<a\b([^>]*)>/i,
-          (_m, attrs) => `<a${attrs} aria-label="${providedText}">`
+          (_m, attrs) => `<a${attrs} aria-label="${safeProvidedText}">`
         );
       }
       // Otherwise, replace inner text

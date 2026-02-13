@@ -126,6 +126,10 @@ dmypy.json
 # Yarn cache
 .yarn/
 
+# JupyterLite build output
+experimental/jupyterlite/_output/
+experimental/jupyterlite/.venv/
+
 # Coding Assistant
 CLAUDE.md
 .claude/

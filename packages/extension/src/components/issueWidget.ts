@@ -38,9 +38,6 @@ export class CellIssueWidget extends Widget {
     if (issue.customDescription) {
       issueInformation!.description = issue.customDescription;
     }
-    if (issue.customDetailedDescription) {
-      issueInformation!.detailedDescription = issue.customDetailedDescription;
-    }
 
     const severity = issueInformation?.severity || 'violation';
     const severityClass =

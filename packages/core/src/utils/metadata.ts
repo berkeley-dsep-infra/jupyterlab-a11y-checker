@@ -14,7 +14,7 @@ export const issueToCategory = new Map<string, string>([
   // 1. Images
   ["image-missing-alt", "Images"],
 
-  // TODO: 2. Headings
+  // 2. Headings
   ["heading-missing-h1", "Headings"],
   ["heading-multiple-h1", "Headings"],
   ["heading-duplicate", "Headings"],
@@ -23,20 +23,20 @@ export const issueToCategory = new Map<string, string>([
   ["heading-wrong-order", "Headings"],
   ["heading-empty", "Headings"],
 
-  // TODO: 3. Tables
+  // 3. Tables
   ["table-missing-header", "Tables"],
   ["table-missing-caption", "Tables"],
   ["table-missing-scope", "Tables"],
 
-  // TODO: 4. Color
+  // 4. Color
   ["color-insufficient-cc-normal", "Color"],
   ["color-insufficient-cc-large", "Color"],
-  // TODO: Lists
+  // 5. Lists
 
-  // TODO: Links
+  // 6. Links
   ["link-discernible-text", "Links"],
 
-  // TODO: Other
+  // 7. Other
 ]);
 
 export const issueToDescription = new Map<string, IIssueInformation>([
@@ -54,7 +54,7 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     },
   ],
 
-  // TODO: 2. Headings
+  // 2. Headings
   [
     "heading-missing-h1",
     {
@@ -124,7 +124,7 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     },
   ],
 
-  // TODO: 3. Tables
+  // 3. Tables
   [
     "table-missing-header",
     {
@@ -155,7 +155,7 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     },
   ],
 
-  // TODO: 4. Color
+  // 4. Color
   [
     "color-insufficient-cc-normal",
     {
@@ -182,9 +182,9 @@ export const issueToDescription = new Map<string, IIssueInformation>([
       severity: "violation",
     },
   ],
-  // TODO: Lists
+  // 5. Lists
 
-  // TODO: Links
+  // 6. Links
   [
     "link-discernible-text",
     {
@@ -199,5 +199,5 @@ export const issueToDescription = new Map<string, IIssueInformation>([
     },
   ],
 
-  // TODO: Other
+  // 7. Other
 ]);

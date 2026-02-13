@@ -130,7 +130,7 @@ even though they fall outside axe-core's rule set.
 
 axe-core remains in the pipeline as a catch-all for any WCAG violations that survive
 the markdown-to-HTML transformation and aren't covered by custom detection (e.g., raw
-HTML `<img>` tags without `alt`, empty `<a>` elements). But for the 13 rules JupyCheck
+HTML `<img>` tags without `alt`, empty `<a>` elements). But for the 13 rules JupyterLab-a11y-checker
 targets, custom detection on the raw markdown source is required for accurate, actionable
 results.
 

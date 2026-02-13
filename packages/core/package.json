@@ -6,6 +6,7 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
+        "test": "vitest run",
         "lint": "true"
     },
     "dependencies": {
@@ -16,6 +17,7 @@
     },
     "devDependencies": {
         "@types/node": "18",
-        "typescript": "~5.4.0"
+        "typescript": "~5.4.0",
+        "vitest": "^3.0.0"
     }
 }

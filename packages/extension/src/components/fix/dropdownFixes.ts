@@ -418,12 +418,7 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
       const accessibleCells = notebookToGeneralCells(notebookPanel);
       const headingHierarchyIssues =
         await analyzeHeadingHierarchy(accessibleCells);
-      const headingOneIssues = await detectHeadingOneIssue(
-        '',
-        0,
-        'markdown',
-        accessibleCells
-      );
+      const headingOneIssues = await detectHeadingOneIssue(accessibleCells);
       const allHeadingIssues = [...headingHierarchyIssues, ...headingOneIssues];
       const mainPanel = document
         .querySelector('.a11y-panel')

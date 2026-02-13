@@ -20,9 +20,7 @@ export async function analyzeCellsAccessibility(
   const notebookIssues: ICellIssue[] = [];
 
   // Add heading one check
-  notebookIssues.push(
-    ...(await detectHeadingOneIssue("", 0, "markdown", cells)),
-  );
+  notebookIssues.push(...(await detectHeadingOneIssue(cells)));
 
   const tempDiv = documentContext.createElement("div");
   documentContext.body.appendChild(tempDiv);
@@ -55,7 +53,12 @@ export async function analyzeCellsAccessibility(
       if (cellType === "markdown") {
         const rawMarkdown = cell.source;
         if (rawMarkdown.trim()) {
-          tempDiv.innerHTML = await marked.parse(rawMarkdown);
+          try {
+            tempDiv.innerHTML = await marked.parse(rawMarkdown);
+          } catch (err) {
+            console.error(`marked.parse() failed for cell ${i}:`, err);
+            continue;
+          }
 
           const results = await axe.run(tempDiv, axeConfig);
           const violations = results.violations;
@@ -207,9 +210,7 @@ export async function analyzeCellsAccessibilityCLI(
   const notebookIssues: ICellIssue[] = [];
 
   // 1. Heading One Check
-  notebookIssues.push(
-    ...(await detectHeadingOneIssue("", 0, "markdown", cells)),
-  );
+  notebookIssues.push(...(await detectHeadingOneIssue(cells)));
 
   // 2. Heading Hierarchy
   const headingIssues = await analyzeHeadingHierarchy(cells);

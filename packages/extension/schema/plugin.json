@@ -11,7 +11,9 @@
         "baseUrl": {
           "type": "string",
           "title": "API Endpoint",
-          "default": "https://litellm.river.berkeley.edu/v1/chat/completions"
+          "default": "https://litellm.river.berkeley.edu/v1/chat/completions",
+          "format": "uri",
+          "minLength": 1
         },
         "apiKey": {
           "type": "string",
@@ -21,7 +23,8 @@
         "model": {
           "type": "string",
           "title": "Language Model",
-          "default": "TBD"
+          "default": "",
+          "minLength": 1
         }
       }
     },
@@ -33,7 +36,9 @@
         "baseUrl": {
           "type": "string",
           "title": "API Endpoint",
-          "default": "https://litellm.river.berkeley.edu/v1/chat/completions"
+          "default": "https://litellm.river.berkeley.edu/v1/chat/completions",
+          "format": "uri",
+          "minLength": 1
         },
         "apiKey": {
           "type": "string",
@@ -43,7 +48,8 @@
         "model": {
           "type": "string",
           "title": "Vision Model",
-          "default": "amazon.nova-pro-v1:0"
+          "default": "amazon.nova-pro-v1:0",
+          "minLength": 1
         }
       }
     }

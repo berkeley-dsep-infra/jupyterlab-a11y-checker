@@ -9,6 +9,10 @@
   --border-color: var(--jp-border-color1, #ddd);
   --error-red: var(--jp-error-color1, #db3939);
   --success-green: var(--jp-success-color1, #28a745);
+  --a11y-highlight-locate: var(--error-red);
+  --a11y-highlight-success: var(--success-green);
+  --a11y-dropdown-z: 100;
+  --a11y-dropdown-content-z: 50;
 }
 
 /* ==========================================================================
@@ -143,6 +147,16 @@
   background-color: var(--primary-blue-hover);
 }
 
+.control-button:focus-visible {
+  outline: 2px solid var(--jp-brand-color1, #1976d2);
+  outline-offset: 2px;
+}
+
+.control-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ==========================================================================
    Issue Categories Section
    ========================================================================== */
@@ -202,6 +216,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.issue-widget .issue-header-button:focus-visible {
+  outline: 2px solid var(--jp-brand-color1, #1976d2);
+  outline-offset: 2px;
 }
 
 .issue-widget .issue-header {
@@ -293,6 +312,18 @@
   background-color: var(--primary-blue-hover);
 }
 
+.jp-Button:focus-visible,
+.jp-Button2:focus-visible {
+  outline: 2px solid var(--jp-brand-color1, #1976d2);
+  outline-offset: 2px;
+}
+
+.jp-Button:disabled,
+.jp-Button2:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .textfield-buttons .jp-Button2 {
   margin-left: 4px;
 }
@@ -354,11 +385,16 @@
   width: calc(100% - 16px);
   padding: 8px;
   margin-bottom: 8px;
-  font-family: Inter, sans-serif;
+  font-family: var(--jp-ui-font-family, sans-serif);
   border: none;
   outline: none;
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
+}
+
+.jp-a11y-input:focus-visible {
+  outline: 2px solid var(--jp-brand-color1, #1976d2);
+  outline-offset: -2px;
 }
 
 .jp-a11y-input::placeholder {
@@ -404,10 +440,8 @@
 }
 
 /* ==========================================================================
-   Material Icons
+   Material Icons — flattened for browser compatibility (no CSS nesting)
    ========================================================================== */
-
-/* If your tooling supports CSS nesting (or you’re using a preprocessor) */
 
 .material-icons {
   font-family: 'Material Icons', sans-serif;
@@ -424,49 +458,49 @@
   white-space: nowrap;
   direction: ltr;
   vertical-align: middle;
+}
 
-  &.md-18 {
-    font-size: 18px;
-  }
+.material-icons.md-18 {
+  font-size: 18px;
+}
 
-  &.md-24 {
-    font-size: 24px;
-  }
+.material-icons.md-24 {
+  font-size: 24px;
+}
 
-  &.md-36 {
-    font-size: 36px;
-  }
+.material-icons.md-36 {
+  font-size: 36px;
+}
 
-  &.md-48 {
-    font-size: 48px;
-  }
+.material-icons.md-48 {
+  font-size: 48px;
+}
 
-  &.md-dark {
-    color: var(--jp-ui-font-color1);
-  }
+.material-icons.md-dark {
+  color: var(--jp-ui-font-color1);
+}
 
-  &.md-dark.md-inactive {
-    color: var(--jp-ui-font-color3);
-  }
+.material-icons.md-dark.md-inactive {
+  color: var(--jp-ui-font-color3);
+}
 
-  &.md-light {
-    color: var(--jp-ui-inverse-font-color1);
-  }
+.material-icons.md-light {
+  color: var(--jp-ui-inverse-font-color1);
+}
 
-  &.md-light.md-inactive {
-    color: var(--jp-ui-inverse-font-color3);
-  }
+.material-icons.md-light.md-inactive {
+  color: var(--jp-ui-inverse-font-color3);
+}
 
-  &.loading {
-    animation: spin 1s linear infinite;
-  }
+.material-icons.loading {
+  animation: spin 1s linear infinite;
 }
 
 .custom-dropdown {
   position: relative;
   width: calc(100% - 16px);
   margin-bottom: 8px;
-  z-index: 9999;
+  z-index: var(--a11y-dropdown-z);
   isolation: isolate;
 }
 
@@ -492,6 +526,11 @@
   color: var(--text-light);
 }
 
+.dropdown-button:focus-visible {
+  outline: 2px solid var(--jp-brand-color1, #1976d2);
+  outline-offset: 2px;
+}
+
 .dropdown-text {
   flex: 1;
   text-align: left;
@@ -514,7 +553,7 @@
   border: 1px solid var(--jp-border-color1);
   border-radius: 4px;
   margin-top: 4px;
-  z-index: 1000;
+  z-index: var(--a11y-dropdown-content-z);
   box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
 }
 
@@ -531,20 +570,6 @@
 .dropdown-option:hover {
   background-color: var(--primary-blue-hover);
   color: #fff;
-}
-
-/* ==========================================================================
-   Animations
-   ========================================================================== */
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 /* ==========================================================================

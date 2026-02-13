@@ -47473,6 +47473,54 @@ var lexer = _Lexer.lex;
 
 // ../core/src/detection/category/heading.ts
 init_esm_shims();
+
+// ../core/src/utils/sanitize.ts
+init_esm_shims();
+function stripHtmlTags(input) {
+  let prev = input;
+  while (true) {
+    const next = prev.replace(/<[^>]*>/g, "");
+    if (next === prev) {
+      return next;
+    }
+    prev = next;
+  }
+}
+function findAllHtmlTags(html2, tagName) {
+  const results = [];
+  const openTag = `<${tagName}`;
+  const closeTag = `</${tagName}>`;
+  const lowerHtml = html2.toLowerCase();
+  const lowerOpen = openTag.toLowerCase();
+  const lowerClose = closeTag.toLowerCase();
+  let searchFrom = 0;
+  while (searchFrom < lowerHtml.length) {
+    const openIdx = lowerHtml.indexOf(lowerOpen, searchFrom);
+    if (openIdx === -1) {
+      break;
+    }
+    const charAfter = lowerHtml[openIdx + lowerOpen.length];
+    if (charAfter !== void 0 && charAfter !== ">" && charAfter !== " " && charAfter !== "	" && charAfter !== "\n" && charAfter !== "\r" && charAfter !== "/") {
+      searchFrom = openIdx + 1;
+      continue;
+    }
+    const closeIdx = lowerHtml.indexOf(lowerClose, openIdx + lowerOpen.length);
+    if (closeIdx === -1) {
+      searchFrom = openIdx + 1;
+      continue;
+    }
+    const end = closeIdx + closeTag.length;
+    results.push({
+      match: html2.slice(openIdx, end),
+      start: openIdx,
+      end
+    });
+    searchFrom = end;
+  }
+  return results;
+}
+
+// ../core/src/detection/category/heading.ts
 async function detectHeadingOneIssue(rawMarkdown, cellIndex, cellType, cells) {
   const notebookIssues = [];
   if (!cells.length) {
@@ -47533,7 +47581,7 @@ async function analyzeHeadingHierarchy(cells) {
           if (m) {
             level = parseInt(m[1], 10);
             rawHeading = m[0];
-            text = rawHeading.replace(/<[^>]+>/g, "");
+            text = stripHtmlTags(rawHeading);
           }
         }
         if (level !== null) {
@@ -47719,57 +47767,105 @@ async function getTextInImage(imagePath, currentDirectoryPath, baseUrl, imagePro
     await worker.terminate();
   }
 }
+function findImgTags(html2) {
+  const results = [];
+  const lower = html2.toLowerCase();
+  let searchFrom = 0;
+  while (searchFrom < lower.length) {
+    const idx = lower.indexOf("<img", searchFrom);
+    if (idx === -1) {
+      break;
+    }
+    const charAfter = lower[idx + 4];
+    if (charAfter !== void 0 && charAfter !== ">" && charAfter !== " " && charAfter !== "	" && charAfter !== "\n" && charAfter !== "\r" && charAfter !== "/") {
+      searchFrom = idx + 1;
+      continue;
+    }
+    const closeIdx = html2.indexOf(">", idx + 4);
+    if (closeIdx === -1) {
+      break;
+    }
+    const end = closeIdx + 1;
+    results.push({ tag: html2.slice(idx, end), start: idx, end });
+    searchFrom = end;
+  }
+  return results;
+}
+function extractImageUrl(imageStr) {
+  const parenOpen = imageStr.indexOf("(");
+  if (parenOpen !== -1) {
+    const parenClose = imageStr.indexOf(")", parenOpen + 1);
+    if (parenClose !== -1) {
+      return imageStr.slice(parenOpen + 1, parenClose).trim();
+    }
+  }
+  const lower = imageStr.toLowerCase();
+  const srcIdx = lower.indexOf("src=");
+  if (srcIdx !== -1) {
+    const quote = imageStr[srcIdx + 4];
+    if (quote === '"' || quote === "'") {
+      const closeQuote = imageStr.indexOf(quote, srcIdx + 5);
+      if (closeQuote !== -1) {
+        return imageStr.slice(srcIdx + 5, closeQuote);
+      }
+    }
+  }
+  return null;
+}
 async function detectImageIssuesInCell(rawMarkdown, cellIndex, cellType, notebookPath, baseUrl, imageProcessor, attachments) {
   const notebookIssues = [];
+  const missingAlt = [];
   const mdSyntaxMissingAltRegex = /!\[\]\([^)]+\)/g;
-  const htmlSyntaxMissingAltRegex = /<img[^>]*alt=["']\s*["'][^>]*\/?>/g;
-  const htmlSyntaxNoAltRegex = /<img(?![^>]*alt=)[^>]*\/?>/g;
-  const regexes = [
-    mdSyntaxMissingAltRegex,
-    htmlSyntaxMissingAltRegex,
-    htmlSyntaxNoAltRegex
-  ];
-  for (const regex of regexes) {
-    regex.lastIndex = 0;
-    let match;
-    while ((match = regex.exec(rawMarkdown)) !== null) {
-      const imageUrl = match[0].match(/\(([^)]+)\)/)?.[1] || match[0].match(/src=["']([^"']+)["']/)?.[1];
-      if (!imageUrl) {
-        continue;
-      }
-      const issueId = "image-missing-alt";
-      const start = match.index ?? 0;
-      const end = start + match[0].length;
-      let suggestedFix = "";
-      try {
-        if (baseUrl) {
-          const ocrResult = await getTextInImage(
-            imageUrl,
-            notebookPath,
-            baseUrl,
-            imageProcessor,
-            attachments
-          );
-          if (ocrResult.confidence > 40) {
-            suggestedFix = ocrResult.text;
-          }
+  let mdMatch;
+  while ((mdMatch = mdSyntaxMissingAltRegex.exec(rawMarkdown)) !== null) {
+    missingAlt.push({
+      matchStr: mdMatch[0],
+      start: mdMatch.index,
+      end: mdMatch.index + mdMatch[0].length
+    });
+  }
+  const imgTags = findImgTags(rawMarkdown);
+  for (const { tag: tag2, start, end } of imgTags) {
+    const hasNonEmptyAlt = /\balt\s*=\s*["'][^"']+["']/i.test(tag2);
+    if (!hasNonEmptyAlt) {
+      missingAlt.push({ matchStr: tag2, start, end });
+    }
+  }
+  for (const { matchStr, start, end } of missingAlt) {
+    const imageUrl = extractImageUrl(matchStr);
+    if (!imageUrl) {
+      continue;
+    }
+    const issueId = "image-missing-alt";
+    let suggestedFix = "";
+    try {
+      if (baseUrl) {
+        const ocrResult = await getTextInImage(
+          imageUrl,
+          notebookPath,
+          baseUrl,
+          imageProcessor,
+          attachments
+        );
+        if (ocrResult.confidence > 40) {
+          suggestedFix = ocrResult.text;
         }
-      } catch (error) {
-        console.error(`Failed to process image ${imageUrl}:`, error);
-      } finally {
-        notebookIssues.push({
-          cellIndex,
-          cellType,
-          violationId: issueId,
-          issueContentRaw: match[0],
-          suggestedFix,
-          metadata: {
-            issueId: `cell-${cellIndex}-${issueId}-o${start}-${end}`,
-            offsetStart: start,
-            offsetEnd: end
-          }
-        });
       }
+    } catch (error) {
+      console.error(`Failed to process image ${imageUrl}:`, error);
+    } finally {
+      notebookIssues.push({
+        cellIndex,
+        cellType,
+        violationId: issueId,
+        issueContentRaw: matchStr,
+        suggestedFix,
+        metadata: {
+          issueId: `cell-${cellIndex}-${issueId}-o${start}-${end}`,
+          offsetStart: start,
+          offsetEnd: end
+        }
+      });
     }
   }
   return notebookIssues;
@@ -47779,42 +47875,32 @@ async function detectImageIssuesInCell(rawMarkdown, cellIndex, cellType, noteboo
 init_esm_shims();
 function detectTableIssuesInCell(rawMarkdown, cellIndex, cellType) {
   const notebookIssues = [];
-  const tableWithoutThRegex = /<table[^>]*>(?![\s\S]*?<th[^>]*>)[\s\S]*?<\/table>/gi;
-  let match;
-  while ((match = tableWithoutThRegex.exec(rawMarkdown)) !== null) {
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
-    notebookIssues.push({
-      cellIndex,
-      cellType,
-      violationId: "table-missing-header",
-      issueContentRaw: match[0],
-      metadata: {
-        offsetStart: start,
-        offsetEnd: end
-      }
-    });
-  }
-  const tableWithoutCaptionRegex = /<table[^>]*>(?![\s\S]*?<caption[^>]*>)[\s\S]*?<\/table>/gi;
-  while ((match = tableWithoutCaptionRegex.exec(rawMarkdown)) !== null) {
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
-    notebookIssues.push({
-      cellIndex,
-      cellType,
-      violationId: "table-missing-caption",
-      issueContentRaw: match[0],
-      metadata: {
-        offsetStart: start,
-        offsetEnd: end
-      }
-    });
-  }
-  const tableWithThRegex = /<table[^>]*>[\s\S]*?<\/table>/gi;
-  while ((match = tableWithThRegex.exec(rawMarkdown)) !== null) {
-    const tableHtml = match[0];
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
+  const tables = findAllHtmlTags(rawMarkdown, "table");
+  for (const { match: tableHtml, start, end } of tables) {
+    if (!/<th[\s>]/i.test(tableHtml)) {
+      notebookIssues.push({
+        cellIndex,
+        cellType,
+        violationId: "table-missing-header",
+        issueContentRaw: tableHtml,
+        metadata: {
+          offsetStart: start,
+          offsetEnd: end
+        }
+      });
+    }
+    if (!/<caption[\s>]/i.test(tableHtml)) {
+      notebookIssues.push({
+        cellIndex,
+        cellType,
+        violationId: "table-missing-caption",
+        issueContentRaw: tableHtml,
+        metadata: {
+          offsetStart: start,
+          offsetEnd: end
+        }
+      });
+    }
     const thRegex = /<th\b([^>]*)>/gi;
     let thMatch;
     let hasMissingScope = false;
@@ -47861,15 +47947,41 @@ function extractAttr(tag2, attr) {
   const m = new RegExp(attr + `=['"][^'"]+['"]`, "i").exec(tag2);
   return m ? m[0].split("=")[1].replace(/^['"]/, "").replace(/['"]$/, "") : null;
 }
+function findMarkdownLinks(text) {
+  const results = [];
+  let searchFrom = 0;
+  while (searchFrom < text.length) {
+    const bracketOpen = text.indexOf("[", searchFrom);
+    if (bracketOpen === -1) {
+      break;
+    }
+    if (bracketOpen > 0 && text[bracketOpen - 1] === "!") {
+      searchFrom = bracketOpen + 1;
+      continue;
+    }
+    const bracketClose = text.indexOf("](", bracketOpen + 1);
+    if (bracketClose === -1) {
+      searchFrom = bracketOpen + 1;
+      continue;
+    }
+    const parenClose = text.indexOf(")", bracketClose + 2);
+    if (parenClose === -1) {
+      searchFrom = bracketClose + 1;
+      continue;
+    }
+    const end = parenClose + 1;
+    const full = text.slice(bracketOpen, end);
+    const linkText = text.slice(bracketOpen + 1, bracketClose);
+    results.push({ full, linkText, start: bracketOpen, end });
+    searchFrom = end;
+  }
+  return results;
+}
 function detectLinkIssuesInCell(rawMarkdown, cellIndex, cellType) {
   const issues = [];
-  const mdLink = /\[([^\]]+)\]\(([^)\s]+)[^)]*\)/g;
-  let match;
-  while ((match = mdLink.exec(rawMarkdown)) !== null) {
-    const full = match[0];
-    const text = (match[1] || "").trim();
-    const start = match.index ?? 0;
-    const end = start + full.length;
+  const mdLinks = findMarkdownLinks(rawMarkdown);
+  for (const { full, linkText, start, end } of mdLinks) {
+    const text = linkText.trim();
     const violation = shouldFlag(text);
     if (violation) {
       issues.push({
@@ -47885,14 +47997,16 @@ function detectLinkIssuesInCell(rawMarkdown, cellIndex, cellType) {
       });
     }
   }
-  const htmlLink = /<a\b[^>]*>\s*([\s\S]*?)\s*<\/a>/gi;
-  while ((match = htmlLink.exec(rawMarkdown)) !== null) {
-    const full = match[0];
-    const inner = (match[1] || "").replace(/<[^>]*>/g, "").trim();
-    const tagStart = match.index ?? 0;
-    const tagEnd = tagStart + full.length;
-    const openingTagMatch = /<a\b[^>]*>/i.exec(full);
-    const openingTag = openingTagMatch ? openingTagMatch[0] : "";
+  const htmlLinks = findAllHtmlTags(rawMarkdown, "a");
+  for (const { match: full, start: tagStart, end: tagEnd } of htmlLinks) {
+    const openClose = full.indexOf(">");
+    const closeTagIdx = full.lastIndexOf("</");
+    let innerHtml = "";
+    if (openClose !== -1 && closeTagIdx !== -1 && openClose < closeTagIdx) {
+      innerHtml = full.slice(openClose + 1, closeTagIdx);
+    }
+    const inner = stripHtmlTags(innerHtml).trim();
+    const openingTag = openClose !== -1 ? full.slice(0, openClose + 1) : "";
     const aria = extractAttr(openingTag, "aria-label");
     const label = aria && aria.trim() ? aria.trim() : inner;
     const hasAria = !!(aria && aria.trim());
@@ -48020,7 +48134,7 @@ init_esm_shims();
 init_esm_shims();
 
 // ../../doc/rules.md
-var rules_default = "# Issue Descriptions\n\n## Image\n\n| No. | Rule ID           | Description                                                               | WCAG       |\n| --- | ----------------- | ------------------------------------------------------------------------- | ---------- |\n| 1a  | image-missing-alt | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 |\n\n---\n\n## Heading\n\n| No. | Rule ID                 | Description                                             | WCAG       |\n| --- | ----------------------- | ------------------------------------------------------- | ---------- |\n| 2a  | heading-missing-h1      | Ensure the presence of H1 tag in a notebook             | WCAG 2.4.2 |\n| 2b  | heading-multiple-h1     | Ensure there is only one H1 tag in a notebook           | WCAG 2.4.6 |\n| 2c  | heading-duplicate-h2    | Ensure no two H2 headings share the same content        | WCAG 2.4.6 |\n| 2d  | heading-duplicate-h1-h2 | Ensure no two H1 and H2 headings share the same content | WCAG 2.4.6 |\n| 2e  | heading-wrong-order     | Ensure the order of heading is accurate                 | WCAG 2.4.6 |\n| 2f  | heading-empty           | Ensure the heading content is non-empty                 | WCAG 2.4.6 |\n\n---\n\n## Table\n\n| No. | Rule ID               | Description                                               | WCAG       |\n| --- | --------------------- | --------------------------------------------------------- | ---------- |\n| 3a  | table-missing-header  | Ensure row and column headers are present in a table      | WCAG 1.3.1 |\n| 3b  | table-missing-caption | Ensure caption was added for a table                      | WCAG 1.3.1 |\n| 3c  | table-missing-scope   | Ensure presence of `scope` attribute for rows and columns | WCAG 1.3.1 |\n\n---\n\n## Color\n\n| No. | Rule ID                      | Description                                                                              | WCAG       |\n| --- | ---------------------------- | ---------------------------------------------------------------------------------------- | ---------- |\n| 4a  | color-insufficient-cc-normal | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 |\n| 4b  | color-insufficient-cc-large  | Ensure large text in images have a contrast ratio of 3:1                                 | WCAG 1.4.3 |\n\n---\n\n## Link\n\n| No. | Rule ID               | Description                                                    | WCAG       |\n| --- | --------------------- | -------------------------------------------------------------- | ---------- |\n| 5a  | link-discernible-text | Ensure link text is descriptive (or aria-label is descriptive) | WCAG 2.4.4 |\n\n## List\n\nTBD\n";
+var rules_default = "# Issue Descriptions\n\n## Image\n\n| No. | Rule ID           | Description                                                               | WCAG                  | Severity      |\n| --- | ----------------- | ------------------------------------------------------------------------- | --------------------- | ------------- |\n| 1a  | image-missing-alt | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 (Level A)  | violation     |\n\n---\n\n## Heading\n\n| No. | Rule ID                 | Description                                             | WCAG                  | Severity      |\n| --- | ----------------------- | ------------------------------------------------------- | --------------------- | ------------- |\n| 2a  | heading-missing-h1      | Ensure the presence of H1 tag in a notebook             |                       | best-practice |\n| 2b  | heading-multiple-h1     | Ensure there is only one H1 tag in a notebook           |                       | best-practice |\n| 2c  | heading-duplicate-h2    | Ensure no two H2 headings share the same content        |                       | best-practice |\n| 2d  | heading-duplicate-h1-h2 | Ensure no two H1 and H2 headings share the same content |                       | best-practice |\n| 2e  | heading-wrong-order     | Ensure the order of heading is accurate                 |                       | best-practice |\n| 2f  | heading-empty           | Ensure the heading content is non-empty                 | WCAG 1.3.1 (Level A)  | violation     |\n\n---\n\n## Table\n\n| No. | Rule ID               | Description                                               | WCAG                  | Severity      |\n| --- | --------------------- | --------------------------------------------------------- | --------------------- | ------------- |\n| 3a  | table-missing-header  | Ensure row and column headers are present in a table      | WCAG 1.3.1 (Level A)  | violation     |\n| 3b  | table-missing-caption | Ensure caption was added for a table                      |                       | best-practice |\n| 3c  | table-missing-scope   | Ensure presence of `scope` attribute for rows and columns |                       | best-practice |\n\n---\n\n## Color\n\n| No. | Rule ID                      | Description                                                                              | WCAG                  | Severity  |\n| --- | ---------------------------- | ---------------------------------------------------------------------------------------- | --------------------- | --------- |\n| 4a  | color-insufficient-cc-normal | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 (Level AA) | violation |\n| 4b  | color-insufficient-cc-large  | Ensure large text in images have a contrast ratio of 3:1                                 | WCAG 1.4.3 (Level AA) | violation |\n\n---\n\n## Link\n\n| No. | Rule ID               | Description                                                    | WCAG                  | Severity  |\n| --- | --------------------- | -------------------------------------------------------------- | --------------------- | --------- |\n| 5a  | link-discernible-text | Ensure link text is descriptive (or aria-label is descriptive) | WCAG 2.4.4 (Level A)  | violation |\n\n## List\n\nTBD\n";
 
 // src/ruleDescriptions.ts
 function parseRuleLines(contents) {
@@ -48035,13 +48149,14 @@ function parseRuleLines(contents) {
     if (columns.length < 3) {
       continue;
     }
-    const [, ruleId, description, wcag] = columns;
+    const [, ruleId, description, wcag, severity] = columns;
     if (!ruleId || ruleId.toLowerCase().startsWith("rule id") || ruleId === "---" || !description || description.toLowerCase().startsWith("description")) {
       continue;
     }
     descriptions[ruleId] = {
       description,
-      wcag: wcag && wcag !== "---" ? wcag : void 0
+      wcag: wcag && wcag !== "---" ? wcag : void 0,
+      severity: severity && severity !== "---" ? severity : void 0
     };
   }
   return descriptions;

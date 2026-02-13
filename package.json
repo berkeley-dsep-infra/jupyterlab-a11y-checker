@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "cd packages/core && jlpm build && cd ../cli && jlpm build && cd ../extension && jlpm build",
+    "build": "cd packages/core && jlpm build && cd ../cli && jlpm build && cd ../extension && jlpm build && jupyter labextension develop --overwrite .",
     "lint": "cd packages/extension && jlpm lint"
   },
   "devDependencies": {

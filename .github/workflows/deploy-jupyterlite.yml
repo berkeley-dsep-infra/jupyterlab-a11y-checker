@@ -1,0 +1,76 @@
+name: Deploy JupyterLite
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install JupyterLab
+        run: python -m pip install -U "jupyterlab>=4.0.0,<5"
+
+      - name: Install JupyterLite
+        run: pip install -r experimental/jupyterlite/requirements.txt
+
+      - name: Build monorepo and install extension
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
+        run: |
+          set -eux
+          jlpm install
+          jlpm build
+          cd packages/extension
+          pip install -e .
+
+      - name: Verify extension
+        run: |
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "a11y-checker.*OK"
+
+      - name: Build JupyterLite
+        working-directory: experimental/jupyterlite
+        run: |
+          jupyter lite build \
+            --contents files/ \
+            --output-dir _output
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: experimental/jupyterlite/_output
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

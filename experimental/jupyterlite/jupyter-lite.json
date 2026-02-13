@@ -1,0 +1,22 @@
+{
+  "$schema": "https://jupyterlite.readthedocs.io/en/stable/_static/schema/jupyterlite.v0.schema.json",
+  "jupyter-lite-schema-version": 0,
+  "jupyter-config-data": {
+    "appName": "JupyterLab A11y Checker Demo",
+    "disabledExtensions": [],
+    "settingsOverrides": {
+      "jupyterlab-a11y-checker:plugin": {
+        "languageModel": {
+          "baseUrl": "",
+          "apiKey": "",
+          "model": ""
+        },
+        "visionModel": {
+          "baseUrl": "",
+          "apiKey": "",
+          "model": ""
+        }
+      }
+    }
+  }
+}

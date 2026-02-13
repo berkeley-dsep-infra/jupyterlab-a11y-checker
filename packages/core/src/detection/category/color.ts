@@ -1,5 +1,10 @@
 import Tesseract, { PSM } from "tesseract.js";
 import { IGeneralCell, ICellIssue, IImageProcessor } from "../../types.js";
+import {
+  findMarkdownImages,
+  findImgTags,
+  extractImageUrl,
+} from "../../utils/image-utils.js";
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -261,111 +266,10 @@ async function getColorContrastInImage(
   });
 }
 
-/**
- * Find all markdown images using indexOf scanning (no ReDoS).
- * Matches ![...](...) patterns.
- */
-function findMarkdownImages(
-  text: string,
-): Array<{ match: string; start: number; end: number }> {
-  const results: Array<{ match: string; start: number; end: number }> = [];
-  let searchFrom = 0;
-  while (searchFrom < text.length) {
-    const bangIdx = text.indexOf("![", searchFrom);
-    if (bangIdx === -1) {
-      break;
-    }
-    const bracketClose = text.indexOf("](", bangIdx + 2);
-    if (bracketClose === -1) {
-      searchFrom = bangIdx + 1;
-      continue;
-    }
-    const parenClose = text.indexOf(")", bracketClose + 2);
-    if (parenClose === -1) {
-      searchFrom = bracketClose + 1;
-      continue;
-    }
-    const end = parenClose + 1;
-    results.push({ match: text.slice(bangIdx, end), start: bangIdx, end });
-    searchFrom = end;
-  }
-  return results;
-}
-
-/**
- * Find all <img> tags using indexOf scanning (no ReDoS).
- */
-function findHtmlImages(
-  html: string,
-): Array<{ match: string; start: number; end: number }> {
-  const results: Array<{ match: string; start: number; end: number }> = [];
-  const lower = html.toLowerCase();
-  let searchFrom = 0;
-  while (searchFrom < lower.length) {
-    const idx = lower.indexOf("<img", searchFrom);
-    if (idx === -1) {
-      break;
-    }
-    const charAfter = lower[idx + 4];
-    if (
-      charAfter !== undefined &&
-      charAfter !== ">" &&
-      charAfter !== " " &&
-      charAfter !== "\t" &&
-      charAfter !== "\n" &&
-      charAfter !== "\r" &&
-      charAfter !== "/"
-    ) {
-      searchFrom = idx + 1;
-      continue;
-    }
-    const closeIdx = html.indexOf(">", idx + 4);
-    if (closeIdx === -1) {
-      break;
-    }
-    let end = closeIdx + 1;
-    // Also consume optional </img> closing tag
-    const afterTag = lower.slice(end, end + 6);
-    if (afterTag === "</img>") {
-      end += 6;
-    }
-    results.push({ match: html.slice(idx, end), start: idx, end });
-    searchFrom = end;
-  }
-  return results;
-}
-
-/**
- * Extract image URL from a matched image string using indexOf (no regex).
- */
-function extractImageUrl(imageStr: string): string | null {
-  // Markdown: ![...](url)
-  const parenOpen = imageStr.indexOf("(");
-  if (parenOpen !== -1) {
-    const parenClose = imageStr.indexOf(")", parenOpen + 1);
-    if (parenClose !== -1) {
-      return imageStr.slice(parenOpen + 1, parenClose).trim();
-    }
-  }
-  // HTML: src="url" or src='url'
-  const lower = imageStr.toLowerCase();
-  const srcIdx = lower.indexOf("src=");
-  if (srcIdx !== -1) {
-    const quote = imageStr[srcIdx + 4];
-    if (quote === '"' || quote === "'") {
-      const closeQuote = imageStr.indexOf(quote, srcIdx + 5);
-      if (closeQuote !== -1) {
-        return imageStr.slice(srcIdx + 5, closeQuote);
-      }
-    }
-  }
-  return null;
-}
-
 export async function detectColorIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
-  cellType: string,
+  cellType: "code" | "markdown",
   notebookPath: string,
   baseUrl: string,
   imageProcessor: IImageProcessor,
@@ -376,7 +280,11 @@ export async function detectColorIssuesInCell(
   // Find all images using indexOf-based scanning (no ReDoS)
   const allImages: Array<{ match: string; start: number; end: number }> = [
     ...findMarkdownImages(rawMarkdown),
-    ...findHtmlImages(rawMarkdown),
+    ...findImgTags(rawMarkdown).map(({ tag, start, end }) => ({
+      match: tag,
+      start,
+      end,
+    })),
   ];
 
   for (const {
@@ -402,9 +310,9 @@ export async function detectColorIssuesInCell(
           if (hasLargeText) {
             notebookIssues.push({
               cellIndex,
-              cellType: cellType as "code" | "markdown",
+              cellType,
               violationId: "color-insufficient-cc-large",
-              customDescription: `Ensure that a text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? "3:1" : "4.5:1"} ratio for ${hasLargeText ? "large" : "normal"} text.`,
+              customDescription: `Ensure that large text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required 3:1 ratio for large text.`,
               issueContentRaw: imageMatch,
               metadata: {
                 offsetStart: matchStart,
@@ -415,9 +323,9 @@ export async function detectColorIssuesInCell(
           } else {
             notebookIssues.push({
               cellIndex,
-              cellType: cellType as "code" | "markdown",
+              cellType,
               violationId: "color-insufficient-cc-normal",
-              customDescription: `Ensure that a large text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required ${hasLargeText ? "3:1" : "4.5:1"} ratio for ${hasLargeText ? "large" : "normal"} text.`,
+              customDescription: `Ensure that text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required 4.5:1 ratio for normal text.`,
               issueContentRaw: imageMatch,
               metadata: {
                 offsetStart: matchStart,

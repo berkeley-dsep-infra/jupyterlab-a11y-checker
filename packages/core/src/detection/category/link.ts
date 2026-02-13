@@ -68,7 +68,7 @@ function findMarkdownLinks(
 export function detectLinkIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
-  cellType: string,
+  cellType: "code" | "markdown",
 ): ICellIssue[] {
   const issues: ICellIssue[] = [];
 
@@ -80,7 +80,7 @@ export function detectLinkIssuesInCell(
     if (violation) {
       issues.push({
         cellIndex,
-        cellType: cellType as "code" | "markdown",
+        cellType,
         violationId: "link-discernible-text",
         issueContentRaw: full,
         metadata: {
@@ -115,7 +115,7 @@ export function detectLinkIssuesInCell(
     if (!hasAria && !hasInnerText) {
       issues.push({
         cellIndex,
-        cellType: cellType as "code" | "markdown",
+        cellType,
         violationId: "link-discernible-text",
         issueContentRaw: full,
         metadata: {
@@ -131,7 +131,7 @@ export function detectLinkIssuesInCell(
     if (violation) {
       issues.push({
         cellIndex,
-        cellType: cellType as "code" | "markdown",
+        cellType,
         violationId: "link-discernible-text",
         issueContentRaw: full,
         metadata: {
@@ -146,6 +146,11 @@ export function detectLinkIssuesInCell(
   return issues;
 }
 
+// Trade-off: We use an AND condition (vague phrase + short text) to reduce
+// false positives. This means long text containing vague phrases (e.g.
+// "Click here to read our full accessibility guide") won't be flagged,
+// even though it starts with "Click here". This is intentional — flagging
+// all vague phrases regardless of length would produce too much noise.
 function shouldFlag(text: string): boolean {
   // Flag if entire text is a URL
   if (isUrlLike(text)) {

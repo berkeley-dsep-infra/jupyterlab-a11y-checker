@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       "@berkeley-dsep-infra/a11y-checker-core": path.resolve(
         __dirname,
-        "../packages/core/src/index.ts",
+        "../../packages/core/src/index.ts",
       ),
     },
   },

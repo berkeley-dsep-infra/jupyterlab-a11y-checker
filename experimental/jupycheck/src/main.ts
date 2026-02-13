@@ -28,23 +28,27 @@ const tokenSection = document.getElementById("tokenSection") as HTMLDivElement;
 const uploadSection = document.getElementById(
   "uploadSection",
 ) as HTMLDivElement;
+const checkBestPractices = document.getElementById(
+  "checkBestPractices",
+) as HTMLInputElement;
 
 // ─── State ──────────────────────────────────────────────────────
 let abortController: AbortController | null = null;
 let isScanning = false;
+let lastResults: NotebookResult[] = [];
 
 // ─── WCAG criterion map ─────────────────────────────────────────
 const wcagCriterionMap: Record<string, string> = {
   "image-missing-alt": "1.1.1",
-  "heading-missing-h1": "2.4.2",
-  "heading-multiple-h1": "2.4.6",
-  "heading-duplicate-h2": "2.4.6",
-  "heading-duplicate-h1-h2": "2.4.6",
-  "heading-wrong-order": "2.4.6",
+  "heading-missing-h1": "",
+  "heading-multiple-h1": "",
+  "heading-duplicate-h2": "",
+  "heading-duplicate-h1-h2": "",
+  "heading-wrong-order": "",
   "heading-empty": "2.4.6",
   "table-missing-header": "1.3.1",
-  "table-missing-caption": "1.3.1",
-  "table-missing-scope": "1.3.1",
+  "table-missing-caption": "",
+  "table-missing-scope": "",
   "color-insufficient-cc-normal": "1.4.3",
   "color-insufficient-cc-large": "1.4.3",
   "link-discernible-text": "2.4.4",
@@ -67,6 +71,10 @@ checkPrivate.addEventListener("change", () => {
 
 checkUpload.addEventListener("change", () => {
   uploadSection.classList.toggle("visible", checkUpload.checked);
+});
+
+checkBestPractices.addEventListener("change", () => {
+  if (lastResults.length > 0) renderResults(lastResults);
 });
 
 // ─── GitHub API helpers ─────────────────────────────────────────
@@ -236,12 +244,27 @@ interface RepoContext {
 
 let currentRepoContext: RepoContext | null = null;
 
+function filterBySeverity(issues: ICellIssue[]): ICellIssue[] {
+  if (checkBestPractices.checked) return issues;
+  return issues.filter((issue) => {
+    const info = issueToDescription.get(issue.violationId);
+    return info?.severity !== "best-practice";
+  });
+}
+
 function renderResults(results: NotebookResult[]) {
+  const filteredResults = results.map((r) => ({
+    ...r,
+    issues: filterBySeverity(r.issues),
+  }));
   resultsEl.innerHTML = "";
 
-  const totalIssues = results.reduce((sum, r) => sum + r.issues.length, 0);
-  const totalNotebooks = results.length;
-  const failedNotebooks = results.filter(
+  const totalIssues = filteredResults.reduce(
+    (sum, r) => sum + r.issues.length,
+    0,
+  );
+  const totalNotebooks = filteredResults.length;
+  const failedNotebooks = filteredResults.filter(
     (r) => r.issues.length > 0 || r.error,
   ).length;
 
@@ -293,8 +316,8 @@ function renderResults(results: NotebookResult[]) {
       e.stopPropagation();
       const format = (item as HTMLElement).dataset.format;
       exportMenu.classList.remove("open");
-      if (format === "md") downloadMdReport(results);
-      else if (format === "json") downloadJsonReport(results);
+      if (format === "md") downloadMdReport(filteredResults);
+      else if (format === "json") downloadJsonReport(filteredResults);
     });
   });
 
@@ -304,7 +327,7 @@ function renderResults(results: NotebookResult[]) {
   chartLabel.textContent = "Issues by Type";
   resultsEl.appendChild(chartLabel);
 
-  const allIssues = results.flatMap((r) => r.issues);
+  const allIssues = filteredResults.flatMap((r) => r.issues);
   const aggregated: Record<string, number> = {};
   allIssues.forEach((issue) => {
     aggregated[issue.violationId] = (aggregated[issue.violationId] || 0) + 1;
@@ -325,15 +348,22 @@ function renderResults(results: NotebookResult[]) {
       .map(([vid, count]) => {
         const pct = Math.round((count / maxCount) * 100);
         const info = issueToDescription.get(vid);
+        const firstIssue = allIssues.find((i) => i.violationId === vid);
         const label = info ? info.title : vid;
-        const desc = info?.detailedDescription || info?.description || "";
+        const desc =
+          info?.detailedDescription ||
+          info?.description ||
+          firstIssue?.customDescription ||
+          "";
         const cat = issueToCategory.get(vid) || "Other";
         const color = categoryColorMap[cat] || "var(--cat-other)";
-        const wcag = wcagCriterionMap[vid] || "";
+        const wcag =
+          wcagCriterionMap[vid] || firstIssue?.metadata?.wcagSc || "";
+        const severity = info?.severity || "";
         return `<div class="chart-row">
           <div class="chart-label">
             <span>${escapeHtml(label)}</span>
-            <span class="info-icon" data-vid="${escapeHtml(vid)}" data-title="${escapeHtml(label)}" data-desc="${escapeHtml(desc)}" data-wcag="${escapeHtml(wcag)}">i</span>
+            <span class="info-icon" data-vid="${escapeHtml(vid)}" data-title="${escapeHtml(label)}" data-desc="${escapeHtml(desc)}" data-wcag="${escapeHtml(wcag)}" data-severity="${escapeHtml(severity)}">i</span>
           </div>
           <div class="chart-bar-track">
             <div class="chart-bar-fill" style="width:${pct}%;background:${color}"></div>
@@ -357,14 +387,26 @@ function renderResults(results: NotebookResult[]) {
         const title = el.dataset.title || "";
         const desc = el.dataset.desc || "";
         const wcag = el.dataset.wcag || "";
+        const severity = el.dataset.severity || "";
 
-        const wcagHtml = wcag
-          ? `<span class="popover-wcag">WCAG ${escapeHtml(wcag)}</span>`
-          : "";
+        let badgeHtml = "";
+        if (wcag) {
+          badgeHtml = `<span class="popover-wcag">WCAG ${escapeHtml(wcag)}</span>`;
+        } else if (severity === "best-practice") {
+          badgeHtml = `<span class="popover-wcag best-practice">Best Practice</span>`;
+        }
+
+        const vid = el.dataset.vid || "";
+        const firstIssue = allIssues.find((i) => i.violationId === vid);
+        const axeHtml =
+          firstIssue?.detectedBy === "axe-core"
+            ? ' <span class="axe-badge">axe-core</span>'
+            : "";
+
         popover.innerHTML = `
           <div class="popover-title">${escapeHtml(title)}</div>
           <div>${escapeHtml(desc)}</div>
-          ${wcagHtml}
+          ${badgeHtml}${axeHtml}
         `;
 
         popover.classList.add("visible");
@@ -416,7 +458,7 @@ function renderResults(results: NotebookResult[]) {
   resultsEl.appendChild(detailsSection);
 
   // Initial render of cards
-  renderNotebookCards(results, cardsContainer);
+  renderNotebookCards(filteredResults, cardsContainer);
 
   // Toolbar event handlers
   const filterSelect = document.getElementById(
@@ -429,7 +471,7 @@ function renderResults(results: NotebookResult[]) {
 
   const applyFilters = () => {
     renderNotebookCards(
-      results,
+      filteredResults,
       cardsContainer,
       filterSelect.value,
       sortSelect.value,
@@ -572,16 +614,28 @@ function createNotebookCard(
         const cells = issues.map((i) => i.cellIndex).join(", ");
         const info = issueToDescription.get(vid);
         const title = info ? info.title : vid;
-        const wcag = wcagCriterionMap[vid] || "";
+        const firstIssue = issues[0];
+        const wcag =
+          wcagCriterionMap[vid] || firstIssue?.metadata?.wcagSc || "";
+        const severity = info?.severity || "";
 
-        const wcagPill = wcag
-          ? `<a class="wcag-pill" href="https://www.w3.org/WAI/WCAG21/Understanding/" target="_blank" rel="noopener" title="WCAG ${wcag}">${wcag}</a>`
-          : "";
+        let wcagPill = "";
+        if (wcag) {
+          wcagPill = `<a class="wcag-pill" href="https://www.w3.org/WAI/WCAG21/Understanding/" target="_blank" rel="noopener" title="WCAG ${wcag}">${wcag}</a>`;
+        } else if (severity === "best-practice") {
+          wcagPill = `<span class="wcag-pill best-practice">Best Practice</span>`;
+        }
+
+        const axePill =
+          firstIssue?.detectedBy === "axe-core"
+            ? '<span class="axe-badge">axe-core</span>'
+            : "";
 
         return `<li class="issue-row">
           <div class="issue-row-summary">
             <span class="violation-id" title="${escapeHtml(vid)}">${escapeHtml(title)}</span>
             ${wcagPill}
+            ${axePill}
             <span class="issue-count">&times; ${issues.length}</span>
             <span class="cell-ref">cells: ${cells}</span>
           </div>
@@ -639,7 +693,7 @@ function generateMarkdownReport(results: NotebookResult[]): string {
   const timestamp = new Date().toLocaleString();
 
   const lines: string[] = [];
-  lines.push("# Jupycheck Accessibility Report");
+  lines.push("# jupycheck Accessibility Report");
   lines.push("");
   lines.push(`> Generated on ${timestamp}`);
   lines.push("");
@@ -670,10 +724,14 @@ function generateMarkdownReport(results: NotebookResult[]): string {
     lines.push("|-------|----------|------|-------|");
     for (const [vid, count] of sorted) {
       const info = issueToDescription.get(vid);
+      const firstIssue = allIssues.find((i) => i.violationId === vid);
       const title = info ? info.title : vid;
       const category = issueToCategory.get(vid) || "Other";
-      const wcag = wcagCriterionMap[vid] || "—";
-      lines.push(`| ${title} | ${category} | ${wcag} | ${count} |`);
+      const wcag = wcagCriterionMap[vid] || firstIssue?.metadata?.wcagSc || "";
+      const severity = info?.severity || "";
+      const wcagCol =
+        wcag || (severity === "best-practice" ? "Best Practice" : "—");
+      lines.push(`| ${title} | ${category} | ${wcagCol} | ${count} |`);
     }
     lines.push("");
   }
@@ -740,7 +798,7 @@ function generateMarkdownReport(results: NotebookResult[]): string {
 
   lines.push("---");
   lines.push(
-    "*Report generated by [Jupycheck](https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker)*",
+    "*Report generated by [jupycheck](https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker)*",
   );
 
   return lines.join("\n");
@@ -806,7 +864,7 @@ function downloadJsonReport(results: NotebookResult[]) {
 function escapeHtml(s: string): string {
   const div = document.createElement("div");
   div.textContent = s;
-  return div.innerHTML;
+  return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 function setStatus(msg: string) {
@@ -906,6 +964,7 @@ async function scanRepo() {
     setStatus("");
     showProgress(false);
     currentRepoContext = { owner, repo, branch };
+    lastResults = results;
     renderResults(results);
   } catch (err: any) {
     if (err.name === "AbortError") {
@@ -961,12 +1020,15 @@ async function handleFiles(files: FileList | File[]) {
     setStatus("");
     showProgress(false);
     currentRepoContext = null;
+    lastResults = results;
     renderResults(results);
   } catch (err: any) {
     if (err.name === "AbortError") {
       setStatus("Scan stopped.");
-      if (results.length > 0) renderResults(results);
-      else resultsEl.innerHTML = "";
+      if (results.length > 0) {
+        lastResults = results;
+        renderResults(results);
+      } else resultsEl.innerHTML = "";
     } else {
       setStatus(`Error: ${err.message}`);
       resultsEl.innerHTML = "";
@@ -996,10 +1058,11 @@ uploadArea.addEventListener("click", () => {
   fileInput.click();
 });
 
-fileInput.addEventListener("change", () => {
+fileInput.addEventListener("change", async () => {
   if (fileInput.files && fileInput.files.length > 0) {
-    handleFiles(fileInput.files);
+    const files = Array.from(fileInput.files);
     fileInput.value = "";
+    await handleFiles(files);
   }
 });
 
@@ -1032,7 +1095,7 @@ document.querySelectorAll(".example-link").forEach((link) => {
   });
 });
 
-// Fetch GitHub star count
+// Fetch GitHub star count + marketplace download count
 (async () => {
   try {
     const res = await fetch(

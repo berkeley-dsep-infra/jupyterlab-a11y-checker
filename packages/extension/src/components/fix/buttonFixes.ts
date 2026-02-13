@@ -1,5 +1,3 @@
-// In src/components/fix/buttonFixes.ts
-
 import { ButtonFixWidget } from './base.js';
 import {
   replaceSlice,
@@ -18,9 +16,6 @@ export class TableScopeFixWidget extends ButtonFixWidget {
   protected async applyFix(): Promise<void> {
     const entireCellContent = this.cell.model.sharedModel.getSource();
 
-    //console.log('Processing table for scope fix:', target);
-
-    // Process the table
     const processTable = (tableHtml: string): string => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(tableHtml, 'text/html');
@@ -32,10 +27,8 @@ export class TableScopeFixWidget extends ButtonFixWidget {
 
       // Get all rows, handling both direct tr children and tr children of tbody
       const rows = Array.from(table.querySelectorAll('tr'));
-      //console.log('Found rows:', rows.length);
 
       if (rows.length === 0) {
-        //console.log('No rows found in table');
         return tableHtml;
       }
 
@@ -50,15 +43,12 @@ export class TableScopeFixWidget extends ButtonFixWidget {
       // Copy caption if it exists
       const existingCaption = table.querySelector('caption');
       if (existingCaption) {
-        //console.log('Found existing caption:', existingCaption.textContent);
         newTable.appendChild(existingCaption.cloneNode(true));
       }
 
       // Process header row
       const headerRow = rows[0];
       const headerCells = headerRow.querySelectorAll('th, td');
-      //console.log('Header cells found:', headerCells.length);
-
       if (headerCells.length > 0) {
         const thead = doc.createElement('thead');
         const newHeaderRow = doc.createElement('tr');

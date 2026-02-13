@@ -134,12 +134,9 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
           );
           const tableIssues = await analyzeTableIssues(accessibleCells);
 
-          // Find the main panel widget
-          const mainPanel = document
-            .querySelector('.a11y-panel')
-            ?.closest('.lm-Widget');
-          if (mainPanel) {
-            // Dispatch a custom event with just table issues
+          // Dispatch consistently via the sidebar root element
+          const mainPanelEl = document.getElementById('a11y-sidebar');
+          if (mainPanelEl) {
             const event = new CustomEvent('notebookReanalyzed', {
               detail: {
                 issues: tableIssues,
@@ -147,13 +144,13 @@ export class TableHeaderFixWidget extends DropdownFixWidget {
               },
               bubbles: true
             });
-            mainPanel.dispatchEvent(event);
+            mainPanelEl.dispatchEvent(event);
           }
         } catch (error) {
           console.error('Error reanalyzing notebook:', error);
         }
       }
-    }, 100); // Small delay to ensure cell content is updated
+    }, 100);
   }
 }
 
@@ -162,17 +159,12 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
     return 'Choose from one of the following heading styles instead:';
   }
 
-  private _currentLevel: number = 1; // Initialize with default value
+  private _currentLevel: number = 1;
   private previousLevel: number | undefined;
   protected selectedLevel: number | undefined;
-  // private notebookPanel: NotebookPanel;
 
   constructor(issue: ICellIssue, cell: Cell<ICellModel>, aiEnabled: boolean) {
     super(issue, cell, aiEnabled);
-
-    // Get reference to notebook panel
-    // Keep reference in case other methods require it; not used in reanalysis anymore
-    // this.notebookPanel = cell.parent?.parent as NotebookPanel;
 
     // Parse and set the current level immediately
     this._currentLevel = HeadingOrderFixWidget.parseHeadingLevel(
@@ -295,7 +287,7 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
       this.dropdownText.textContent = this.getDefaultDropdownText();
     }
 
-    // Force update dropdown content after initialization
+    // Populate dropdown options and use event delegation instead of per-option handlers
     if (this.dropdownContent) {
       const validLevels = this.getValidHeadingLevels();
       this.dropdownContent.innerHTML = Array.from(validLevels)
@@ -309,16 +301,19 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
         )
         .join('');
 
-      // Add click handlers to the options
-      const options = this.dropdownContent.querySelectorAll('.dropdown-option');
-      options.forEach(option => {
-        option.addEventListener('click', e => {
-          e.stopPropagation();
-          const value = (option as HTMLElement).dataset.value;
-          if (value) {
-            this.handleOptionSelect(value);
-          }
-        });
+      // Use event delegation on the container to avoid duplicate per-option handlers
+      this.dropdownContent.addEventListener('click', e => {
+        const target = (e.target as HTMLElement).closest(
+          '.dropdown-option'
+        ) as HTMLElement | null;
+        if (!target) {
+          return;
+        }
+        e.stopPropagation();
+        const value = target.dataset.value;
+        if (value) {
+          this.handleOptionSelect(value);
+        }
       });
     }
   }
@@ -420,10 +415,8 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
         await analyzeHeadingHierarchy(accessibleCells);
       const headingOneIssues = await detectHeadingOneIssue(accessibleCells);
       const allHeadingIssues = [...headingHierarchyIssues, ...headingOneIssues];
-      const mainPanel = document
-        .querySelector('.a11y-panel')
-        ?.closest('.lm-Widget');
-      if (mainPanel) {
+      const mainPanelEl = document.getElementById('a11y-sidebar');
+      if (mainPanelEl) {
         const event = new CustomEvent('notebookReanalyzed', {
           detail: {
             issues: allHeadingIssues,
@@ -431,7 +424,7 @@ export class HeadingOrderFixWidget extends DropdownFixWidget {
           },
           bubbles: true
         });
-        mainPanel.dispatchEvent(event);
+        mainPanelEl.dispatchEvent(event);
       }
     }, 100);
   }

@@ -19,8 +19,11 @@ import { MainPanelWidget } from './mainpanelWidget.js';
 export class CellIssueWidget extends Widget {
   private issue: ICellIssue;
   private cell: Cell<ICellModel>;
-  private aiEnabled: boolean = false; // TODO: Create a higher order component to handle this
+  private aiEnabled: boolean = false;
   private mainPanel: MainPanelWidget;
+
+  /** Track the child fix widget so we can dispose it. */
+  private _fixWidget: Widget | null = null;
 
   constructor(
     issue: ICellIssue,
@@ -35,8 +38,8 @@ export class CellIssueWidget extends Widget {
     this.mainPanel = mainPanel;
 
     const issueInformation = issueToDescription.get(issue.violationId);
-    if (issue.customDescription) {
-      issueInformation!.description = issue.customDescription;
+    if (issue.customDescription && issueInformation) {
+      issueInformation.description = issue.customDescription;
     }
 
     const severity = issueInformation?.severity || 'violation';
@@ -56,27 +59,26 @@ export class CellIssueWidget extends Widget {
         ? '<span class="severity-badge detected-by-axe">axe-core</span>'
         : '';
 
+    // Build the issue title safely
+    const issueTitle = issueInformation?.title || issue.violationId;
+
     this.node.innerHTML = `
       <span class="severity-badge ${severityClass}">${severityLabel}</span>
       ${axeBadge}
-      <button class="issue-header-button">
-          <h3 class="issue-header"> ${issueInformation?.title || issue.violationId}</h3>
-          <span class="chevron material-icons">expand_more</span>
+      <button class="issue-header-button" aria-expanded="false">
+          <h3 class="issue-header"> ${issueTitle}</h3>
+          <span class="chevron material-icons" aria-hidden="true">expand_more</span>
       </button>
       <div class="collapsible-content" style="display: none;">
-          <p class="description">
-              ${issueInformation?.description}
-          </p>
-          <p class="detailed-description" style="display: none;">
-              ${issueInformation?.detailedDescription || ''} (<a href="${issueInformation?.descriptionUrl || ''}" target="_blank">learn more about the issue and its impact</a>).
-          </p>
+          <p class="description"></p>
+          <p class="detailed-description" style="display: none;"></p>
           <div class="button-container">
               <button class="jp-Button2 locate-button">
-                  <span class="material-icons">search</span>
+                  <span class="material-icons" aria-hidden="true">search</span>
                   <div>Locate</div>
               </button>
-              <button class="jp-Button2 explain-button">
-                  <span class="material-icons">question_mark</span>
+              <button class="jp-Button2 explain-button" aria-expanded="false">
+                  <span class="material-icons" aria-hidden="true">question_mark</span>
                   <div>Learn more</div>
               </button>
           </div>
@@ -88,8 +90,33 @@ export class CellIssueWidget extends Widget {
       </div>
     `;
 
+    // Populate description and detailed description as textContent to prevent XSS
+    const descriptionEl = this.node.querySelector(
+      '.description'
+    ) as HTMLElement;
+    if (descriptionEl) {
+      descriptionEl.textContent = issueInformation?.description || '';
+    }
+
+    const detailedDescriptionEl = this.node.querySelector(
+      '.detailed-description'
+    ) as HTMLElement;
+    if (detailedDescriptionEl && issueInformation) {
+      // Build the detailed description with a safe link
+      detailedDescriptionEl.textContent =
+        (issueInformation.detailedDescription || '') + ' (';
+      const link = document.createElement('a');
+      link.href = issueInformation.descriptionUrl || '';
+      link.target = '_blank';
+      link.textContent = 'learn more about the issue and its impact';
+      detailedDescriptionEl.appendChild(link);
+      detailedDescriptionEl.appendChild(document.createTextNode(').'));
+    }
+
     // Add event listeners using query selectors
-    const headerButton = this.node.querySelector('.issue-header-button');
+    const headerButton = this.node.querySelector(
+      '.issue-header-button'
+    ) as HTMLButtonElement;
     const collapsibleContent = this.node.querySelector(
       '.collapsible-content'
     ) as HTMLElement;
@@ -99,6 +126,7 @@ export class CellIssueWidget extends Widget {
       if (collapsibleContent) {
         const isHidden = collapsibleContent.style.display === 'none';
         collapsibleContent.style.display = isHidden ? 'block' : 'none';
+        headerButton.setAttribute('aria-expanded', String(isHidden));
 
         const expandIcon = this.node.querySelector('.chevron');
         expandIcon?.classList.toggle('expanded');
@@ -108,14 +136,14 @@ export class CellIssueWidget extends Widget {
     const locateButton = this.node.querySelector('.locate-button');
     locateButton?.addEventListener('click', () => this.navigateToCell());
 
-    const explainButton = this.node.querySelector('.explain-button');
-    const detailedDescription = this.node.querySelector(
-      '.detailed-description'
-    ) as HTMLElement;
+    const explainButton = this.node.querySelector(
+      '.explain-button'
+    ) as HTMLButtonElement;
     explainButton?.addEventListener('click', () => {
-      if (detailedDescription) {
-        detailedDescription.style.display =
-          detailedDescription.style.display === 'none' ? 'block' : 'none';
+      if (detailedDescriptionEl) {
+        const isHidden = detailedDescriptionEl.style.display === 'none';
+        detailedDescriptionEl.style.display = isHidden ? 'block' : 'none';
+        explainButton.setAttribute('aria-expanded', String(isHidden));
       }
     });
 
@@ -148,57 +176,65 @@ export class CellIssueWidget extends Widget {
     }
 
     if (this.issue.violationId === 'image-missing-alt') {
-      const textFieldFixWidget = new ImageAltFixWidget(
+      this._fixWidget = new ImageAltFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled,
         this.mainPanel.getVisionModelSettings()
       );
-      fixWidgetContainer.appendChild(textFieldFixWidget.node);
+      fixWidgetContainer.appendChild(this._fixWidget.node);
     } else if (this.issue.violationId === 'table-missing-caption') {
-      const tableCaptionFixWidget = new TableCaptionFixWidget(
+      this._fixWidget = new TableCaptionFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled,
         this.mainPanel.getLanguageModelSettings()
       );
-      fixWidgetContainer.appendChild(tableCaptionFixWidget.node);
+      fixWidgetContainer.appendChild(this._fixWidget.node);
     } else if (this.issue.violationId === 'table-missing-header') {
-      const tableHeaderFixWidget = new TableHeaderFixWidget(
+      this._fixWidget = new TableHeaderFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
-      fixWidgetContainer.appendChild(tableHeaderFixWidget.node);
+      fixWidgetContainer.appendChild(this._fixWidget.node);
     } else if (this.issue.violationId === 'heading-missing-h1') {
-      const headingOneFixWidget = new HeadingOneFixWidget(
+      this._fixWidget = new HeadingOneFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
-      fixWidgetContainer.appendChild(headingOneFixWidget.node);
+      fixWidgetContainer.appendChild(this._fixWidget.node);
     } else if (this.issue.violationId === 'heading-wrong-order') {
-      const headingOrderFixWidget = new HeadingOrderFixWidget(
+      this._fixWidget = new HeadingOrderFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
-      fixWidgetContainer.appendChild(headingOrderFixWidget.node);
+      fixWidgetContainer.appendChild(this._fixWidget.node);
     } else if (this.issue.violationId === 'table-missing-scope') {
-      const tableScopeFixWidget = new TableScopeFixWidget(
+      this._fixWidget = new TableScopeFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
-      fixWidgetContainer.appendChild(tableScopeFixWidget.node);
+      fixWidgetContainer.appendChild(this._fixWidget.node);
     } else if (this.issue.violationId === 'link-discernible-text') {
-      const linkTextFixWidget = new LinkTextFixWidget(
+      this._fixWidget = new LinkTextFixWidget(
         this.issue,
         this.cell,
         this.aiEnabled
       );
-      fixWidgetContainer.appendChild(linkTextFixWidget.node);
+      fixWidgetContainer.appendChild(this._fixWidget.node);
     }
+  }
+
+  dispose(): void {
+    if (this._fixWidget) {
+      this._fixWidget.dispose();
+      this._fixWidget = null;
+    }
+    super.dispose();
   }
 
   private navigateToCell(): void {
@@ -209,7 +245,7 @@ export class CellIssueWidget extends Widget {
     });
 
     this.cell.node.style.transition = 'background-color 0.5s ease';
-    this.cell.node.style.backgroundColor = '#DB3939';
+    this.cell.node.style.backgroundColor = 'var(--error-red)';
 
     setTimeout(() => {
       this.cell.node.style.backgroundColor = '';

@@ -20,11 +20,23 @@ import {
 import { CellIssueWidget } from './issueWidget.js';
 import { notebookToGeneralCells } from '../adapter.js';
 
+/** Maximum time (ms) to wait for a full analysis before timing out. */
+const ANALYSIS_TIMEOUT_MS = 60_000;
+
+interface ISettingsShape {
+  baseUrl?: string;
+  apiKey?: string;
+  model?: string;
+}
+
 export class MainPanelWidget extends Widget {
   private aiEnabled: boolean = false;
   private currentNotebook: NotebookPanel | null = null;
   private languageModelSettings: IModelSettings;
   private visionModelSettings: IModelSettings;
+
+  /** Track child CellIssueWidget instances for proper disposal. */
+  private _childIssueWidgets: CellIssueWidget[] = [];
 
   constructor(settingRegistry?: ISettingRegistry) {
     super();
@@ -61,16 +73,16 @@ export class MainPanelWidget extends Widget {
           <div class="notice-container">
               <div class="notice-header">
                   <div class="notice-title">
-                      <span class="chevron material-icons">expand_more</span>
+                      <span class="chevron material-icons" aria-hidden="true">expand_more</span>
                       <strong>Notice: Known cell navigation error </strong>
                   </div>
-                  <button class="notice-delete-button">✕</button>
+                  <button class="notice-delete-button" aria-label="Dismiss notice">&#x2715;</button>
               </div>
               <div class="notice-content hidden">
                   <p>
-                      The jupyterlab-a11y-checker has a known cell navigation issue for Jupyterlab version 4.2.5 or later. 
-                      To fix this, please navigate to 'Settings' → 'Settings Editor' → Notebook, scroll down to 'Windowing mode', 
-                      and choose 'defer' from the dropdown. Please note that this option may reduce the performance of the application. 
+                      The jupyterlab-a11y-checker has a known cell navigation issue for Jupyterlab version 4.2.5 or later.
+                      To fix this, please navigate to 'Settings' → 'Settings Editor' → Notebook, scroll down to 'Windowing mode',
+                      and choose 'defer' from the dropdown. Please note that this option may reduce the performance of the application.
                       For more information, please see the <a href="https://jupyter-notebook.readthedocs.io/en/stable/changelog.html" target="_blank" style="text-decoration: underline;">Jupyter Notebook changelog.</a>
                   </p>
               </div>
@@ -78,11 +90,11 @@ export class MainPanelWidget extends Widget {
           <h1 class="main-title">Accessibility Checker</h1>
           <div class="controls-container">
               <button class="control-button ai-control-button">
-                <span class="material-icons">auto_awesome</span>
+                <span class="material-icons" aria-hidden="true">auto_awesome</span>
                 Use AI : Disabled
               </button>
               <button class="control-button analyze-control-button">
-                <span class="material-icons">science</span>  
+                <span class="material-icons" aria-hidden="true">science</span>
                 Analyze Notebook
               </button>
           </div>
@@ -116,13 +128,14 @@ export class MainPanelWidget extends Widget {
       '.analyze-control-button'
     ) as HTMLButtonElement;
     const progressIcon = `
-    <svg class="icon loading" viewBox="0 0 24 24">
+    <svg class="icon loading" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8z"/>
     </svg>
     `;
 
     aiControlButton?.addEventListener('click', async () => {
-      const aiIcon = '<span class="material-icons">auto_awesome</span>';
+      const aiIcon =
+        '<span class="material-icons" aria-hidden="true">auto_awesome</span>';
 
       this.aiEnabled = !this.aiEnabled;
       aiControlButton.innerHTML = `${aiIcon} Use AI : ${this.aiEnabled ? 'Enabled' : 'Disabled'}`;
@@ -147,6 +160,7 @@ export class MainPanelWidget extends Widget {
       const issuesContainer = this.node.querySelector(
         '.issues-container'
       ) as HTMLElement;
+      this.disposeChildWidgets();
       issuesContainer.innerHTML = '';
       analyzeControlButton.innerHTML = `${progressIcon} Please wait...`;
       analyzeControlButton.disabled = true;
@@ -155,14 +169,24 @@ export class MainPanelWidget extends Widget {
         // Convert widgets to accessible cells
         const accessibleCells = notebookToGeneralCells(this.currentNotebook);
 
-        // Identify issues
-        const notebookIssues: ICellIssue[] = await analyzeCellsAccessibility(
+        // Run analysis with a timeout guard
+        const analysisPromise = analyzeCellsAccessibility(
           accessibleCells,
           document,
           PageConfig.getBaseUrl(),
           new BrowserImageProcessor(),
           this.currentNotebook.context.path
         );
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Analysis timed out')),
+            ANALYSIS_TIMEOUT_MS
+          )
+        );
+        const notebookIssues: ICellIssue[] = await Promise.race([
+          analysisPromise,
+          timeoutPromise
+        ]);
 
         // Log a human-readable summary for troubleshooting
         try {
@@ -214,6 +238,7 @@ export class MainPanelWidget extends Widget {
           issuesByCategory.get(categoryName)!.push(notebookIssue);
         });
         // Create widgets for each category
+        const widgetCount = this.currentNotebook.content.widgets.length;
         for (const categoryName of issueCategoryNames) {
           const categoryIssues: ICellIssue[] =
             issuesByCategory.get(categoryName) || [];
@@ -240,17 +265,26 @@ export class MainPanelWidget extends Widget {
           ) as HTMLDivElement;
 
           categoryIssues.forEach(issue => {
+            // Bounds check to avoid crash on stale cell index
+            if (issue.cellIndex < 0 || issue.cellIndex >= widgetCount) {
+              console.warn(
+                `Skipping issue for out-of-bounds cell index ${issue.cellIndex}`
+              );
+              return;
+            }
             const issueWidget = new CellIssueWidget(
               issue,
               this.currentNotebook!.content.widgets[issue.cellIndex],
               this.aiEnabled,
               this
             );
+            this._childIssueWidgets.push(issueWidget);
             issuesList.appendChild(issueWidget.node);
           });
         }
       } catch (error) {
-        issuesContainer.innerHTML = '';
+        issuesContainer.innerHTML =
+          '<div class="no-issues" style="color: var(--error-red);">Analysis failed. Check the browser console for details.</div>';
         console.error('Error analyzing notebook:', error);
       } finally {
         analyzeControlButton.innerHTML = analyzeControlButtonText;
@@ -259,13 +293,14 @@ export class MainPanelWidget extends Widget {
     });
 
     // Add event listener for notebookReanalyzed event
-    // Listen on both the panel node and document to ensure we catch bubbled events
     const handler = async (event: Event) => {
       const customEvent = event as CustomEvent;
       const newIssues = customEvent.detail.issues;
       const isHeadingUpdate = customEvent.detail.isHeadingUpdate;
       const isTableUpdate = customEvent.detail.isTableUpdate;
       const isCellUpdate = customEvent.detail.isCellUpdate;
+
+      const widgetCount = this.currentNotebook?.content.widgets.length ?? 0;
 
       if (isHeadingUpdate) {
         // Find the Headings category section
@@ -279,16 +314,22 @@ export class MainPanelWidget extends Widget {
           // Clear only the issues list in the Headings section
           const issuesList = headingsCategory.querySelector('.issues-list');
           if (issuesList) {
+            // Dispose widgets being removed
+            this.disposeWidgetsInElement(issuesList);
             issuesList.innerHTML = '';
 
             // Add new heading issues to this section
             newIssues.forEach((issue: ICellIssue) => {
+              if (issue.cellIndex < 0 || issue.cellIndex >= widgetCount) {
+                return;
+              }
               const issueWidget = new CellIssueWidget(
                 issue,
                 this.currentNotebook!.content.widgets[issue.cellIndex],
                 this.aiEnabled,
                 this
               );
+              this._childIssueWidgets.push(issueWidget);
               issuesList.appendChild(issueWidget.node);
             });
           }
@@ -305,6 +346,7 @@ export class MainPanelWidget extends Widget {
           // Clear only the issues list in the Tables section
           const issuesList = tablesCategory.querySelector('.issues-list');
           if (issuesList) {
+            this.disposeWidgetsInElement(issuesList);
             issuesList.innerHTML = '';
 
             // Reanalyze table issues
@@ -315,12 +357,16 @@ export class MainPanelWidget extends Widget {
 
             // Add new table issues to this section
             tableIssues.forEach((issue: ICellIssue) => {
+              if (issue.cellIndex < 0 || issue.cellIndex >= widgetCount) {
+                return;
+              }
               const issueWidget = new CellIssueWidget(
                 issue,
                 this.currentNotebook!.content.widgets[issue.cellIndex],
                 this.aiEnabled,
                 this
               );
+              this._childIssueWidgets.push(issueWidget);
               issuesList.appendChild(issueWidget.node);
             });
           }
@@ -370,25 +416,29 @@ export class MainPanelWidget extends Widget {
             const el = child as HTMLElement;
             const idxAttr = el.getAttribute('data-cell-index');
             if (idxAttr && impacted.has(parseInt(idxAttr))) {
+              this.disposeWidgetByNode(el);
               el.remove();
             }
           });
 
           // Append new issues for this category
           categoryIssues.forEach(issue => {
+            if (issue.cellIndex < 0 || issue.cellIndex >= widgetCount) {
+              return;
+            }
             const issueWidget = new CellIssueWidget(
               issue,
               this.currentNotebook!.content.widgets[issue.cellIndex],
               this.aiEnabled,
               this
             );
+            this._childIssueWidgets.push(issueWidget);
             issuesList.appendChild(issueWidget.node);
           });
         }
       }
     };
     this.node.addEventListener('notebookReanalyzed', handler as EventListener);
-    //document.addEventListener('notebookReanalyzed', handler as EventListener);
   }
 
   private async loadSettings(settingRegistry: ISettingRegistry): Promise<void> {
@@ -397,8 +447,9 @@ export class MainPanelWidget extends Widget {
         'jupyterlab-a11y-checker:plugin'
       );
 
-      if (settings.get('languageModel').composite) {
-        const langModel = settings.get('languageModel').composite as any;
+      const langRaw = settings.get('languageModel').composite;
+      if (langRaw && typeof langRaw === 'object') {
+        const langModel = langRaw as ISettingsShape;
         this.languageModelSettings = {
           baseUrl: langModel.baseUrl || this.languageModelSettings.baseUrl,
           apiKey: langModel.apiKey || this.languageModelSettings.apiKey,
@@ -406,8 +457,9 @@ export class MainPanelWidget extends Widget {
         };
       }
 
-      if (settings.get('visionModel').composite) {
-        const visionModel = settings.get('visionModel').composite as any;
+      const visionRaw = settings.get('visionModel').composite;
+      if (visionRaw && typeof visionRaw === 'object') {
+        const visionModel = visionRaw as ISettingsShape;
         this.visionModelSettings = {
           baseUrl: visionModel.baseUrl || this.visionModelSettings.baseUrl,
           apiKey: visionModel.apiKey || this.visionModelSettings.apiKey,
@@ -430,9 +482,42 @@ export class MainPanelWidget extends Widget {
   setNotebook(notebook: NotebookPanel) {
     this.currentNotebook = notebook;
 
+    // Dispose all child widgets before clearing the container
+    this.disposeChildWidgets();
+
     const issuesContainer = this.node.querySelector(
       '.issues-container'
     ) as HTMLElement;
     issuesContainer.innerHTML = '';
+  }
+
+  /** Dispose all tracked child CellIssueWidgets. */
+  private disposeChildWidgets(): void {
+    for (const widget of this._childIssueWidgets) {
+      widget.dispose();
+    }
+    this._childIssueWidgets = [];
+  }
+
+  /** Dispose tracked widgets whose nodes are children of the given element. */
+  private disposeWidgetsInElement(container: Element): void {
+    this._childIssueWidgets = this._childIssueWidgets.filter(widget => {
+      if (container.contains(widget.node)) {
+        widget.dispose();
+        return false;
+      }
+      return true;
+    });
+  }
+
+  /** Dispose a single tracked widget by its DOM node. */
+  private disposeWidgetByNode(node: Element): void {
+    this._childIssueWidgets = this._childIssueWidgets.filter(widget => {
+      if (widget.node === node) {
+        widget.dispose();
+        return false;
+      }
+      return true;
+    });
   }
 }

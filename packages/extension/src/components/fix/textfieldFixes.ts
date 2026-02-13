@@ -7,12 +7,15 @@ import {
   IModelSettings,
   escapeHtmlAttr,
   escapeHtmlText,
-  stripHtmlTags
+  stripHtmlTags,
+  analyzeHeadingHierarchy,
+  detectHeadingOneIssue
 } from '@berkeley-dsep-infra/a11y-checker-core';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { TextFieldFixWidget } from './base.js';
+import { notebookToGeneralCells } from '../../adapter.js';
 
 export class ImageAltFixWidget extends TextFieldFixWidget {
   private visionSettings: IModelSettings;
@@ -327,7 +330,7 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
       const firstCell = notebookPanel.content.widgets[0];
       if (firstCell) {
         firstCell.node.style.transition = 'background-color 0.5s ease';
-        firstCell.node.style.backgroundColor = '#28A745';
+        firstCell.node.style.backgroundColor = 'var(--success-green)';
         setTimeout(() => {
           firstCell.node.style.backgroundColor = '';
         }, 1000);
@@ -361,53 +364,40 @@ export class HeadingOneFixWidget extends TextFieldFixWidget {
 
     // Remove the issue widget
     this.removeIssueWidget();
+
+    // Re-analyze heading hierarchy since adding H1 affects all heading checks
+    void this.reanalyzeNotebookAndDispatch();
+  }
+
+  // Override to run heading-wide checks since adding H1 affects all heading rules
+  protected async reanalyzeNotebookAndDispatch(): Promise<void> {
+    const notebookPanel = this.cell.parent?.parent as NotebookPanel;
+    if (!notebookPanel) {
+      return;
+    }
+    setTimeout(async () => {
+      const accessibleCells = notebookToGeneralCells(notebookPanel);
+      const headingHierarchyIssues =
+        await analyzeHeadingHierarchy(accessibleCells);
+      const headingOneIssues = await detectHeadingOneIssue(accessibleCells);
+      const allHeadingIssues = [...headingHierarchyIssues, ...headingOneIssues];
+      const mainPanelEl = document.getElementById('a11y-sidebar');
+      if (mainPanelEl) {
+        const event = new CustomEvent('notebookReanalyzed', {
+          detail: {
+            issues: allHeadingIssues,
+            isHeadingUpdate: true
+          },
+          bubbles: true
+        });
+        mainPanelEl.dispatchEvent(event);
+      }
+    }, 100);
   }
 
   async displayAISuggestions(): Promise<void> {
-    const headingInput = this.node.querySelector(
-      '.jp-a11y-input'
-    ) as HTMLInputElement;
-    if (!headingInput) {
-      return;
-    }
-
-    // Save the original placeholder text
-    const originalPlaceholder = headingInput.placeholder;
-
-    // Create loading overlay
-    const loadingOverlay = document.createElement('div');
-    loadingOverlay.className = 'loading-overlay';
-    loadingOverlay.innerHTML = `
-        <span class="material-icons loading">refresh</span>
-        Getting AI suggestions...
-      `;
-
-    // Add relative positioning to input container and append loading overlay
-    const inputContainer = headingInput.parentElement;
-    if (inputContainer) {
-      inputContainer.style.position = 'relative';
-      inputContainer.appendChild(loadingOverlay);
-    }
-
-    // Show loading state in the input
-    headingInput.disabled = true;
-    headingInput.style.color = 'transparent';
-    headingInput.placeholder = '';
-
-    try {
-      // TODO: Implement AI suggestion??? Is it needed?
-      headingInput.value = 'Notebook Title';
-    } catch (error) {
-      console.error(error);
-      headingInput.placeholder = 'Error getting suggestions. Please try again.';
-    } finally {
-      headingInput.disabled = false;
-      headingInput.style.color = '';
-      loadingOverlay.remove();
-      if (headingInput.value) {
-        headingInput.placeholder = originalPlaceholder;
-      }
-    }
+    // AI suggestion not applicable for H1 heading — suggest button is removed in constructor
+    return;
   }
 }
 

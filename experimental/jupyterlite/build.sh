@@ -74,6 +74,10 @@ cd "$SCRIPT_DIR"
 # Clean previous build
 rm -rf _output
 
+# Remove source-tree labextension to avoid duplicate discovery by JupyterLite
+# (pip install -e . already registered it in sys-prefix)
+rm -rf "$REPO_ROOT/packages/extension/jupyterlab_a11y_checker/labextension"
+
 jupyter lite build \
     --contents files/ \
     --output-dir _output

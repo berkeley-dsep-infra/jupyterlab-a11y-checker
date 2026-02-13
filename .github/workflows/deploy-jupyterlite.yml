@@ -52,6 +52,9 @@ jobs:
           jupyter labextension list
           jupyter labextension list 2>&1 | grep -ie "a11y-checker.*OK"
 
+      - name: Remove source-tree labextension to avoid duplicate discovery
+        run: rm -rf packages/extension/jupyterlab_a11y_checker/labextension
+
       - name: Build JupyterLite
         working-directory: experimental/jupyterlite
         run: |

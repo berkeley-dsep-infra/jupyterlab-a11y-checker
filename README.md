@@ -2,7 +2,7 @@
 
 [![jupyterlab-a11y-checker](https://marketplace.orbrx.io/api/badge/jupyterlab-a11y-checker?metric=downloads&leftColor=%23555&rightColor=%23F37620&style=flat)](https://marketplace.orbrx.io/extensions/jupyterlab-a11y-checker)
 
-jupyterLab-a11y-checker is an acessibility engine for Jupyter Notebooks, assisting authors detect and fix accessibility issues, aligning with WCAG 2.1 AA guidelines. It combines the strengths of [axe-core](https://github.com/dequelabs/axe-core), a widely used accessibility engine, with custom notebook-specific detection algorithms that address issues axe cannot reliably cover in JupyterLab.
+jupyterLab-a11y-checker is an acessibility engine for Jupyter Notebooks, assisting authors detect and fix accessibility issues, aligning with WCAG 2.1 AA guidelines.
 
 Users can use this tool in two ways:
 
@@ -11,7 +11,9 @@ Users can use this tool in two ways:
 
 ## Core Detection Engine
 
-While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a study on Jupyter Notebooks, [Notably Inaccessible — Data Driven Understanding of Data Science Notebook (In)Accessibility](https://arxiv.org/pdf/2308.03241). To address them, we implement custom detection logic for the issues listed in [Rule Description](./doc/rules.md). In addition, we integrate axe-core to detect other standard accessibility issues beyond these main issues, which are listed in [Axe Rule Description](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md). Currently, axe is supported in the extension but not in the CLI tool.
+While there are many possible a11y issues in Jupyter Notebooks, we prioritized the issues discussed in a [accessibility study on Jupyter Notebooks](https://arxiv.org/pdf/2308.03241), as well as [accessibility guideline for developers](https://docs.google.com/spreadsheets/d/1TBE4BhcmAN2wQHGYSvRGGdyL2pWTVw4cLFU3mARMfjM/edit?gid=0#gid=0). The core issues we detect are listed in [Rule Description](./doc/rules.md).
+
+Our detection engine relies on custom detection logic. In addition, we integrate [axe-core](https://github.com/dequelabs/axe-core) to detect other standard accessibility issues beyond these main issues, listed in [Axe Rule Description](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md). For details on why we use custom detection over axe-core for our core rules, see [Notes on Detection](./doc/notes-on-detection.md). Currently, axe is supported in the extension but not in the CLI tool.
 
 ## JupyterLab Extension
 

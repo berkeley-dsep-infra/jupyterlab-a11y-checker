@@ -1,80 +1,68 @@
-import { IGeneralCell, ICellIssue } from '../../types.js';
+import { IGeneralCell, ICellIssue } from "../../types.js";
+import { findAllHtmlTags } from "../../utils/sanitize.js";
 
 export function detectTableIssuesInCell(
   rawMarkdown: string,
   cellIndex: number,
-  cellType: string
+  cellType: string,
 ): ICellIssue[] {
   const notebookIssues: ICellIssue[] = [];
 
-  // Check for tables without th tags
-  const tableWithoutThRegex =
-    /<table[^>]*>(?![\s\S]*?<th[^>]*>)[\s\S]*?<\/table>/gi;
-  let match;
-  while ((match = tableWithoutThRegex.exec(rawMarkdown)) !== null) {
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
-    notebookIssues.push({
-      cellIndex,
-      cellType: cellType as 'code' | 'markdown',
-      violationId: 'table-missing-header',
-      issueContentRaw: match[0],
-      metadata: {
-        offsetStart: start,
-        offsetEnd: end
-      }
-    });
-  }
+  // Find all <table>...</table> blocks using indexOf-based scanning (no ReDoS)
+  const tables = findAllHtmlTags(rawMarkdown, "table");
 
-  // Check for tables without caption tags
-  const tableWithoutCaptionRegex =
-    /<table[^>]*>(?![\s\S]*?<caption[^>]*>)[\s\S]*?<\/table>/gi;
-  while ((match = tableWithoutCaptionRegex.exec(rawMarkdown)) !== null) {
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
-    notebookIssues.push({
-      cellIndex,
-      cellType: cellType as 'code' | 'markdown',
-      violationId: 'table-missing-caption',
-      issueContentRaw: match[0],
-      metadata: {
-        offsetStart: start,
-        offsetEnd: end
-      }
-    });
-  }
+  for (const { match: tableHtml, start, end } of tables) {
+    // Check for tables without <th> tags
+    if (!/<th[\s>]/i.test(tableHtml)) {
+      notebookIssues.push({
+        cellIndex,
+        cellType: cellType as "code" | "markdown",
+        violationId: "table-missing-header",
+        issueContentRaw: tableHtml,
+        metadata: {
+          offsetStart: start,
+          offsetEnd: end,
+        },
+      });
+    }
 
-  // Check for tables with th tags but missing scope attributes
-  // Use regex instead of DOMParser for CLI compatibility
-  const tableWithThRegex = /<table[^>]*>[\s\S]*?<\/table>/gi;
-  while ((match = tableWithThRegex.exec(rawMarkdown)) !== null) {
-    const tableHtml = match[0];
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
+    // Check for tables without <caption> tags
+    if (!/<caption[\s>]/i.test(tableHtml)) {
+      notebookIssues.push({
+        cellIndex,
+        cellType: cellType as "code" | "markdown",
+        violationId: "table-missing-caption",
+        issueContentRaw: tableHtml,
+        metadata: {
+          offsetStart: start,
+          offsetEnd: end,
+        },
+      });
+    }
 
-    // Find all th tags within this table
+    // Check for tables with <th> tags but missing scope attributes
     const thRegex = /<th\b([^>]*)>/gi;
     let thMatch;
     let hasMissingScope = false;
 
     while ((thMatch = thRegex.exec(tableHtml)) !== null) {
       const attributes = thMatch[1];
-      if (!attributes.toLowerCase().includes('scope=')) {
+      if (!attributes.toLowerCase().includes("scope=")) {
         hasMissingScope = true;
-        break; // Found one, flag the table
+        break;
       }
     }
 
     if (hasMissingScope) {
       notebookIssues.push({
         cellIndex,
-        cellType: cellType as 'code' | 'markdown',
-        violationId: 'table-missing-scope',
+        cellType: cellType as "code" | "markdown",
+        violationId: "table-missing-scope",
         issueContentRaw: tableHtml,
         metadata: {
           offsetStart: start,
-          offsetEnd: end
-        }
+          offsetEnd: end,
+        },
       });
     }
   }
@@ -83,13 +71,13 @@ export function detectTableIssuesInCell(
 }
 
 export async function analyzeTableIssues(
-  cells: IGeneralCell[]
+  cells: IGeneralCell[],
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
-    if (!cell || cell.type !== 'markdown') {
+    if (!cell || cell.type !== "markdown") {
       continue;
     }
 
@@ -98,7 +86,7 @@ export async function analyzeTableIssues(
       continue;
     }
 
-    const cellIssues = detectTableIssuesInCell(content, i, 'markdown');
+    const cellIssues = detectTableIssuesInCell(content, i, "markdown");
     notebookIssues.push(...cellIssues);
   }
 

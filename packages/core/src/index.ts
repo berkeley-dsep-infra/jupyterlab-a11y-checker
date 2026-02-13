@@ -7,4 +7,5 @@ export * from "./utils/ai-utils.js";
 export * from "./utils/metadata.js";
 export * from "./detection/category/table.js";
 export * from "./detection/category/heading.js";
+export * from "./utils/sanitize.js";
 // Export others if needed, using glob patterns or directories if possible, but specific files for now.

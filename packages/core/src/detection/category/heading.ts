@@ -1,11 +1,12 @@
-import { marked } from 'marked';
-import { IGeneralCell, ICellIssue } from '../../types.js';
+import { marked } from "marked";
+import { IGeneralCell, ICellIssue } from "../../types.js";
+import { stripHtmlTags } from "../../utils/sanitize.js";
 
 export async function detectHeadingOneIssue(
   rawMarkdown: string,
   cellIndex: number,
   cellType: string,
-  cells: IGeneralCell[]
+  cells: IGeneralCell[],
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
@@ -17,16 +18,16 @@ export async function detectHeadingOneIssue(
   // Check if the first cell begins with an H1 (the only case where we do NOT flag)
   const firstCell = cells[0];
   let firstCellStartsWithH1 = false;
-  if (firstCell.type === 'markdown') {
+  if (firstCell.type === "markdown") {
     const content = firstCell.source;
     const tokens: any[] = marked.lexer(content) as any[];
     const firstToken: any = tokens.find(
-      (t: any) => t && t.type !== 'space' && (t.raw || '').trim().length > 0
+      (t: any) => t && t.type !== "space" && (t.raw || "").trim().length > 0,
     );
-    if (firstToken && firstToken.type === 'heading' && firstToken.depth === 1) {
+    if (firstToken && firstToken.type === "heading" && firstToken.depth === 1) {
       firstCellStartsWithH1 = true;
-    } else if (firstToken && firstToken.type === 'html') {
-      const rawHtml = firstToken.raw || '';
+    } else if (firstToken && firstToken.type === "html") {
+      const rawHtml = firstToken.raw || "";
       firstCellStartsWithH1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.test(rawHtml);
     }
   }
@@ -38,16 +39,16 @@ export async function detectHeadingOneIssue(
   // Emit a single top-level issue at the beginning and return
   notebookIssues.push({
     cellIndex: 0,
-    cellType: firstCell.type as 'markdown' | 'code',
-    violationId: 'heading-missing-h1',
-    issueContentRaw: ''
+    cellType: firstCell.type as "markdown" | "code",
+    violationId: "heading-missing-h1",
+    issueContentRaw: "",
   });
 
   return notebookIssues;
 }
 
 export async function analyzeHeadingHierarchy(
-  cells: IGeneralCell[]
+  cells: IGeneralCell[],
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
@@ -64,7 +65,7 @@ export async function analyzeHeadingHierarchy(
     // First pass: collect all headings
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
-      if (!cell || cell.type !== 'markdown') {
+      if (!cell || cell.type !== "markdown") {
         continue;
       }
 
@@ -78,20 +79,20 @@ export async function analyzeHeadingHierarchy(
       let searchStart = 0;
       for (const token of tokens) {
         let level: number | null = null;
-        let rawHeading = '';
-        let text = '';
+        let rawHeading = "";
+        let text = "";
 
-        if ((token as any).type === 'heading') {
+        if ((token as any).type === "heading") {
           level = (token as any).depth;
-          rawHeading = (token as any).raw || '';
-          text = (token as any).text || '';
-        } else if ((token as any).type === 'html') {
-          const rawHtml = (token as any).raw || '';
+          rawHeading = (token as any).raw || "";
+          text = (token as any).text || "";
+        } else if ((token as any).type === "html") {
+          const rawHtml = (token as any).raw || "";
           const m = rawHtml.match(/<h([1-6])[^>]*>[\s\S]*?<\/h\1>/i);
           if (m) {
             level = parseInt(m[1], 10);
             rawHeading = m[0];
-            text = rawHeading.replace(/<[^>]+>/g, '');
+            text = stripHtmlTags(rawHeading);
           }
         }
 
@@ -99,7 +100,7 @@ export async function analyzeHeadingHierarchy(
           // Bug Check: Is the rendered h1 really h1? (Markdown Setext-heading) -> Can be improved.
           if (
             level === 1 &&
-            ((text || '').match(/(?<!\\)\$\$/g) || []).length === 1
+            ((text || "").match(/(?<!\\)\$\$/g) || []).length === 1
           ) {
             continue;
           }
@@ -117,7 +118,7 @@ export async function analyzeHeadingHierarchy(
             content: text,
             html: rawHeading,
             offsetStart: start,
-            offsetEnd: end
+            offsetEnd: end,
           } as any);
         }
       }
@@ -149,24 +150,24 @@ export async function analyzeHeadingHierarchy(
     // First, find all h1 headings regardless of content
     const allH1Indices = headingStructure
       .map((heading, index) => (heading.level === 1 ? index : -1))
-      .filter(index => index !== -1);
+      .filter((index) => index !== -1);
 
     // If there are multiple h1 headings, flag all but the first one
     if (allH1Indices.length > 1) {
-      allH1Indices.slice(1).forEach(index => {
+      allH1Indices.slice(1).forEach((index) => {
         const heading = headingStructure[index];
         notebookIssues.push({
           cellIndex: heading.cellIndex,
-          cellType: 'markdown',
-          violationId: 'heading-multiple-h1',
+          cellType: "markdown",
+          violationId: "heading-multiple-h1",
           issueContentRaw: heading.html,
           metadata: {
             headingStructure: headingStructure.filter(
-              h => h.level === 1 || h.level === 2
+              (h) => h.level === 1 || h.level === 2,
             ),
             offsetStart: (heading as any).offsetStart,
-            offsetEnd: (heading as any).offsetEnd
-          }
+            offsetEnd: (heading as any).offsetEnd,
+          },
         });
       });
     }
@@ -175,20 +176,20 @@ export async function analyzeHeadingHierarchy(
     h2Headings.forEach((indices, content) => {
       if (indices.length > 1) {
         // Flag all h2 headings after the first one
-        indices.slice(1).forEach(index => {
+        indices.slice(1).forEach((index) => {
           const heading = headingStructure[index];
           notebookIssues.push({
             cellIndex: heading.cellIndex,
-            cellType: 'markdown',
-            violationId: 'heading-duplicate-h2',
+            cellType: "markdown",
+            violationId: "heading-duplicate-h2",
             issueContentRaw: heading.html,
             metadata: {
               headingStructure: headingStructure.filter(
-                h => h.level === 1 || h.level === 2
+                (h) => h.level === 1 || h.level === 2,
               ),
               offsetStart: (heading as any).offsetStart,
-              offsetEnd: (heading as any).offsetEnd
-            }
+              offsetEnd: (heading as any).offsetEnd,
+            },
           });
         });
       }
@@ -198,20 +199,20 @@ export async function analyzeHeadingHierarchy(
     h1Headings.forEach((h1Indices, content) => {
       if (h2Headings.has(content)) {
         // Flag all h2 headings that share content with h1
-        h2Headings.get(content)!.forEach(index => {
+        h2Headings.get(content)!.forEach((index) => {
           const heading = headingStructure[index];
           notebookIssues.push({
             cellIndex: heading.cellIndex,
-            cellType: 'markdown',
-            violationId: 'heading-duplicate-h1-h2',
+            cellType: "markdown",
+            violationId: "heading-duplicate-h1-h2",
             issueContentRaw: heading.html,
             metadata: {
               headingStructure: headingStructure.filter(
-                h => h.level === 1 || h.level === 2
+                (h) => h.level === 1 || h.level === 2,
               ),
               offsetStart: (heading as any).offsetStart,
-              offsetEnd: (heading as any).offsetEnd
-            }
+              offsetEnd: (heading as any).offsetEnd,
+            },
           });
         });
       }
@@ -226,13 +227,13 @@ export async function analyzeHeadingHierarchy(
       if (!current.content.trim()) {
         notebookIssues.push({
           cellIndex: current.cellIndex,
-          cellType: 'markdown',
-          violationId: 'heading-empty',
+          cellType: "markdown",
+          violationId: "heading-empty",
           issueContentRaw: current.html,
           metadata: {
             offsetStart: (current as any).offsetStart,
-            offsetEnd: (current as any).offsetEnd
-          }
+            offsetEnd: (current as any).offsetEnd,
+          },
         });
       }
 
@@ -249,19 +250,19 @@ export async function analyzeHeadingHierarchy(
         // Only check when going to lower levels
         notebookIssues.push({
           cellIndex: current.cellIndex,
-          cellType: 'markdown',
-          violationId: 'heading-wrong-order',
+          cellType: "markdown",
+          violationId: "heading-wrong-order",
           issueContentRaw: current.html,
           metadata: {
             previousHeadingLevel: previous.level,
             offsetStart: (current as any).offsetStart,
-            offsetEnd: (current as any).offsetEnd
-          }
+            offsetEnd: (current as any).offsetEnd,
+          },
         });
       }
     }
   } catch (error) {
-    console.error('Error in heading hierarchy analysis:', error);
+    console.error("Error in heading hierarchy analysis:", error);
   }
 
   return notebookIssues;

@@ -33,12 +33,14 @@ Below are the issues that we detect. On top of this, we run axe-core as well.
 
 ---
 
-## Color
+## Color (currently disabled)
 
 | No. | Rule ID                      | Description                                                                              | WCAG                  | Severity  |
 | --- | ---------------------------- | ---------------------------------------------------------------------------------------- | --------------------- | --------- |
 | 4a  | color-insufficient-cc-normal | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 (Level AA) | violation |
 | 4b  | color-insufficient-cc-large  | Ensure large text in images have a contrast ratio of 3:1                                 | WCAG 1.4.3 (Level AA) | violation |
+
+> **Why disabled:** The custom color contrast detection relies on Tesseract.js OCR to extract text regions from raster images, then measures foreground/background contrast ratios. In practice this approach is unreliable — OCR frequently misidentifies text boundaries, produces false positives on non-text image regions, and misses text rendered at unusual angles or over complex backgrounds. Until a more robust detection strategy is in place (e.g., delegating to axe-core for rendered HTML contrast or using a vision model), these rules are commented out in `packages/core/src/detection/base.ts`. The implementation in `packages/core/src/detection/category/color.ts` is preserved and can be re-enabled once accuracy improves.
 
 ---
 
@@ -50,4 +52,4 @@ Below are the issues that we detect. On top of this, we run axe-core as well.
 
 ## List
 
-TBD
+Not yet implemented.

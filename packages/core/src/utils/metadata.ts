@@ -1,40 +1,40 @@
-import { IIssueInformation } from '../types.js';
+import { IIssueInformation } from "../types.js";
 
 export const issueCategoryNames = [
-  'Images',
-  'Headings',
-  'Lists',
-  'Tables',
-  'Color',
-  'Links',
-  'Other'
+  "Images",
+  "Headings",
+  "Lists",
+  "Tables",
+  "Color",
+  "Links",
+  "Other",
 ];
 
 export const issueToCategory = new Map<string, string>([
   // 1. Images
-  ['image-missing-alt', 'Images'],
+  ["image-missing-alt", "Images"],
 
   // TODO: 2. Headings
-  ['heading-missing-h1', 'Headings'],
-  ['heading-multiple-h1', 'Headings'],
-  ['heading-duplicate', 'Headings'],
-  ['heading-duplicate-h2', 'Headings'],
-  ['heading-duplicate-h1-h2', 'Headings'],
-  ['heading-wrong-order', 'Headings'],
-  ['heading-empty', 'Headings'],
+  ["heading-missing-h1", "Headings"],
+  ["heading-multiple-h1", "Headings"],
+  ["heading-duplicate", "Headings"],
+  ["heading-duplicate-h2", "Headings"],
+  ["heading-duplicate-h1-h2", "Headings"],
+  ["heading-wrong-order", "Headings"],
+  ["heading-empty", "Headings"],
 
   // TODO: 3. Tables
-  ['table-missing-header', 'Tables'],
-  ['table-missing-caption', 'Tables'],
-  ['table-missing-scope', 'Tables'],
+  ["table-missing-header", "Tables"],
+  ["table-missing-caption", "Tables"],
+  ["table-missing-scope", "Tables"],
 
   // TODO: 4. Color
-  ['color-insufficient-cc-normal', 'Color'],
-  ['color-insufficient-cc-large', 'Color'],
+  ["color-insufficient-cc-normal", "Color"],
+  ["color-insufficient-cc-large", "Color"],
   // TODO: Lists
 
   // TODO: Links
-  ['link-discernible-text', 'Links']
+  ["link-discernible-text", "Links"],
 
   // TODO: Other
 ]);
@@ -42,147 +42,162 @@ export const issueToCategory = new Map<string, string>([
 export const issueToDescription = new Map<string, IIssueInformation>([
   // 1. Images
   [
-    'image-missing-alt',
+    "image-missing-alt",
     {
-      title: 'Missing Alt Text',
+      title: "Missing Alt Text",
       description:
-        'All images must have alternate text to convey their purpose and meaning to screen reader users.',
+        "All images must have alternate text to convey their purpose and meaning to screen reader users.",
       detailedDescription:
         "Ensure all informative images have short, descriptive alternate text. Screen readers have no way of translating an image into words that gets read to the user, even if the image only consists of text. As a result, it's necessary for images to have short, descriptive alt text so screen reader users clearly understand the image's contents and purpose",
-      descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.4/image-alt'
-    }
+      descriptionUrl: "https://dequeuniversity.com/rules/axe/4.4/image-alt",
+      severity: "violation",
+    },
   ],
 
   // TODO: 2. Headings
   [
-    'heading-missing-h1',
+    "heading-missing-h1",
     {
-      title: 'Missing H1 Heading',
+      title: "Missing H1 Heading",
       description:
-        'Ensure a single H1 tag is present at the top of the notebook.',
+        "Ensure a single H1 tag is present at the top of the notebook.",
       detailedDescription:
-        'Screen reader users can use keyboard shortcuts to navigate directly to the first h1, which, in principle, should allow them to jump directly to the main content of the web page. If there is no h1, or if the h1 appears somewhere other than at the start of the main content, screen reader users must listen to more of the web page to understand its structure, making the experience confusing and frustrating. Please also ensure that headings contain descriptive, accurate text',
+        "Screen reader users can use keyboard shortcuts to navigate directly to the first h1, which, in principle, should allow them to jump directly to the main content of the web page. If there is no h1, or if the h1 appears somewhere other than at the start of the main content, screen reader users must listen to more of the web page to understand its structure, making the experience confusing and frustrating. Please also ensure that headings contain descriptive, accurate text",
       descriptionUrl:
-        'https://dequeuniversity.com/rules/axe/4.1/page-has-heading-one'
-    }
+        "https://dequeuniversity.com/rules/axe/4.1/page-has-heading-one",
+      severity: "best-practice",
+    },
   ],
   [
-    'heading-multiple-h1',
+    "heading-multiple-h1",
     {
-      title: 'Duplicate H1 Heading',
+      title: "Duplicate H1 Heading",
       description:
-        'Ensure there is only one level-one heading (h1) in the notebook.',
+        "Ensure there is only one level-one heading (h1) in the notebook.",
       detailedDescription:
-        'The h1 heading should be at the top of the document and serve as the main title. Additional h1 headings can confuse screen reader users about the document structure. Please also ensure that headings contain descriptive, accurate text'
-    }
+        "The h1 heading should be at the top of the document and serve as the main title. Additional h1 headings can confuse screen reader users about the document structure. Please also ensure that headings contain descriptive, accurate text",
+      severity: "best-practice",
+    },
   ],
   [
-    'heading-duplicate-h2',
+    "heading-duplicate-h2",
     {
-      title: 'Duplicate Heading h2',
-      description: 'Ensure identical h2 headings are not used.',
+      title: "Duplicate Heading h2",
+      description: "Ensure identical h2 headings are not used.",
       detailedDescription:
-        'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text'
-    }
+        "This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please consider combining the sections or using different heading text",
+      severity: "best-practice",
+    },
   ],
   [
-    'heading-duplicate-h1-h2',
+    "heading-duplicate-h1-h2",
     {
-      title: 'Duplicate Heading h1 and h2',
-      description: 'Ensure h1 and h2 headings do not share the same text.',
+      title: "Duplicate Heading h1 and h2",
+      description: "Ensure h1 and h2 headings do not share the same text.",
       detailedDescription:
-        'This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please use different text for h1 and h2 headings'
-    }
+        "This can be confusing for screen reader users as it creates redundant landmarks in the document structure. Please use different text for h1 and h2 headings",
+      severity: "best-practice",
+    },
   ],
   [
-    'heading-wrong-order',
+    "heading-wrong-order",
     {
-      title: 'Wrong Heading Order',
+      title: "Wrong Heading Order",
       description:
-        'Headings must be in a valid logical order, meaning H1 through H6 element tags must appear in a sequentially-descending order.',
+        "Headings must be in a valid logical order, meaning H1 through H6 element tags must appear in a sequentially-descending order.",
       detailedDescription:
-        'Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure that headings contain descriptive, accurate text',
+        "Ensure the order of headings is semantically correct. Headings provide essential structure for screen reader users to navigate a page. Skipping levels or using headings out of order can make the content feel disorganized or inaccessible. Please also ensure that headings contain descriptive, accurate text",
       descriptionUrl:
-        'https://dequeuniversity.com/rules/axe/pdf/2.0/heading-order'
-    }
+        "https://dequeuniversity.com/rules/axe/pdf/2.0/heading-order",
+      severity: "best-practice",
+    },
   ],
   [
-    'heading-empty',
+    "heading-empty",
     {
-      title: 'Empty Heading',
-      description: 'Ensure that a heading element contains content.',
+      title: "Empty Heading",
+      description: "Ensure that a heading element contains content.",
       detailedDescription:
-        'Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience. Please also ensure that headings contain descriptive, accurate text',
-      descriptionUrl: 'https://dequeuniversity.com/rules/axe/4.2/empty-heading'
-    }
+        "Ensure headings have discernible text. Headings provide essential structure for screen reader users to navigate a page. When a heading is empty, it creates confusion and disrupts this experience. Please also ensure that headings contain descriptive, accurate text",
+      descriptionUrl: "https://dequeuniversity.com/rules/axe/4.2/empty-heading",
+      severity: "violation",
+    },
   ],
 
   // TODO: 3. Tables
   [
-    'table-missing-header',
+    "table-missing-header",
     {
-      title: 'Missing Table Header',
-      description: 'Ensure that a table has a row, column, or both headers.',
+      title: "Missing Table Header",
+      description: "Ensure that a table has a row, column, or both headers.",
       detailedDescription:
-        'Tables must have header cells to provide context for the data. Without headers, screen reader users cannot understand the relationship between data cells and their meaning. Please add appropriate header cells using the <th> tag'
-    }
+        "Tables must have header cells to provide context for the data. Without headers, screen reader users cannot understand the relationship between data cells and their meaning. Please add appropriate header cells using the <th> tag",
+      severity: "violation",
+    },
   ],
   [
-    'table-missing-caption',
+    "table-missing-caption",
     {
-      title: 'Missing Table Caption',
-      description: 'Ensure that a table has a caption.',
+      title: "Missing Table Caption",
+      description: "Ensure that a table has a caption.",
       detailedDescription:
-        'Tables should have captions to provide a brief description of their content. Captions help screen reader users understand the purpose and context of the table data. Please add a caption using the <caption> tag'
-    }
+        "Tables should have captions to provide a brief description of their content. Captions help screen reader users understand the purpose and context of the table data. Please add a caption using the <caption> tag",
+      severity: "best-practice",
+    },
   ],
   [
-    'table-missing-scope',
+    "table-missing-scope",
     {
-      title: 'Missing Table Scope',
-      description: 'Ensure that a table has a scope attribute.',
-      detailedDescription: 'Table headers must have scope attributes'
-    }
+      title: "Missing Table Scope",
+      description: "Ensure that a table has a scope attribute.",
+      detailedDescription: "Table headers must have scope attributes",
+      severity: "best-practice",
+    },
   ],
 
   // TODO: 4. Color
   [
-    'color-insufficient-cc-normal',
+    "color-insufficient-cc-normal",
     {
-      title: 'Insufficient Color Contrast',
+      title: "Insufficient Color Contrast",
       description:
-        'Ensure that a text in an image has sufficient color contrast.',
+        "Ensure that a text in an image has sufficient color contrast.",
       detailedDescription:
-        'Text must have sufficient contrast with its background to be readable. For normal text, the contrast ratio should be at least 4.5:1. This ensures that users with visual impairments can read the content',
-      descriptionUrl: 'https://dequeuniversity.com/rules/axe/3.5/color-contrast'
-    }
+        "Text must have sufficient contrast with its background to be readable. For normal text, the contrast ratio should be at least 4.5:1. This ensures that users with visual impairments can read the content",
+      descriptionUrl:
+        "https://dequeuniversity.com/rules/axe/3.5/color-contrast",
+      severity: "violation",
+    },
   ],
   [
-    'color-insufficient-cc-large',
+    "color-insufficient-cc-large",
     {
-      title: 'Insufficient Color Contrast',
+      title: "Insufficient Color Contrast",
       description:
-        'Ensure that a large text in an image has sufficient color contrast.',
+        "Ensure that a large text in an image has sufficient color contrast.",
       detailedDescription:
-        'Large text must have sufficient contrast with its background to be readable. For large text (18pt or 14pt bold), the contrast ratio should be at least 3:1. This ensures that users with visual impairments can read the content',
-      descriptionUrl: 'https://dequeuniversity.com/rules/axe/3.5/color-contrast'
-    }
+        "Large text must have sufficient contrast with its background to be readable. For large text (18pt or 14pt bold), the contrast ratio should be at least 3:1. This ensures that users with visual impairments can read the content",
+      descriptionUrl:
+        "https://dequeuniversity.com/rules/axe/3.5/color-contrast",
+      severity: "violation",
+    },
   ],
   // TODO: Lists
 
   // TODO: Links
   [
-    'link-discernible-text',
+    "link-discernible-text",
     {
-      title: 'Link Text Not Descriptive',
+      title: "Link Text Not Descriptive",
       description:
-        'Links must have discernible, descriptive text (or aria-label) that conveys purpose without relying on surrounding context.',
+        "Links must have discernible, descriptive text (or aria-label) that conveys purpose without relying on surrounding context.",
       detailedDescription:
         'Avoid vague phrases like "click here" or bare URLs. Provide concise, meaningful link text that describes the destination. This helps all users, including screen reader users, understand link purpose.',
       descriptionUrl:
-        'https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context.html'
-    }
-  ]
+        "https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context.html",
+      severity: "violation",
+    },
+  ],
 
   // TODO: Other
 ]);

@@ -1,41 +1,41 @@
-import axe from 'axe-core';
-import { marked } from 'marked';
-import { ICellIssue, IGeneralCell, IImageProcessor } from '../types.js';
+import axe from "axe-core";
+import { marked } from "marked";
+import { ICellIssue, IGeneralCell, IImageProcessor } from "../types.js";
 import {
   detectHeadingOneIssue,
-  analyzeHeadingHierarchy
-} from './category/heading.js';
-import { detectImageIssuesInCell } from './category/index.js';
-import { detectTableIssuesInCell } from './category/index.js';
-import { detectColorIssuesInCell } from './category/index.js';
-import { detectLinkIssuesInCell } from './category/index.js';
+  analyzeHeadingHierarchy,
+} from "./category/heading.js";
+import { detectImageIssuesInCell } from "./category/index.js";
+import { detectTableIssuesInCell } from "./category/index.js";
+// import { detectColorIssuesInCell } from './category/index.js';
+import { detectLinkIssuesInCell } from "./category/index.js";
 
 export async function analyzeCellsAccessibility(
   cells: IGeneralCell[],
   documentContext: Document,
   baseUrl: string,
   imageProcessor: IImageProcessor,
-  notebookPath: string = ''
+  notebookPath: string = "",
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
   // Add heading one check
   notebookIssues.push(
-    ...(await detectHeadingOneIssue('', 0, 'markdown', cells))
+    ...(await detectHeadingOneIssue("", 0, "markdown", cells)),
   );
 
-  const tempDiv = documentContext.createElement('div');
+  const tempDiv = documentContext.createElement("div");
   documentContext.body.appendChild(tempDiv);
 
   const axeConfig: axe.RunOptions = {
-    runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
+    runOnly: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"],
     rules: {
-      'image-alt': { enabled: false },
-      'empty-heading': { enabled: false },
-      'heading-order': { enabled: false },
-      'page-has-heading-one': { enabled: false },
-      'link-name': { enabled: false }
-    }
+      "image-alt": { enabled: false },
+      "empty-heading": { enabled: false },
+      "heading-order": { enabled: false },
+      "page-has-heading-one": { enabled: false },
+      "link-name": { enabled: false },
+    },
   };
 
   try {
@@ -52,7 +52,7 @@ export async function analyzeCellsAccessibility(
       }
 
       const cellType = cell.type;
-      if (cellType === 'markdown') {
+      if (cellType === "markdown") {
         const rawMarkdown = cell.source;
         if (rawMarkdown.trim()) {
           tempDiv.innerHTML = await marked.parse(rawMarkdown);
@@ -62,13 +62,24 @@ export async function analyzeCellsAccessibility(
 
           // Can have multiple violations in a single cell
           if (violations.length > 0) {
-            violations.forEach(violation => {
-              violation.nodes.forEach(node => {
+            violations.forEach((violation) => {
+              violation.nodes.forEach((node) => {
+                // Extract WCAG SC from axe tags (e.g. "wcag111" → "1.1.1")
+                const wcagTag = violation.tags.find((t) =>
+                  /^wcag\d{3,4}$/.test(t),
+                );
+                const wcagSc = wcagTag
+                  ? wcagTag.replace("wcag", "").split("").join(".")
+                  : undefined;
+
                 notebookIssues.push({
                   cellIndex: i,
                   cellType: cellType,
                   violationId: violation.id,
-                  issueContentRaw: node.html
+                  issueContentRaw: node.html,
+                  customDescription: violation.description,
+                  metadata: { wcagSc },
+                  detectedBy: "axe-core",
                 });
               });
             });
@@ -83,16 +94,18 @@ export async function analyzeCellsAccessibility(
               notebookPath,
               baseUrl,
               imageProcessor,
-              cell.attachments
-            ))
+              cell.attachments,
+            )),
           );
 
           // Table Issues
           notebookIssues.push(
-            ...detectTableIssuesInCell(rawMarkdown, i, cellType)
+            ...detectTableIssuesInCell(rawMarkdown, i, cellType),
           );
 
-          // Color Issues
+          // Color Issues — disabled: custom Tesseract.js-based detection is
+          // unreliable for raster images. See .claude/docs/color-contrast-axe-core.md
+          /*
           notebookIssues.push(
             ...(await detectColorIssuesInCell(
               rawMarkdown,
@@ -104,13 +117,14 @@ export async function analyzeCellsAccessibility(
               cell.attachments
             ))
           );
+          */
 
           // Link Issues
           notebookIssues.push(
-            ...detectLinkIssuesInCell(rawMarkdown, i, cellType)
+            ...detectLinkIssuesInCell(rawMarkdown, i, cellType),
           );
         }
-      } else if (cellType === 'code') {
+      } else if (cellType === "code") {
         // Code cell analysis not implemented yet
       }
     }
@@ -128,12 +142,12 @@ export async function analyzeCellIssues(
   documentContext: Document,
   baseUrl: string,
   imageProcessor: IImageProcessor,
-  notebookPath: string = ''
+  notebookPath: string = "",
 ): Promise<ICellIssue[]> {
   const issues: ICellIssue[] = [];
 
   const cellType = cell.type;
-  if (cellType !== 'markdown') {
+  if (cellType !== "markdown") {
     return issues;
   }
 
@@ -151,16 +165,18 @@ export async function analyzeCellIssues(
       notebookPath,
       baseUrl,
       imageProcessor,
-      cell.attachments
-    ))
+      cell.attachments,
+    )),
   );
 
   // Tables
   issues.push(
-    ...detectTableIssuesInCell(rawMarkdown, cell.cellIndex, cellType)
+    ...detectTableIssuesInCell(rawMarkdown, cell.cellIndex, cellType),
   );
 
-  // Color
+  // Color — disabled: custom Tesseract.js-based detection is unreliable for
+  // raster images. See .claude/docs/color-contrast-axe-core.md
+  /*
   issues.push(
     ...(await detectColorIssuesInCell(
       rawMarkdown,
@@ -172,6 +188,7 @@ export async function analyzeCellIssues(
       cell.attachments
     ))
   );
+  */
 
   // Links
   issues.push(...detectLinkIssuesInCell(rawMarkdown, cell.cellIndex, cellType));
@@ -185,13 +202,13 @@ export async function analyzeCellIssues(
  */
 export async function analyzeCellsAccessibilityCLI(
   cells: IGeneralCell[],
-  imageProcessor: IImageProcessor
+  imageProcessor: IImageProcessor,
 ): Promise<ICellIssue[]> {
   const notebookIssues: ICellIssue[] = [];
 
   // 1. Heading One Check
   notebookIssues.push(
-    ...(await detectHeadingOneIssue('', 0, 'markdown', cells))
+    ...(await detectHeadingOneIssue("", 0, "markdown", cells)),
   );
 
   // 2. Heading Hierarchy
@@ -201,7 +218,7 @@ export async function analyzeCellsAccessibilityCLI(
   // 3. Per-cell checks
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
-    if (cell.type === 'markdown' && cell.source.trim()) {
+    if (cell.type === "markdown" && cell.source.trim()) {
       const rawMarkdown = cell.source;
 
       // Image Issues
@@ -210,16 +227,16 @@ export async function analyzeCellsAccessibilityCLI(
           rawMarkdown,
           i,
           cell.type,
-          '', // notebookPath
-          '', // baseUrl
+          "", // notebookPath
+          "", // baseUrl
           imageProcessor,
-          cell.attachments
-        ))
+          cell.attachments,
+        )),
       );
 
       // Table Issues
       notebookIssues.push(
-        ...detectTableIssuesInCell(rawMarkdown, i, cell.type)
+        ...detectTableIssuesInCell(rawMarkdown, i, cell.type),
       );
 
       // Color Issues

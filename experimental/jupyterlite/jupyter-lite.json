@@ -3,6 +3,7 @@
   "jupyter-lite-schema-version": 0,
   "jupyter-config-data": {
     "appName": "JupyterLab A11y Checker Demo",
+    "contentsStorageName": "a11y-checker-contents-v2",
     "disabledExtensions": [],
     "settingsOverrides": {
       "jupyterlab-a11y-checker:plugin": {

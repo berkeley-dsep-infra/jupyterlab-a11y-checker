@@ -32,7 +32,7 @@
         --accent-hover: #d4631c;
         --accent-light: rgba(243, 118, 38, 0.08);
         --green: #1e8e3e;
-        --green-bg: rgba(30, 142, 62, 0.08);
+        --green-bg: rgba(30, 142, 62, 0.10);
         --red: #d93025;
         --red-bg: rgba(217, 48, 37, 0.08);
         --orange: #e37400;
@@ -787,35 +787,50 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 1rem;
-        padding: 0.85rem 1.25rem;
+        gap: 1.25rem;
+        padding: 1.1rem 1.5rem;
         margin-bottom: 1.25rem;
-        background: var(--green-bg);
+        background: linear-gradient(135deg, rgba(30, 142, 62, 0.12) 0%, rgba(30, 142, 62, 0.06) 100%);
         border: 2px solid var(--green);
-        border-radius: 10px;
-        font-size: 0.85rem;
-        color: var(--text-secondary);
+        border-radius: 12px;
+        font-size: 0.88rem;
+        color: var(--text-primary);
+        box-shadow: 0 2px 8px rgba(30, 142, 62, 0.15);
       }
 
       .fix-cta-text {
         flex: 1;
+        line-height: 1.4;
+      }
+
+      .fix-cta-text strong {
+        display: block;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #15803d;
+        margin-bottom: 0.15rem;
+      }
+
+      .fix-cta-text span {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
       }
 
       .fix-cta-btn {
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
-        padding: 0.5rem 1rem;
-        border: 2px solid #15803d;
+        padding: 0.6rem 1.2rem;
+        border: 2px solid #000;
         border-radius: 8px;
         background: var(--green);
         color: #fff;
-        font-size: 0.82rem;
-        font-weight: 600;
+        font-size: 0.85rem;
+        font-weight: 700;
         font-family: inherit;
         text-decoration: none;
         white-space: nowrap;
-        transition: all 0.1s;
+        transition: all 0.15s;
         box-shadow: 2px 2px 0 0 #000;
       }
 

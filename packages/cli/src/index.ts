@@ -14,7 +14,7 @@ const program = new Command();
 program
   .name("jupyterlab-a11y-check")
   .description("CLI to check Jupyter Notebooks for accessibility issues")
-  .version("0.2.5")
+  .version("0.1.4")
   .option("-llm, --llm-only", "output only the LLM-friendly summary")
   .argument("[files...]", "Paths to the .ipynb files to check")
   .action(async (filePaths: string[], options: { llmOnly?: boolean }) => {

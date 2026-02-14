@@ -130,7 +130,10 @@ dmypy.json
 experimental/jupyterlite/_output/
 experimental/jupyterlite/.venv/
 
+# Editor config
+.vscode/
+
 # Coding Assistant
 CLAUDE.md
 .claude/
-yarn.lock
+package-lock.json

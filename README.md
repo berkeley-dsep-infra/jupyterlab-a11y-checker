@@ -29,6 +29,10 @@ We provide a user interface tailored to each issue, such as a text field for add
 
 To simplify the remediation process, we integrate both a Large Language Model (LLM) and a Vision-Language Model (VLM) to generate accessibility recommendations within several fix interfaces. Users can configure these models by providing their API endpoint, API key, and model name in: `Settings > Settings Editor > A11y Checker Settings`.
 
+## Try it in JupyterLite
+
+You can try the extension directly in your browser without any installation via our [JupyterLite demo](https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html).
+
 ## CLI Tool
 
 ### Running via NPM

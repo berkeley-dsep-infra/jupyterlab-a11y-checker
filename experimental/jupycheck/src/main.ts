@@ -403,9 +403,14 @@ function renderResults(results: NotebookResult[]) {
             ? ' <span class="axe-badge">axe-core</span>'
             : "";
 
+        const ocrNote = vid.startsWith("color-")
+          ? `<div class="popover-ocr-note">This check uses OCR and may produce inaccurate results. Please verify manually.</div>`
+          : "";
+
         popover.innerHTML = `
           <div class="popover-title">${escapeHtml(title)}</div>
           <div>${escapeHtml(desc)}</div>
+          ${ocrNote}
           ${badgeHtml}${axeHtml}
         `;
 
@@ -418,6 +423,20 @@ function renderResults(results: NotebookResult[]) {
     });
   }
   resultsEl.appendChild(chartSection);
+
+  // ── Fix CTA banner (shown only when issues exist) ──
+  if (totalIssues > 0) {
+    const ctaDiv = document.createElement("div");
+    ctaDiv.className = "fix-cta";
+    ctaDiv.innerHTML = `
+      <span class="fix-cta-text">Want to fix these issues? Try out the extension in a jupyterlite environment.</span>
+      <a class="fix-cta-btn" href="https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html" target="_blank" rel="noopener noreferrer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Fix the issues
+      </a>
+    `;
+    resultsEl.appendChild(ctaDiv);
+  }
 
   // ── 3. Per-notebook details (collapsed by default) ──
   const detailsSection = document.createElement("div");
@@ -777,6 +796,11 @@ function generateMarkdownReport(results: NotebookResult[]): string {
 
       lines.push(`- **${title}**${wcagTag} — ×${issues.length} (${cells})`);
 
+      if (vid.startsWith("color-")) {
+        lines.push(
+          `  - ⚠ *Note: This check uses OCR and may produce inaccurate results. Please verify manually.*`,
+        );
+      }
       if (info?.description) {
         lines.push(`  - ${info.description}`);
       }

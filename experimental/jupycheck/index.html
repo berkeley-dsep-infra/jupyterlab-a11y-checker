@@ -730,6 +730,18 @@
         font-size: 0.82rem;
       }
 
+      .chart-info-popover .popover-ocr-note {
+        margin-top: 0.4rem;
+        padding: 0.35rem 0.55rem;
+        background: var(--orange-bg);
+        border-left: 2px solid var(--orange);
+        border-radius: 2px;
+        font-size: 0.72rem;
+        line-height: 1.4;
+        color: var(--orange);
+        font-weight: 500;
+      }
+
       .chart-info-popover .popover-wcag {
         display: inline-block;
         margin-top: 0.4rem;
@@ -769,6 +781,67 @@
         color: var(--text-muted);
         font-size: 0.88rem;
         padding: 1.5rem 0;
+      }
+
+      .fix-cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem 1.25rem;
+        margin-bottom: 1.25rem;
+        background: var(--green-bg);
+        border: 2px solid var(--green);
+        border-radius: 10px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .fix-cta-text {
+        flex: 1;
+      }
+
+      .fix-cta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border: 2px solid #15803d;
+        border-radius: 8px;
+        background: var(--green);
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 600;
+        font-family: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.1s;
+        box-shadow: 2px 2px 0 0 #000;
+      }
+
+      .fix-cta-btn:hover {
+        background: #15803d;
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 0 #000;
+      }
+
+      .fix-cta-btn:active {
+        transform: translate(1px, 1px);
+        box-shadow: 0 0 0 0 #000;
+      }
+
+      .chart-disclaimer {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.6rem 0.85rem;
+        margin-top: 0.75rem;
+        background: var(--orange-bg);
+        border-left: 3px solid var(--orange);
+        border-radius: 2px;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        color: var(--text-secondary);
       }
 
       /* ─── Details section (collapsible) ─── */
@@ -1137,19 +1210,6 @@
         ><span style="color: var(--accent)">jupy</span>check</a
       >
       <div class="topbar-links">
-        <a
-          class="github-link"
-          href="https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/>
-            <line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-          Live Demo
-        </a>
         <a
           class="github-link"
           href="https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker"

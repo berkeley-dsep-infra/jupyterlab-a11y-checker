@@ -249,9 +249,14 @@ export class MainPanelWidget extends Widget {
 
           const categoryWidget: HTMLDivElement = document.createElement('div');
           categoryWidget.classList.add('category');
+          const disclaimerHtml =
+            categoryName === 'Color'
+              ? `<div class="category-disclaimer">Color contrast detection uses OCR to analyze text in images. Results may be inaccurate for complex backgrounds, angled text, or non-standard fonts. Please verify flagged issues manually.</div>`
+              : '';
           categoryWidget.innerHTML = `
             <h2 class="category-title">${categoryName}</h2>
             <hr>
+            ${disclaimerHtml}
             <div class="issues-list"></div>
           `;
 
@@ -395,9 +400,14 @@ export class MainPanelWidget extends Widget {
           if (!categoryEl) {
             categoryEl = document.createElement('div');
             categoryEl.classList.add('category');
+            const disclaimerHtml =
+              categoryName === 'Color'
+                ? `<div class="category-disclaimer">Color contrast detection uses OCR to analyze text in images. Results may be inaccurate for complex backgrounds, angled text, or non-standard fonts. Please verify flagged issues manually.</div>`
+                : '';
             categoryEl.innerHTML = `
               <h2 class="category-title">${categoryName}</h2>
               <hr>
+              ${disclaimerHtml}
               <div class="issues-list"></div>
             `;
             const container = this.node.querySelector(

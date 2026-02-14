@@ -100,6 +100,13 @@ program
             if (ruleMeta?.wcag) {
               console.log(chalk.gray(`    WCAG Reference: ${ruleMeta.wcag}`));
             }
+            if (violationId.startsWith("color-")) {
+              console.log(
+                chalk.yellow(
+                  `    ⚠ Note: This check uses OCR and may produce inaccurate results. Please verify manually.`,
+                ),
+              );
+            }
 
             group.forEach((issue) => {
               console.log(`  - Cell ${issue.cellIndex} (${issue.cellType}):`);

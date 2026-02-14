@@ -80014,6 +80014,24 @@ function stripHtmlTags(input) {
     prev = next;
   }
 }
+function stripHtmlComments(html2) {
+  let result = "";
+  let searchFrom = 0;
+  while (searchFrom < html2.length) {
+    const openIdx = html2.indexOf("<!--", searchFrom);
+    if (openIdx === -1) {
+      result += html2.slice(searchFrom);
+      break;
+    }
+    result += html2.slice(searchFrom, openIdx);
+    const closeIdx = html2.indexOf("-->", openIdx + 4);
+    if (closeIdx === -1) {
+      break;
+    }
+    searchFrom = closeIdx + 3;
+  }
+  return result;
+}
 function findAllHtmlTags(html2, tagName) {
   const results = [];
   const openTag = `<${tagName}`;
@@ -80057,7 +80075,7 @@ function findAllHtmlTags(html2, tagName) {
 }
 
 // ../core/src/detection/category/heading.ts
-async function detectHeadingOneIssue(rawMarkdown, cellIndex, cellType, cells) {
+async function detectHeadingOneIssue(cells) {
   const notebookIssues = [];
   if (!cells.length) {
     return notebookIssues;
@@ -80121,10 +80139,8 @@ async function analyzeHeadingHierarchy(cells) {
           }
         }
         if (level !== null) {
-          if (
-            level === 1 &&
-            ((text || "").match(/(?<!\\)\$\$/g) || []).length === 1
-          ) {
+          const trimmedText = (text || "").trim();
+          if (trimmedText === "$$" || trimmedText === "$") {
             continue;
           }
           const start = content.indexOf(rawHeading, searchStart);
@@ -80267,57 +80283,9 @@ init_cjs_shims();
 // ../core/src/detection/category/image.ts
 init_cjs_shims();
 var import_tesseract = __toESM(require_src());
-async function getTextInImage(
-  imagePath,
-  currentDirectoryPath,
-  baseUrl,
-  imageProcessor,
-  attachments,
-) {
-  const worker = await import_tesseract.default.createWorker("eng");
-  try {
-    let imageSource;
-    if (imagePath.startsWith("attachment:")) {
-      if (!attachments) {
-        throw new Error("Attachments required for attachment images");
-      }
-      const attachmentId = imagePath.substring("attachment:".length);
-      const data = attachments[attachmentId];
-      let dataUrl = null;
-      if (data) {
-        for (const mimetype in data) {
-          if (mimetype.startsWith("image/")) {
-            const base64 = data[mimetype];
-            if (typeof base64 === "string") {
-              dataUrl = `data:${mimetype};base64,${base64}`;
-              break;
-            }
-          }
-        }
-      }
-      if (!dataUrl) {
-        throw new Error(`Could not load attachment: ${attachmentId}`);
-      }
-      imageSource = dataUrl;
-    } else {
-      imageSource = imagePath.startsWith("http")
-        ? imagePath
-        : baseUrl
-          ? `${baseUrl}files/${currentDirectoryPath}/${imagePath}`
-          : `${currentDirectoryPath}/${imagePath}`;
-    }
-    const img = await imageProcessor.loadImage(imageSource);
-    const {
-      data: { text, confidence },
-    } = await worker.recognize(img);
-    if (!text) {
-      throw new Error("No text found in the image");
-    }
-    return { text, confidence };
-  } finally {
-    await worker.terminate();
-  }
-}
+
+// ../core/src/utils/image-utils.ts
+init_cjs_shims();
 function findImgTags(html2) {
   const results = [];
   const lower = html2.toLowerCase();
@@ -80371,6 +80339,59 @@ function extractImageUrl(imageStr) {
   }
   return null;
 }
+
+// ../core/src/detection/category/image.ts
+async function getTextInImage(
+  imagePath,
+  currentDirectoryPath,
+  baseUrl,
+  imageProcessor,
+  attachments,
+) {
+  const worker = await import_tesseract.default.createWorker("eng");
+  try {
+    let imageSource;
+    if (imagePath.startsWith("attachment:")) {
+      if (!attachments) {
+        throw new Error("Attachments required for attachment images");
+      }
+      const attachmentId = imagePath.substring("attachment:".length);
+      const data = attachments[attachmentId];
+      let dataUrl = null;
+      if (data) {
+        for (const mimetype in data) {
+          if (mimetype.startsWith("image/")) {
+            const base64 = data[mimetype];
+            if (typeof base64 === "string") {
+              dataUrl = `data:${mimetype};base64,${base64}`;
+              break;
+            }
+          }
+        }
+      }
+      if (!dataUrl) {
+        throw new Error(`Could not load attachment: ${attachmentId}`);
+      }
+      imageSource = dataUrl;
+    } else {
+      imageSource = imagePath.startsWith("http")
+        ? imagePath
+        : baseUrl
+          ? `${baseUrl}files/${currentDirectoryPath}/${imagePath}`
+          : `${currentDirectoryPath}/${imagePath}`;
+    }
+    const img = await imageProcessor.loadImage(imageSource);
+    const {
+      data: { text, confidence },
+    } = await worker.recognize(img);
+    if (!text) {
+      throw new Error("No text found in the image");
+    }
+    return { text, confidence };
+  } finally {
+    await worker.terminate();
+  }
+}
 async function detectImageIssuesInCell(
   rawMarkdown,
   cellIndex,
@@ -80393,7 +80414,9 @@ async function detectImageIssuesInCell(
   }
   const imgTags = findImgTags(rawMarkdown);
   for (const { tag: tag2, start, end } of imgTags) {
-    const hasNonEmptyAlt = /\balt\s*=\s*["'][^"']+["']/i.test(tag2);
+    const hasNonEmptyAlt = /\balt\s*=\s*(?:["'][^"']+["']|[^\s>"']+)/i.test(
+      tag2,
+    );
     if (!hasNonEmptyAlt) {
       missingAlt.push({ matchStr: tag2, start, end });
     }
@@ -80444,7 +80467,8 @@ function detectTableIssuesInCell(rawMarkdown, cellIndex, cellType) {
   const notebookIssues = [];
   const tables = findAllHtmlTags(rawMarkdown, "table");
   for (const { match: tableHtml, start, end } of tables) {
-    if (!/<th[\s>]/i.test(tableHtml)) {
+    const uncommented = stripHtmlComments(tableHtml);
+    if (!/<th[\s>]/i.test(uncommented)) {
       notebookIssues.push({
         cellIndex,
         cellType,
@@ -80456,7 +80480,7 @@ function detectTableIssuesInCell(rawMarkdown, cellIndex, cellType) {
         },
       });
     }
-    if (!/<caption[\s>]/i.test(tableHtml)) {
+    if (!/<caption[\s>]/i.test(uncommented)) {
       notebookIssues.push({
         cellIndex,
         cellType,
@@ -80471,9 +80495,9 @@ function detectTableIssuesInCell(rawMarkdown, cellIndex, cellType) {
     const thRegex = /<th\b([^>]*)>/gi;
     let thMatch;
     let hasMissingScope = false;
-    while ((thMatch = thRegex.exec(tableHtml)) !== null) {
+    while ((thMatch = thRegex.exec(uncommented)) !== null) {
       const attributes = thMatch[1];
-      if (!attributes.toLowerCase().includes("scope=")) {
+      if (!/(?:^|\s)scope\s*=/i.test(attributes)) {
         hasMissingScope = true;
         break;
       }
@@ -80623,9 +80647,7 @@ function shouldFlag(text) {
 // ../core/src/detection/base.ts
 async function analyzeCellsAccessibilityCLI(cells, imageProcessor) {
   const notebookIssues = [];
-  notebookIssues.push(
-    ...(await detectHeadingOneIssue("", 0, "markdown", cells)),
-  );
+  notebookIssues.push(...(await detectHeadingOneIssue(cells)));
   const headingIssues = await analyzeHeadingHierarchy(cells);
   notebookIssues.push(...headingIssues);
   for (let i = 0; i < cells.length; i++) {
@@ -80705,7 +80727,7 @@ init_cjs_shims();
 
 // ../../doc/rules.md
 var rules_default =
-  "# Issue Descriptions\n\n## Image\n\n| No. | Rule ID           | Description                                                               | WCAG                  | Severity      |\n| --- | ----------------- | ------------------------------------------------------------------------- | --------------------- | ------------- |\n| 1a  | image-missing-alt | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 (Level A)  | violation     |\n\n---\n\n## Heading\n\n| No. | Rule ID                 | Description                                             | WCAG                  | Severity      |\n| --- | ----------------------- | ------------------------------------------------------- | --------------------- | ------------- |\n| 2a  | heading-missing-h1      | Ensure the presence of H1 tag in a notebook             |                       | best-practice |\n| 2b  | heading-multiple-h1     | Ensure there is only one H1 tag in a notebook           |                       | best-practice |\n| 2c  | heading-duplicate-h2    | Ensure no two H2 headings share the same content        |                       | best-practice |\n| 2d  | heading-duplicate-h1-h2 | Ensure no two H1 and H2 headings share the same content |                       | best-practice |\n| 2e  | heading-wrong-order     | Ensure the order of heading is accurate                 |                       | best-practice |\n| 2f  | heading-empty           | Ensure the heading content is non-empty                 | WCAG 1.3.1 (Level A)  | violation     |\n\n---\n\n## Table\n\n| No. | Rule ID               | Description                                               | WCAG                  | Severity      |\n| --- | --------------------- | --------------------------------------------------------- | --------------------- | ------------- |\n| 3a  | table-missing-header  | Ensure row and column headers are present in a table      | WCAG 1.3.1 (Level A)  | violation     |\n| 3b  | table-missing-caption | Ensure caption was added for a table                      |                       | best-practice |\n| 3c  | table-missing-scope   | Ensure presence of `scope` attribute for rows and columns |                       | best-practice |\n\n---\n\n## Color\n\n| No. | Rule ID                      | Description                                                                              | WCAG                  | Severity  |\n| --- | ---------------------------- | ---------------------------------------------------------------------------------------- | --------------------- | --------- |\n| 4a  | color-insufficient-cc-normal | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 (Level AA) | violation |\n| 4b  | color-insufficient-cc-large  | Ensure large text in images have a contrast ratio of 3:1                                 | WCAG 1.4.3 (Level AA) | violation |\n\n---\n\n## Link\n\n| No. | Rule ID               | Description                                                    | WCAG                  | Severity  |\n| --- | --------------------- | -------------------------------------------------------------- | --------------------- | --------- |\n| 5a  | link-discernible-text | Ensure link text is descriptive (or aria-label is descriptive) | WCAG 2.4.4 (Level A)  | violation |\n\n## List\n\nTBD\n";
+  "# Issue Descriptions\n\nBelow are the issues that we detect. On top of this, we run axe-core as well.\n\n## Image\n\n| No. | Rule ID           | Description                                                               | WCAG                 | Severity  |\n| --- | ----------------- | ------------------------------------------------------------------------- | -------------------- | --------- |\n| 1a  | image-missing-alt | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 (Level A) | violation |\n\n---\n\n## Heading\n\n| No. | Rule ID                 | Description                                             | WCAG                 | Severity      |\n| --- | ----------------------- | ------------------------------------------------------- | -------------------- | ------------- |\n| 2a  | heading-missing-h1      | Ensure the presence of H1 tag in a notebook             |                      | best-practice |\n| 2b  | heading-multiple-h1     | Ensure there is only one H1 tag in a notebook           |                      | best-practice |\n| 2c  | heading-duplicate-h2    | Ensure no two H2 headings share the same content        |                      | best-practice |\n| 2d  | heading-duplicate-h1-h2 | Ensure no two H1 and H2 headings share the same content |                      | best-practice |\n| 2e  | heading-wrong-order     | Ensure the order of heading is accurate                 |                      | best-practice |\n| 2f  | heading-empty           | Ensure the heading content is non-empty                 | WCAG 1.3.1 (Level A) | violation     |\n\n---\n\n## Table\n\n| No. | Rule ID               | Description                                               | WCAG                 | Severity      |\n| --- | --------------------- | --------------------------------------------------------- | -------------------- | ------------- |\n| 3a  | table-missing-header  | Ensure row and column headers are present in a table      | WCAG 1.3.1 (Level A) | violation     |\n| 3b  | table-missing-caption | Ensure caption was added for a table                      |                      | best-practice |\n| 3c  | table-missing-scope   | Ensure presence of `scope` attribute for rows and columns |                      | best-practice |\n\n---\n\n## Color\n\n| No. | Rule ID                      | Description                                                                              | WCAG                  | Severity  |\n| --- | ---------------------------- | ---------------------------------------------------------------------------------------- | --------------------- | --------- |\n| 4a  | color-insufficient-cc-normal | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 (Level AA) | violation |\n| 4b  | color-insufficient-cc-large  | Ensure large text in images have a contrast ratio of 3:1                                 | WCAG 1.4.3 (Level AA) | violation |\n\n---\n\n## Link\n\n| No. | Rule ID               | Description                                                    | WCAG                 | Severity  |\n| --- | --------------------- | -------------------------------------------------------------- | -------------------- | --------- |\n| 5a  | link-discernible-text | Ensure link text is descriptive (or aria-label is descriptive) | WCAG 2.4.4 (Level A) | violation |\n\n## List\n\nTBD\n";
 
 // src/ruleDescriptions.ts
 function parseRuleLines(contents) {

@@ -7,7 +7,7 @@ import {
 } from "./category/heading.js";
 import { detectImageIssuesInCell } from "./category/index.js";
 import { detectTableIssuesInCell } from "./category/index.js";
-// import { detectColorIssuesInCell } from './category/index.js';
+import { detectColorIssuesInCell } from "./category/index.js";
 import { detectLinkIssuesInCell } from "./category/index.js";
 
 export async function analyzeCellsAccessibility(
@@ -106,9 +106,7 @@ export async function analyzeCellsAccessibility(
             ...detectTableIssuesInCell(rawMarkdown, i, cellType),
           );
 
-          // Color Issues — disabled: custom Tesseract.js-based detection is
-          // unreliable for raster images. See .claude/docs/color-contrast-axe-core.md
-          /*
+          // Color Issues (OCR-based detection — results may be inaccurate)
           notebookIssues.push(
             ...(await detectColorIssuesInCell(
               rawMarkdown,
@@ -117,10 +115,9 @@ export async function analyzeCellsAccessibility(
               notebookPath,
               baseUrl,
               imageProcessor,
-              cell.attachments
-            ))
+              cell.attachments,
+            )),
           );
-          */
 
           // Link Issues
           notebookIssues.push(
@@ -177,9 +174,7 @@ export async function analyzeCellIssues(
     ...detectTableIssuesInCell(rawMarkdown, cell.cellIndex, cellType),
   );
 
-  // Color — disabled: custom Tesseract.js-based detection is unreliable for
-  // raster images. See .claude/docs/color-contrast-axe-core.md
-  /*
+  // Color Issues (OCR-based detection — results may be inaccurate)
   issues.push(
     ...(await detectColorIssuesInCell(
       rawMarkdown,
@@ -188,10 +183,9 @@ export async function analyzeCellIssues(
       notebookPath,
       baseUrl,
       imageProcessor,
-      cell.attachments
-    ))
+      cell.attachments,
+    )),
   );
-  */
 
   // Links
   issues.push(...detectLinkIssuesInCell(rawMarkdown, cell.cellIndex, cellType));
@@ -240,20 +234,18 @@ export async function analyzeCellsAccessibilityCLI(
         ...detectTableIssuesInCell(rawMarkdown, i, cell.type),
       );
 
-      // Color Issues
-      /*
+      // Color Issues (OCR-based detection — results may be inaccurate)
       notebookIssues.push(
         ...(await detectColorIssuesInCell(
           rawMarkdown,
           i,
           cell.type,
-          '', // notebookPath
-          '', // baseUrl
+          "", // notebookPath
+          "", // baseUrl
           imageProcessor,
-          cell.attachments
-        ))
+          cell.attachments,
+        )),
       );
-      */
 
       // Link Issues
       notebookIssues.push(...detectLinkIssuesInCell(rawMarkdown, i, cell.type));

@@ -6,7 +6,7 @@ jupyterLab-a11y-checker is an acessibility engine for Jupyter Notebooks, assisti
 
 Users can use this tool in two ways:
 
-1. As a JupyterLab extension. It not only provides accessibility scan results in real-time but also provides actionable suggestions to fix them.
+1. As a JupyterLab extension. It not only provides accessibility scan results in real-time but also provides actionable suggestions to fix them. You can try the extension directly in your browser without any installation via our [JupyterLite demo](https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html).
 2. As a CLI tool. It can be ran independently of JupyterLab, for instance in GitHub Actions, to maintain accessible notebooks.
 
 ## Core Detection Engine
@@ -25,13 +25,9 @@ Here's a snapshot of the extension:
 
 We provide a user interface tailored to each issue, such as a text field for adding alt-text, a dropdown for fixing header issues, etc. The fix interfaces are listed in [Fix Interface Description](./doc/fix-interfaces.md).
 
-#### AI Assistance
+### AI Assistance
 
 To simplify the remediation process, we integrate both a Large Language Model (LLM) and a Vision-Language Model (VLM) to generate accessibility recommendations within several fix interfaces. Users can configure these models by providing their API endpoint, API key, and model name in: `Settings > Settings Editor > A11y Checker Settings`.
-
-## Try it in JupyterLite
-
-You can try the extension directly in your browser without any installation via our [JupyterLite demo](https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html).
 
 ## CLI Tool
 

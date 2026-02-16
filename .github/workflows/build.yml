@@ -37,6 +37,7 @@ jobs:
       - name: Install and build packages
         env:
           YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
+          YARN_CHECKSUM_BEHAVIOR: update
         run: |
           set -eux
           jlpm install

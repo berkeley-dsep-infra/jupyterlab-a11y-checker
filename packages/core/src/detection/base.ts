@@ -234,19 +234,6 @@ export async function analyzeCellsAccessibilityCLI(
         ...detectTableIssuesInCell(rawMarkdown, i, cell.type),
       );
 
-      // Color Issues (OCR-based detection — results may be inaccurate)
-      notebookIssues.push(
-        ...(await detectColorIssuesInCell(
-          rawMarkdown,
-          i,
-          cell.type,
-          "", // notebookPath
-          "", // baseUrl
-          imageProcessor,
-          cell.attachments,
-        )),
-      );
-
       // Link Issues
       notebookIssues.push(...detectLinkIssuesInCell(rawMarkdown, i, cell.type));
     }

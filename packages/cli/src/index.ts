@@ -149,6 +149,11 @@ program
     if (!options.json) {
       if (hasIssues) {
         console.log(
+          chalk.red(
+            "\nNote: CLI mode does not support color contrast detection. Use the JupyterLab extension for color-related accessibility checks.",
+          ),
+        );
+        console.log(
           chalk.blue(
             "\nLearn more about the issues? Check out issue descriptions at https://github.com/berkeley-dsep-infra/jupyterlab-a11y-checker/blob/main/doc/rules.md",
           ),

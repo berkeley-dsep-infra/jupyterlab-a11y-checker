@@ -48104,10 +48104,39 @@ async function getColorContrastInImage(imagePath, currentDirectoryPath, baseUrl,
           });
         } catch (error) {
           console.error("Error analyzing image with Tesseract:", error);
+          const colorCount = {};
+          const data = imageData.data;
+          const width = imageData.width;
+          const height = imageData.height;
+          for (let y = 0; y < height; y += 10) {
+            for (let x = 0; x < width; x += 10) {
+              const index = (y * width + x) * 4;
+              const r = data[index];
+              const g = data[index + 1];
+              const b = data[index + 2];
+              if (data[index + 3] < 128) {
+                continue;
+              }
+              const scale = 30;
+              const colorKey = "#" + ((1 << 24) + (Math.floor(r / scale) * scale << 16) + (Math.floor(g / scale) * scale << 8) + Math.floor(b / scale) * scale).toString(16).slice(1).toUpperCase();
+              colorCount[colorKey] = (colorCount[colorKey] || 0) + 1;
+            }
+          }
+          const sortedColors = Object.entries(colorCount).sort(
+            (a, b) => b[1] - a[1]
+          );
+          let contrast = 21;
+          if (sortedColors.length >= 2) {
+            const bgColor = sortedColors[0][0];
+            const fgColor = sortedColors[1][0];
+            contrast = calculateContrast(fgColor, bgColor);
+          }
+          const isAccessible = contrast >= 4.5;
           resolve({
-            contrast: 21,
-            isAccessible: true,
+            contrast,
+            isAccessible,
             hasLargeText: false
+            // Default to false in fallback case
           });
         }
       } catch (error) {

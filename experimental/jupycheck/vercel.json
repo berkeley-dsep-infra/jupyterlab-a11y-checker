@@ -1,0 +1,7 @@
+{
+  "framework": "vite",
+  "installCommand": "npm install && ln -s $PWD/node_modules ../../node_modules",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../../packages/core"
+}

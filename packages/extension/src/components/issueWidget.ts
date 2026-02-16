@@ -54,17 +54,14 @@ export class CellIssueWidget extends Widget {
     // Tag widget with identifiers so the panel can selectively update
     this.node.setAttribute('data-cell-index', String(issue.cellIndex));
     this.node.setAttribute('data-violation-id', issue.violationId);
-    const axeBadge =
-      issue.detectedBy === 'axe-core'
-        ? '<span class="severity-badge detected-by-axe">axe-core</span>'
-        : '';
 
     // Build the issue title safely
     const issueTitle = issueInformation?.title || issue.violationId;
 
     this.node.innerHTML = `
-      <span class="severity-badge ${severityClass}">${severityLabel}</span>
-      ${axeBadge}
+      <div class="badge-row">
+        <span class="severity-badge ${severityClass}">${severityLabel}</span>
+      </div>
       <button class="issue-header-button" aria-expanded="false">
           <h3 class="issue-header"> ${issueTitle}</h3>
           <span class="chevron material-icons" aria-hidden="true">expand_more</span>
@@ -111,6 +108,14 @@ export class CellIssueWidget extends Widget {
       link.textContent = 'learn more about the issue and its impact';
       detailedDescriptionEl.appendChild(link);
       detailedDescriptionEl.appendChild(document.createTextNode(').'));
+
+      // Show detection source for axe-core issues
+      if (issue.detectedBy === 'axe-core') {
+        const axeLine = document.createElement('p');
+        axeLine.className = 'detected-by-axe';
+        axeLine.textContent = 'Detected by axe-core';
+        detailedDescriptionEl.appendChild(axeLine);
+      }
     }
 
     // Add event listeners using query selectors

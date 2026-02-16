@@ -38,6 +38,9 @@ export class MainPanelWidget extends Widget {
   /** Track child CellIssueWidget instances for proper disposal. */
   private _childIssueWidgets: CellIssueWidget[] = [];
 
+  /** Stored reference for the reanalysis handler so we can remove it on dispose. */
+  private _reanalysisHandler: EventListener | null = null;
+
   constructor(settingRegistry?: ISettingRegistry) {
     super();
 
@@ -448,7 +451,20 @@ export class MainPanelWidget extends Widget {
         }
       }
     };
-    this.node.addEventListener('notebookReanalyzed', handler as EventListener);
+    this._reanalysisHandler = handler as EventListener;
+    this.node.addEventListener('notebookReanalyzed', this._reanalysisHandler);
+  }
+
+  dispose(): void {
+    if (this._reanalysisHandler) {
+      this.node.removeEventListener(
+        'notebookReanalyzed',
+        this._reanalysisHandler
+      );
+      this._reanalysisHandler = null;
+    }
+    this.disposeChildWidgets();
+    super.dispose();
   }
 
   private async loadSettings(settingRegistry: ISettingRegistry): Promise<void> {

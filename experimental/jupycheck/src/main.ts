@@ -289,6 +289,7 @@ function renderResults(results: NotebookResult[]) {
       <div class="export-dropdown">
         <button class="action-btn" id="exportBtn"><span class="btn-icon">\u2913</span> Export</button>
         <div class="export-menu" id="exportMenu">
+          <button class="export-menu-item" data-format="csv">.csv <span style="color:var(--text-muted)">(for humans)</span></button>
           <button class="export-menu-item" data-format="md">.md <span style="color:var(--text-muted)">(for humans)</span></button>
           <button class="export-menu-item" data-format="json">.json <span style="color:var(--text-muted)">(for agents)</span></button>
         </div>
@@ -316,7 +317,8 @@ function renderResults(results: NotebookResult[]) {
       e.stopPropagation();
       const format = (item as HTMLElement).dataset.format;
       exportMenu.classList.remove("open");
-      if (format === "md") downloadMdReport(filteredResults);
+      if (format === "csv") downloadCsvReport(filteredResults);
+      else if (format === "md") downloadMdReport(filteredResults);
       else if (format === "json") downloadJsonReport(filteredResults);
     });
   });
@@ -431,7 +433,7 @@ function renderResults(results: NotebookResult[]) {
     ctaDiv.innerHTML = `
       <div class="fix-cta-text">
         <strong>Ready to fix these issues?</strong>
-        <span>Try the extension in a JupyterLite environment to apply fixes interactively.</span>
+        <span>Try the extension in a JupyterLite environment to apply fixes interactively. AI suggestions are not yet available in JupyterLite.</span>
       </div>
       <a class="fix-cta-btn" href="https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html" target="_blank" rel="noopener noreferrer">
         Fix issues
@@ -873,6 +875,74 @@ function downloadBlob(content: string, filename: string, mimeType: string) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function csvEscape(value: string): string {
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+function generateCSV(results: NotebookResult[]): string {
+  const headers = [
+    "Notebook",
+    "Cell",
+    "Cell Type",
+    "Issue",
+    "Category",
+    "WCAG",
+    "Severity",
+    "Description",
+    "Content Snippet",
+  ];
+
+  const rows: string[][] = [];
+
+  for (const result of results) {
+    if (result.error) {
+      rows.push([result.path, "", "", "Error", "", "", "", result.error, ""]);
+      continue;
+    }
+
+    for (const issue of result.issues) {
+      const info = issueToDescription.get(issue.violationId);
+      const title = info?.title || issue.violationId;
+      const category = issueToCategory.get(issue.violationId) || "Other";
+      const wcag =
+        wcagCriterionMap[issue.violationId] || issue.metadata?.wcagSc || "";
+      const severity = info?.severity || "";
+      const description = issue.customDescription || info?.description || "";
+      const snippet = (issue.issueContentRaw || "")
+        .replace(/\n/g, " ")
+        .trim()
+        .slice(0, 200);
+
+      rows.push([
+        result.path,
+        String(issue.cellIndex),
+        issue.cellType,
+        title,
+        category,
+        wcag,
+        severity,
+        description,
+        snippet,
+      ]);
+    }
+  }
+
+  const lines = [headers.map(csvEscape).join(",")];
+  for (const row of rows) {
+    lines.push(row.map(csvEscape).join(","));
+  }
+  return lines.join("\n");
+}
+
+function downloadCsvReport(results: NotebookResult[]) {
+  const csv = generateCSV(results);
+  const date = new Date().toISOString().slice(0, 10);
+  downloadBlob(csv, `jupycheck-report-${date}.csv`, "text/csv");
 }
 
 function downloadMdReport(results: NotebookResult[]) {

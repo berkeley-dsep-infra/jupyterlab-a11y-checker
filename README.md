@@ -2,7 +2,7 @@
 
 [![jupyterlab-a11y-checker](https://marketplace.orbrx.io/api/badge/jupyterlab-a11y-checker?metric=downloads&leftColor=%23555&rightColor=%23F37620&style=flat)](https://marketplace.orbrx.io/extensions/jupyterlab-a11y-checker)
 
-jupyterLab-a11y-checker is an acessibility engine for Jupyter Notebooks, assisting authors detect and fix accessibility issues, aligning with WCAG 2.1 AA guidelines.
+jupyterLab-a11y-checker is an accessibility engine for Jupyter Notebooks, assisting authors detect and fix accessibility issues, aligning with WCAG 2.1 AA guidelines.
 
 Users can use this tool in two ways:
 
@@ -42,7 +42,7 @@ npx @jupyterlab-a11y-checker/cli path/to/your_notebook.ipynb
 **Options:**
 
 - `[files...]`: A space-separated list of paths to `.ipynb` files. You can also use glob patterns (e.g. `**/*.ipynb`) to check multiple files.
-- `-llm`: Output a JSON summary suitable for LLM processing (no human-friendly logs).
+- `--json`: Output a JSON summary suitable for LLM processing (no human-friendly logs).
 
 ### GitHub Action Usage
 

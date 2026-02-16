@@ -19,6 +19,7 @@ This repository is organized into three main packages:
 ### Using the CLI Tool
 
 The CLI tool can be used as a standalone tool to audit notebooks without requiring JupyterLab to be running. This makes it ideal for:
+
 - CI/CD pipelines and automated workflows
 - Batch processing of multiple notebooks
 - Integration with AI agents for accessibility analysis
@@ -61,6 +62,7 @@ npx @jupyterlab-a11y-checker/cli notebook.ipynb
 ```
 
 **Output includes:**
+
 - Total number of issues found
 - Issues grouped by violation type
 - Rule descriptions and WCAG references
@@ -70,13 +72,14 @@ npx @jupyterlab-a11y-checker/cli notebook.ipynb
 
 ### LLM-Friendly Output
 
-For programmatic processing or LLM consumption, use the `-llm` flag:
+For programmatic processing or LLM consumption, use the `--json` flag:
 
 ```bash
-npx @jupyterlab-a11y-checker/cli -llm notebook.ipynb
+npx @jupyterlab-a11y-checker/cli --json notebook.ipynb
 ```
 
 **Output format:**
+
 - Clean JSON structure
 - No color codes or human-friendly formatting
 - Suitable for parsing and further processing
@@ -84,6 +87,7 @@ npx @jupyterlab-a11y-checker/cli -llm notebook.ipynb
 ## Exit Codes
 
 The CLI uses standard exit codes:
+
 - **Exit 0**: No issues found, no errors
 - **Exit 1**: Issues found OR errors occurred during processing
 
@@ -94,9 +98,11 @@ This makes it suitable for CI/CD pipelines and automated workflows.
 The tool detects the following categories of accessibility issues:
 
 ### 1. Image Issues
+
 - **`image-missing-alt`**: Images without alt text (WCAG 1.1.1)
 
 ### 2. Heading Issues
+
 - **`heading-missing-h1`**: No H1 heading in notebook (WCAG 2.4.2)
 - **`heading-multiple-h1`**: Multiple H1 headings (WCAG 2.4.6)
 - **`heading-duplicate-h2`**: Duplicate H2 headings (WCAG 2.4.6)
@@ -105,15 +111,18 @@ The tool detects the following categories of accessibility issues:
 - **`heading-empty`**: Empty heading tags (WCAG 2.4.6)
 
 ### 3. Table Issues
+
 - **`table-missing-header`**: Tables without proper headers (WCAG 1.3.1)
 - **`table-missing-caption`**: Tables without captions (WCAG 1.3.1)
 - **`table-missing-scope`**: Missing scope attributes (WCAG 1.3.1)
 
 ### 4. Color Contrast Issues
+
 - **`color-insufficient-cc-normal`**: Normal text with contrast ratio < 4.5:1 (WCAG 1.4.3)
 - **`color-insufficient-cc-large`**: Large text with contrast ratio < 3:1 (WCAG 1.4.3)
 
 ### 5. Link Issues
+
 - **`link-discernible-text`**: Non-descriptive link text (WCAG 2.4.4)
 
 ## Example Usage Scenarios
@@ -134,7 +143,7 @@ npx @jupyterlab-a11y-checker/cli **/*.ipynb
 ### Scenario 3: Generate JSON Report for Processing
 
 ```bash
-npx @jupyterlab-a11y-checker/cli -llm notebook.ipynb > report.json
+npx @jupyterlab-a11y-checker/cli --json notebook.ipynb > report.json
 ```
 
 ### Scenario 4: Check Specific Notebooks in a Directory
@@ -152,7 +161,7 @@ Use the pre-built GitHub Action:
 ```yaml
 steps:
   - uses: actions/checkout@v4
-  
+
   - name: Scan notebooks for accessibility issues
     uses: berkeley-dsep-infra/jupyterlab-a11y-checker@main
     with:
@@ -261,24 +270,30 @@ When issues are found, agents should:
 - **Binary Name**: `jupyterlab-a11y-check`
 - **Language**: TypeScript/Node.js
 - **Input Format**: Jupyter Notebook (.ipynb) JSON files
-- **Output Formats**: Human-readable (default) or JSON (`-llm` flag)
+- **Output Formats**: Human-readable (default) or JSON (`--json` flag)
 
 ## Troubleshooting
 
 ### File Not Found
+
 Ensure the path is correct and the file exists:
+
 ```bash
 ls -la path/to/notebook.ipynb
 ```
 
 ### Invalid JSON Error
+
 The notebook file may be corrupted. Verify it's valid JSON:
+
 ```bash
 cat notebook.ipynb | python -m json.tool
 ```
 
 ### No Files Matching Pattern
+
 When using glob patterns, ensure your shell expands them correctly:
+
 ```bash
 # Use quotes to let npx handle the glob
 npx @jupyterlab-a11y-checker/cli "**/*.ipynb"
@@ -289,6 +304,7 @@ npx @jupyterlab-a11y-checker/cli "**/*.ipynb"
 Current CLI version: 0.2.5 (as of index.ts)
 
 Check for updates:
+
 ```bash
 npm view @jupyterlab-a11y-checker/cli version
 ```

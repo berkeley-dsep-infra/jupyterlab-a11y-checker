@@ -55,7 +55,7 @@ If you need to run checks offline or in CI, the repository now ships a CLI that 
 
 3. To produce only the LLM-friendly JSON summary (no human-friendly log), run:
    ```bash
-   jupyterlab-a11y-check -llm test_notebooks/Demo.ipynb
+   jupyterlab-a11y-check --json test_notebooks/Demo.ipynb
    ```
 
 The CLI output matches what the extension returns, so you can pipe the JSON directly into downstream LLM/automation workflows.

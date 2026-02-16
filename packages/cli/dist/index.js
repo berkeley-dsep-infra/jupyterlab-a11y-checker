@@ -80318,6 +80318,30 @@ function findImgTags(html2) {
   }
   return results;
 }
+function findMarkdownImages(text) {
+  const results = [];
+  let searchFrom = 0;
+  while (searchFrom < text.length) {
+    const bangIdx = text.indexOf("![", searchFrom);
+    if (bangIdx === -1) {
+      break;
+    }
+    const bracketClose = text.indexOf("](", bangIdx + 2);
+    if (bracketClose === -1) {
+      searchFrom = bangIdx + 1;
+      continue;
+    }
+    const parenClose = text.indexOf(")", bracketClose + 2);
+    if (parenClose === -1) {
+      searchFrom = bracketClose + 1;
+      continue;
+    }
+    const end = parenClose + 1;
+    results.push({ match: text.slice(bangIdx, end), start: bangIdx, end });
+    searchFrom = end;
+  }
+  return results;
+}
 function extractImageUrl(imageStr) {
   const parenOpen = imageStr.indexOf("(");
   if (parenOpen !== -1) {
@@ -80521,6 +80545,233 @@ function detectTableIssuesInCell(rawMarkdown, cellIndex, cellType) {
 // ../core/src/detection/category/color.ts
 init_cjs_shims();
 var import_tesseract2 = __toESM(require_src());
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return { r, g, b };
+}
+function calculateLuminance(rgb) {
+  const a = [rgb.r, rgb.g, rgb.b].map((v) => {
+    v /= 255;
+    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+function calculateContrast(foregroundHex, backgroundHex) {
+  const rgb1 = hexToRgb(foregroundHex);
+  const rgb2 = hexToRgb(backgroundHex);
+  const L1 = calculateLuminance(rgb1);
+  const L2 = calculateLuminance(rgb2);
+  const lighter = Math.max(L1, L2);
+  const darker = Math.min(L1, L2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+async function getColorContrastInImage(
+  imagePath,
+  currentDirectoryPath,
+  baseUrl,
+  imageProcessor,
+  attachments,
+) {
+  let imageSource;
+  if (imagePath.startsWith("attachment:")) {
+    if (!attachments) {
+      throw new Error("Attachments required for attachment images");
+    }
+    const attachmentId = imagePath.substring("attachment:".length);
+    const data = attachments[attachmentId];
+    let dataUrl = null;
+    if (data) {
+      for (const mimetype in data) {
+        if (mimetype.startsWith("image/")) {
+          const base64 = data[mimetype];
+          if (typeof base64 === "string") {
+            dataUrl = `data:${mimetype};base64,${base64}`;
+            break;
+          }
+        }
+      }
+    }
+    if (!dataUrl) {
+      throw new Error(`Could not load attachment: ${attachmentId}`);
+    }
+    imageSource = dataUrl;
+  } else {
+    imageSource = imagePath.startsWith("http")
+      ? imagePath
+      : `${baseUrl}files/${currentDirectoryPath}/${imagePath}`;
+  }
+  const img = await imageProcessor.loadImage(imageSource);
+  return new Promise((resolve, reject) => {
+    (async () => {
+      try {
+        const canvas = imageProcessor.createCanvas(img.width, img.height);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Could not get canvas context"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        try {
+          const worker = await import_tesseract2.default.createWorker();
+          await worker.setParameters({
+            tessedit_pageseg_mode: import_tesseract2.PSM.SPARSE_TEXT,
+          });
+          const result = await worker.recognize(canvas, {}, { blocks: true });
+          if (result.data.confidence < 40) {
+            resolve({
+              contrast: 21,
+              isAccessible: true,
+              hasLargeText: false,
+            });
+            return;
+          }
+          let minContrast = 21;
+          let hasLargeText = false;
+          if (result.data.blocks && result.data.blocks.length > 0) {
+            result.data.blocks.forEach((block2) => {
+              const { x0, y0, x1, y1 } = block2.bbox;
+              const textHeight = y1 - y0;
+              if (textHeight >= 24) {
+                hasLargeText = true;
+              }
+              const colorCount = {};
+              const data = imageData.data;
+              const width = imageData.width;
+              for (let y = y0; y <= y1; y++) {
+                for (let x = x0; x <= x1; x++) {
+                  const index = (y * width + x) * 4;
+                  const r = data[index];
+                  const g = data[index + 1];
+                  const b = data[index + 2];
+                  if (data[index + 3] < 128) {
+                    continue;
+                  }
+                  const scale = 30;
+                  const colorKey =
+                    "#" +
+                    (
+                      (1 << 24) +
+                      ((Math.floor(r / scale) * scale) << 16) +
+                      ((Math.floor(g / scale) * scale) << 8) +
+                      Math.floor(b / scale) * scale
+                    )
+                      .toString(16)
+                      .slice(1)
+                      .toUpperCase();
+                  colorCount[colorKey] = (colorCount[colorKey] || 0) + 1;
+                }
+              }
+              const sortedColors = Object.entries(colorCount).sort(
+                (a, b) => b[1] - a[1],
+              );
+              if (sortedColors.length >= 2) {
+                const bgColor = sortedColors[0][0];
+                const fgColor = sortedColors[1][0];
+                const contrast = calculateContrast(fgColor, bgColor);
+                if (contrast < minContrast) {
+                  minContrast = contrast;
+                }
+              }
+            });
+          }
+          const isAccessible = hasLargeText
+            ? minContrast >= 3
+            : minContrast >= 4.5;
+          await worker.terminate();
+          resolve({
+            contrast: minContrast,
+            isAccessible,
+            hasLargeText,
+          });
+        } catch (error) {
+          console.error("Error analyzing image with Tesseract:", error);
+          resolve({
+            contrast: 21,
+            isAccessible: true,
+            hasLargeText: false,
+          });
+        }
+      } catch (error) {
+        console.error("Error processing image data:", error);
+        reject(error);
+      }
+    })().catch(reject);
+  });
+}
+async function detectColorIssuesInCell(
+  rawMarkdown,
+  cellIndex,
+  cellType,
+  notebookPath,
+  baseUrl,
+  imageProcessor,
+  attachments,
+) {
+  const notebookIssues = [];
+  const allImages = [
+    ...findMarkdownImages(rawMarkdown),
+    ...findImgTags(rawMarkdown).map(({ tag: tag2, start, end }) => ({
+      match: tag2,
+      start,
+      end,
+    })),
+  ];
+  for (const {
+    match: imageMatch,
+    start: matchStart,
+    end: matchEnd,
+  } of allImages) {
+    const imageUrl = extractImageUrl(imageMatch);
+    if (imageUrl) {
+      const suggestedFix = "";
+      try {
+        const { contrast, isAccessible, hasLargeText } =
+          await getColorContrastInImage(
+            imageUrl,
+            notebookPath,
+            baseUrl,
+            imageProcessor,
+            attachments,
+          );
+        if (!isAccessible) {
+          if (hasLargeText) {
+            notebookIssues.push({
+              cellIndex,
+              cellType,
+              violationId: "color-insufficient-cc-large",
+              customDescription: `Ensure that large text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required 3:1 ratio for large text.`,
+              issueContentRaw: imageMatch,
+              metadata: {
+                offsetStart: matchStart,
+                offsetEnd: matchEnd,
+              },
+              suggestedFix,
+            });
+          } else {
+            notebookIssues.push({
+              cellIndex,
+              cellType,
+              violationId: "color-insufficient-cc-normal",
+              customDescription: `Ensure that text in an image has sufficient color contrast. The text contrast ratio is ${contrast.toFixed(2)}:1, which is below the required 4.5:1 ratio for normal text.`,
+              issueContentRaw: imageMatch,
+              metadata: {
+                offsetStart: matchStart,
+                offsetEnd: matchEnd,
+              },
+              suggestedFix,
+            });
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to process image ${imageUrl}:`, error);
+      }
+    }
+  }
+  return notebookIssues;
+}
 
 // ../core/src/detection/category/link.ts
 init_cjs_shims();
@@ -80670,6 +80921,19 @@ async function analyzeCellsAccessibilityCLI(cells, imageProcessor) {
       notebookIssues.push(
         ...detectTableIssuesInCell(rawMarkdown, i, cell.type),
       );
+      notebookIssues.push(
+        ...(await detectColorIssuesInCell(
+          rawMarkdown,
+          i,
+          cell.type,
+          "",
+          // notebookPath
+          "",
+          // baseUrl
+          imageProcessor,
+          cell.attachments,
+        )),
+      );
       notebookIssues.push(...detectLinkIssuesInCell(rawMarkdown, i, cell.type));
     }
   }
@@ -80727,7 +80991,7 @@ init_cjs_shims();
 
 // ../../doc/rules.md
 var rules_default =
-  "# Issue Descriptions\n\nBelow are the issues that we detect. On top of this, we run axe-core as well.\n\n## Image\n\n| No. | Rule ID           | Description                                                               | WCAG                 | Severity  |\n| --- | ----------------- | ------------------------------------------------------------------------- | -------------------- | --------- |\n| 1a  | image-missing-alt | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 (Level A) | violation |\n\n---\n\n## Heading\n\n| No. | Rule ID                 | Description                                             | WCAG                 | Severity      |\n| --- | ----------------------- | ------------------------------------------------------- | -------------------- | ------------- |\n| 2a  | heading-missing-h1      | Ensure the presence of H1 tag in a notebook             |                      | best-practice |\n| 2b  | heading-multiple-h1     | Ensure there is only one H1 tag in a notebook           |                      | best-practice |\n| 2c  | heading-duplicate-h2    | Ensure no two H2 headings share the same content        |                      | best-practice |\n| 2d  | heading-duplicate-h1-h2 | Ensure no two H1 and H2 headings share the same content |                      | best-practice |\n| 2e  | heading-wrong-order     | Ensure the order of heading is accurate                 |                      | best-practice |\n| 2f  | heading-empty           | Ensure the heading content is non-empty                 | WCAG 1.3.1 (Level A) | violation     |\n\n---\n\n## Table\n\n| No. | Rule ID               | Description                                               | WCAG                 | Severity      |\n| --- | --------------------- | --------------------------------------------------------- | -------------------- | ------------- |\n| 3a  | table-missing-header  | Ensure row and column headers are present in a table      | WCAG 1.3.1 (Level A) | violation     |\n| 3b  | table-missing-caption | Ensure caption was added for a table                      |                      | best-practice |\n| 3c  | table-missing-scope   | Ensure presence of `scope` attribute for rows and columns |                      | best-practice |\n\n---\n\n## Color\n\n| No. | Rule ID                      | Description                                                                              | WCAG                  | Severity  |\n| --- | ---------------------------- | ---------------------------------------------------------------------------------------- | --------------------- | --------- |\n| 4a  | color-insufficient-cc-normal | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 (Level AA) | violation |\n| 4b  | color-insufficient-cc-large  | Ensure large text in images have a contrast ratio of 3:1                                 | WCAG 1.4.3 (Level AA) | violation |\n\n---\n\n## Link\n\n| No. | Rule ID               | Description                                                    | WCAG                 | Severity  |\n| --- | --------------------- | -------------------------------------------------------------- | -------------------- | --------- |\n| 5a  | link-discernible-text | Ensure link text is descriptive (or aria-label is descriptive) | WCAG 2.4.4 (Level A) | violation |\n\n## List\n\nTBD\n";
+  "# Issue Descriptions\n\nBelow are the issues that we detect. On top of this, we run axe-core as well.\n\n## Image\n\n| No. | Rule ID           | Description                                                               | WCAG                 | Severity  |\n| --- | ----------------- | ------------------------------------------------------------------------- | -------------------- | --------- |\n| 1a  | image-missing-alt | Ensure the presence of alt text in images which are embedded in markdown. | WCAG 1.1.1 (Level A) | violation |\n\n---\n\n## Heading\n\n| No. | Rule ID                 | Description                                             | WCAG                 | Severity      |\n| --- | ----------------------- | ------------------------------------------------------- | -------------------- | ------------- |\n| 2a  | heading-missing-h1      | Ensure the presence of H1 tag in a notebook             |                      | best-practice |\n| 2b  | heading-multiple-h1     | Ensure there is only one H1 tag in a notebook           |                      | best-practice |\n| 2c  | heading-duplicate-h2    | Ensure no two H2 headings share the same content        |                      | best-practice |\n| 2d  | heading-duplicate-h1-h2 | Ensure no two H1 and H2 headings share the same content |                      | best-practice |\n| 2e  | heading-wrong-order     | Ensure the order of heading is accurate                 |                      | best-practice |\n| 2f  | heading-empty           | Ensure the heading content is non-empty                 | WCAG 1.3.1 (Level A) | violation     |\n\n---\n\n## Table\n\n| No. | Rule ID               | Description                                               | WCAG                 | Severity      |\n| --- | --------------------- | --------------------------------------------------------- | -------------------- | ------------- |\n| 3a  | table-missing-header  | Ensure row and column headers are present in a table      | WCAG 1.3.1 (Level A) | violation     |\n| 3b  | table-missing-caption | Ensure caption was added for a table                      |                      | best-practice |\n| 3c  | table-missing-scope   | Ensure presence of `scope` attribute for rows and columns |                      | best-practice |\n\n---\n\n## Color\n\n| No. | Rule ID                      | Description                                                                              | WCAG                  | Severity  |\n| --- | ---------------------------- | ---------------------------------------------------------------------------------------- | --------------------- | --------- |\n| 4a  | color-insufficient-cc-normal | Ensure normal text in images have a contrast ratio of 4.5:1 and text contrast in general | WCAG 1.4.3 (Level AA) | violation |\n| 4b  | color-insufficient-cc-large  | Ensure large text in images have a contrast ratio of 3:1                                 | WCAG 1.4.3 (Level AA) | violation |\n\n> **Accuracy note:** Color contrast detection uses Tesseract.js OCR to extract text regions from raster images and measure foreground/background contrast ratios. This approach may produce inaccurate results \u2014 OCR can misidentify text boundaries, generate false positives on non-text image regions, or miss text rendered at unusual angles or over complex backgrounds. Flagged issues should be verified manually.\n\n---\n\n## Link\n\n| No. | Rule ID               | Description                                                    | WCAG                 | Severity  |\n| --- | --------------------- | -------------------------------------------------------------- | -------------------- | --------- |\n| 5a  | link-discernible-text | Ensure link text is descriptive (or aria-label is descriptive) | WCAG 2.4.4 (Level A) | violation |\n\n## List\n\nNot yet implemented.\n";
 
 // src/ruleDescriptions.ts
 function parseRuleLines(contents) {
@@ -80787,8 +81051,8 @@ var program2 = new Command();
 program2
   .name("jupyterlab-a11y-check")
   .description("CLI to check Jupyter Notebooks for accessibility issues")
-  .version("0.2.5")
-  .option("-llm, --llm-only", "output only the LLM-friendly summary")
+  .version("0.1.4")
+  .option("--json", "output a JSON summary suitable for LLM processing")
   .argument("[files...]", "Paths to the .ipynb files to check")
   .action(async (filePaths, options2) => {
     if (!filePaths || filePaths.length === 0) {
@@ -80844,7 +81108,7 @@ program2
         }
         hasIssues = true;
         const llmReport = buildLLMReport(issues);
-        if (!options2.llmOnly) {
+        if (!options2.json) {
           console.log(
             import_chalk.default.yellow(
               `Found ${issues.length} issues in ${filePath}:`,
@@ -80880,6 +81144,13 @@ ${group.length} ${group.length === 1 ? "violation" : "violations"} found for ${v
                 ),
               );
             }
+            if (violationId.startsWith("color-")) {
+              console.log(
+                import_chalk.default.yellow(
+                  `    \u26A0 Note: This check uses OCR and may produce inaccurate results. Please verify manually.`,
+                ),
+              );
+            }
             group.forEach((issue) => {
               console.log(`  - Cell ${issue.cellIndex} (${issue.cellType}):`);
               if (issue.customDescription) {
@@ -80912,7 +81183,7 @@ ${group.length} ${group.length === 1 ? "violation" : "violations"} found for ${v
     for (const file of filePaths) {
       await processFile(file);
     }
-    if (!options2.llmOnly) {
+    if (!options2.json) {
       if (hasIssues) {
         console.log(
           import_chalk.default.blue(

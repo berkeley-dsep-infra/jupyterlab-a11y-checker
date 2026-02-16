@@ -1,4 +1,5 @@
 import { defineConfig } from "tsup";
+import pkg from "./package.json";
 
 export default defineConfig({
   entry: ["src/index.ts"],
@@ -16,5 +17,9 @@ export default defineConfig({
   },
   loader: {
     ".md": "text",
+  },
+  // Inject the version from package.json at build time
+  define: {
+    __CLI_VERSION__: JSON.stringify(pkg.version),
   },
 });

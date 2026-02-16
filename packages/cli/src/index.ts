@@ -9,15 +9,17 @@ import { buildLLMReport } from "@berkeley-dsep-infra/a11y-checker-core";
 import { getRuleDescription } from "./ruleDescriptions.js";
 import { NodeImageProcessor } from "./image-processor.js";
 
+declare const __CLI_VERSION__: string;
+
 const program = new Command();
 
 program
   .name("jupyterlab-a11y-check")
   .description("CLI to check Jupyter Notebooks for accessibility issues")
-  .version("0.1.4")
-  .option("-llm, --llm-only", "output only the LLM-friendly summary")
+  .version(__CLI_VERSION__)
+  .option("--json", "output a JSON summary suitable for LLM processing")
   .argument("[files...]", "Paths to the .ipynb files to check")
-  .action(async (filePaths: string[], options: { llmOnly?: boolean }) => {
+  .action(async (filePaths: string[], options: { json?: boolean }) => {
     if (!filePaths || filePaths.length === 0) {
       console.log(
         chalk.yellow(
@@ -70,7 +72,7 @@ program
         hasIssues = true;
         const llmReport = buildLLMReport(issues);
 
-        if (!options.llmOnly) {
+        if (!options.json) {
           console.log(
             chalk.yellow(`Found ${issues.length} issues in ${filePath}:`),
           );
@@ -144,7 +146,7 @@ program
       await processFile(file);
     }
 
-    if (!options.llmOnly) {
+    if (!options.json) {
       if (hasIssues) {
         console.log(
           chalk.blue(

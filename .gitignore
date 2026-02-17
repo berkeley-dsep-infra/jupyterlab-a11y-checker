@@ -137,3 +137,4 @@ experimental/jupyterlite/.venv/
 CLAUDE.md
 .claude/
 package-lock.json
+.vercel

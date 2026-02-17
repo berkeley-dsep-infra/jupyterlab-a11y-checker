@@ -27,16 +27,16 @@
         --border-hover: #c9ccd1;
         --text-primary: #000000;
         --text-secondary: #5c5c5c;
-        --text-muted: #8c8c8c;
-        --accent: #f37626;
-        --accent-hover: #d4631c;
-        --accent-light: rgba(243, 118, 38, 0.08);
-        --green: #1e8e3e;
-        --green-bg: rgba(30, 142, 62, 0.10);
-        --red: #d93025;
-        --red-bg: rgba(217, 48, 37, 0.08);
-        --orange: #e37400;
-        --orange-bg: rgba(227, 116, 0, 0.08);
+        --text-muted: #717171;
+        --accent: #b45309;
+        --accent-hover: #9a4a0c;
+        --accent-light: rgba(180, 83, 9, 0.06);
+        --green: #166d31;
+        --green-bg: rgba(22, 109, 49, 0.12);
+        --red: #c62b21;
+        --red-bg: rgba(198, 43, 33, 0.08);
+        --orange: #9a5000;
+        --orange-bg: rgba(154, 80, 0, 0.08);
         --purple: #7c3aed;
         --shadow-sm: 2px 2px 0 0 #000;
         --shadow-md: 3px 3px 0 0 #000;
@@ -260,7 +260,7 @@
       }
 
       .scan-btn.stop:hover {
-        background: #c62828;
+        background: #a81e1e;
       }
 
       /* ─── Checkbox options ─── */
@@ -806,7 +806,7 @@
         display: block;
         font-size: 0.92rem;
         font-weight: 700;
-        color: #15803d;
+        color: #14532d;
         margin-bottom: 0.15rem;
       }
 
@@ -834,7 +834,7 @@
       }
 
       .fix-cta-btn:hover {
-        background: #15803d;
+        background: #14532d;
         transform: translate(-1px, -1px);
         box-shadow: 3px 3px 0 0 #000;
       }
@@ -969,7 +969,7 @@
         display: block;
       }
 
-      .notebook-card h3 {
+      .notebook-card-title {
         font-size: 0.92rem;
         font-weight: 600;
         overflow-wrap: anywhere;
@@ -977,27 +977,27 @@
         flex: 1;
       }
 
-      .notebook-card h3 .path-prefix {
+      .notebook-card-title .path-prefix {
         color: var(--text-muted);
         font-weight: 400;
       }
 
-      .notebook-card h3 .notebook-link {
+      .notebook-card-title .notebook-link {
         color: var(--text-primary);
         text-decoration: none;
         transition: color 0.15s;
       }
 
-      .notebook-card h3 .notebook-link:hover {
+      .notebook-card-title .notebook-link:hover {
         color: var(--accent);
         text-decoration: underline;
       }
 
-      .notebook-card h3 .notebook-link .path-prefix {
+      .notebook-card-title .notebook-link .path-prefix {
         color: var(--text-muted);
       }
 
-      .notebook-card h3 .notebook-link:hover .path-prefix {
+      .notebook-card-title .notebook-link:hover .path-prefix {
         color: var(--accent);
       }
 
@@ -1005,7 +1005,7 @@
         padding: 0.6rem 1rem;
       }
 
-      .notebook-card.compact h3 {
+      .notebook-card.compact .notebook-card-title {
         font-size: 0.85rem;
         margin-bottom: 0;
       }
@@ -1214,12 +1214,24 @@
           gap: 0.75rem;
         }
       }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
     </style>
   </head>
 
   <body>
     <!-- Top bar -->
-    <div class="topbar">
+    <header class="topbar">
       <a class="topbar-brand" href="/"
         ><span style="color: var(--accent)">jupy</span>check</a
       >
@@ -1251,8 +1263,9 @@
           />
         </a>
       </div>
-    </div>
+    </header>
 
+    <main>
     <!-- Hero -->
     <div class="hero">
       <h1>
@@ -1335,7 +1348,9 @@
       <div id="results"></div>
     </div>
 
-    <div class="footer">
+    </main>
+
+    <footer class="footer">
       Inspired by
       <a href="https://gitingest.com" target="_blank" rel="noopener noreferrer"
         >Gitingest</a
@@ -1346,7 +1361,7 @@
         rel="noopener noreferrer"
         >jupyterlab-a11y-checker</a
       >
-    </div>
+    </footer>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

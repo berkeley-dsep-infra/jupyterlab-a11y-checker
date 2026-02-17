@@ -457,18 +457,19 @@ function renderResults(results: NotebookResult[]) {
   const toolbar = document.createElement("div");
   toolbar.className = "results-toolbar";
   toolbar.innerHTML = `
-    <label>Filter:</label>
+    <label for="filterSelect">Filter:</label>
     <select id="filterSelect">
       <option value="with-issues" selected>With issues</option>
       <option value="all">All</option>
       <option value="clean">Clean</option>
       <option value="errors">Errors</option>
     </select>
-    <label>Sort:</label>
+    <label for="sortSelect">Sort:</label>
     <select id="sortSelect">
       <option value="most-issues" selected>Most issues</option>
       <option value="az">A-Z</option>
     </select>
+    <label for="searchInput" class="sr-only">Search notebooks</label>
     <input type="text" id="searchInput" placeholder="Search notebooks..." />
   `;
   detailsSection.appendChild(toolbar);
@@ -681,7 +682,7 @@ function createNotebookCard(
   card.innerHTML = `
     <div class="notebook-card-header">
       ${chevronHtml}
-      <h3>${titleHtml}</h3>
+      <span class="notebook-card-title">${titleHtml}</span>
       <span class="badge ${badgeClass}">${badgeText}</span>
     </div>
     ${hasContent && !compact ? `<div class="notebook-card-body">${issueHtml}</div>` : ""}

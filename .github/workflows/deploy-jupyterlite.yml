@@ -46,7 +46,7 @@ jobs:
           jlpm install
           jlpm build
           cd packages/extension
-          pip install -e .
+          pip install .
 
       - name: Verify extension
         run: |

@@ -44,10 +44,10 @@ if [ "$MODE" = "local" ]; then
     cd "$REPO_ROOT"
     jlpm build
 
-    # Install the extension in editable mode
+    # Install the extension (non-editable so files are copied to sys-prefix)
     echo "Installing extension package..."
     cd "$REPO_ROOT/packages/extension"
-    pip install -e .
+    pip install .
 
 elif [ "$MODE" = "pypi" ]; then
     echo "Installing extension from PyPI..."
@@ -75,7 +75,7 @@ cd "$SCRIPT_DIR"
 rm -rf _output
 
 # Remove source-tree labextension to avoid duplicate discovery by JupyterLite
-# (pip install -e . already registered it in sys-prefix)
+# (pip install . already copied it to sys-prefix)
 rm -rf "$REPO_ROOT/packages/extension/jupyterlab_a11y_checker/labextension"
 
 jupyter lite build \

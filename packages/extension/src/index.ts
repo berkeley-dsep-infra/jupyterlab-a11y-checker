@@ -26,6 +26,11 @@ const extension: JupyterFrontEndPlugin<void> = {
 
     labShell.add(panel, 'right');
 
+    // Expand the a11y sidebar once the app is fully restored
+    app.restored.then(() => {
+      labShell.activateById(panel.id);
+    });
+
     // Update current notebook when active widget changes
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;

@@ -61,8 +61,7 @@ jobs:
         run: |
           jupyter lite build \
             --contents files/ \
-            --output-dir _output \
-            --workspaces workspaces/default.jupyterlab-workspace
+            --output-dir _output
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

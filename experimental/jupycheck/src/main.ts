@@ -466,7 +466,7 @@ function renderResults(results: NotebookResult[]) {
         <div class="fix-cta-text">
           <strong>Ready to fix these issues?</strong>
           <span>Open all notebooks with issues in JupyterLite to apply fixes interactively. AI suggestions are not yet available in JupyterLite.</span>
-          <span class="fix-cta-hint">To fix individual notebooks, click Show Details above.</span>
+          <span class="fix-cta-hint">To fix individual notebooks, click "Show Details" above.</span>
         </div>
         <a class="fix-cta-btn" href="${escapeHtml(fixAllUrl)}" target="_blank" rel="noopener noreferrer">
           Fix all issues
@@ -477,7 +477,7 @@ function renderResults(results: NotebookResult[]) {
         <div class="fix-cta-text">
           <strong>Ready to fix these issues?</strong>
           <span>Try the extension in a JupyterLite environment to apply fixes interactively. Upload your notebooks manually. AI suggestions are not yet available in JupyterLite.</span>
-          <span class="fix-cta-hint">To fix individual notebooks, click Show Details above.</span>
+          <span class="fix-cta-hint">To fix individual notebooks, click "Show Details" above.</span>
         </div>
         <a class="fix-cta-btn" href="${JUPYTERLITE_BASE_URL}" target="_blank" rel="noopener noreferrer">
           Open JupyterLite

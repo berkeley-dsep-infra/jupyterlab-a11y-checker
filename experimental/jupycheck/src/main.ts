@@ -36,6 +36,7 @@ const checkBestPractices = document.getElementById(
 let abortController: AbortController | null = null;
 let isScanning = false;
 let lastResults: NotebookResult[] = [];
+let isPrivateRepo = false;
 
 // ─── WCAG criterion map ─────────────────────────────────────────
 const wcagCriterionMap: Record<string, string> = {
@@ -253,6 +254,21 @@ interface RepoContext {
 
 let currentRepoContext: RepoContext | null = null;
 
+const JUPYTERLITE_BASE_URL =
+  "https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html";
+
+function buildJupyterLiteUrl(paths: string[]): string | null {
+  if (!currentRepoContext || isPrivateRepo || paths.length === 0) return null;
+  const { owner, repo, branch } = currentRepoContext;
+  const params = paths
+    .map(
+      (p) =>
+        `fromURL=${encodeURIComponent(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${p}`)}`,
+    )
+    .join("&");
+  return `${JUPYTERLITE_BASE_URL}?${params}`;
+}
+
 function filterBySeverity(issues: ICellIssue[]): ICellIssue[] {
   if (checkBestPractices.checked) return issues;
   return issues.filter((issue) => {
@@ -437,17 +453,35 @@ function renderResults(results: NotebookResult[]) {
 
   // ── Fix CTA banner (shown only when issues exist) ──
   if (totalIssues > 0) {
+    const notebooksWithIssues = filteredResults
+      .filter((r) => r.issues.length > 0)
+      .map((r) => r.path);
+    const fixAllUrl = buildJupyterLiteUrl(notebooksWithIssues);
+
     const ctaDiv = document.createElement("div");
     ctaDiv.className = "fix-cta";
-    ctaDiv.innerHTML = `
-      <div class="fix-cta-text">
-        <strong>Ready to fix these issues?</strong>
-        <span>Try the extension in a JupyterLite environment to apply fixes interactively. AI suggestions are not yet available in JupyterLite.</span>
-      </div>
-      <a class="fix-cta-btn" href="https://berkeley-dsep-infra.github.io/jupyterlab-a11y-checker/lab/index.html" target="_blank" rel="noopener noreferrer">
-        Fix issues
-      </a>
-    `;
+
+    if (fixAllUrl) {
+      ctaDiv.innerHTML = `
+        <div class="fix-cta-text">
+          <strong>Ready to fix these issues?</strong>
+          <span>Open all notebooks with issues in JupyterLite to apply fixes interactively. AI suggestions are not yet available in JupyterLite.</span>
+        </div>
+        <a class="fix-cta-btn" href="${escapeHtml(fixAllUrl)}" target="_blank" rel="noopener noreferrer">
+          Fix all issues
+        </a>
+      `;
+    } else {
+      ctaDiv.innerHTML = `
+        <div class="fix-cta-text">
+          <strong>Ready to fix these issues?</strong>
+          <span>Try the extension in a JupyterLite environment to apply fixes interactively. Upload your notebooks manually. AI suggestions are not yet available in JupyterLite.</span>
+        </div>
+        <a class="fix-cta-btn" href="${JUPYTERLITE_BASE_URL}" target="_blank" rel="noopener noreferrer">
+          Open JupyterLite
+        </a>
+      `;
+    }
     resultsEl.appendChild(ctaDiv);
   }
 
@@ -688,10 +722,17 @@ function createNotebookCard(
       ? `<span class="notebook-card-chevron">\u25B6</span>`
       : "";
 
+  const fixUrl = hasIssues ? buildJupyterLiteUrl([result.path]) : null;
+  const fixBtnHtml =
+    fixUrl && !compact
+      ? `<a class="notebook-card-fix" href="${escapeHtml(fixUrl)}" target="_blank" rel="noopener noreferrer" title="Fix in JupyterLite">Fix</a>`
+      : "";
+
   card.innerHTML = `
     <div class="notebook-card-header">
       ${chevronHtml}
       <span class="notebook-card-title">${titleHtml}</span>
+      ${fixBtnHtml}
       <span class="badge ${badgeClass}">${badgeText}</span>
     </div>
     ${hasContent && !compact ? `<div class="notebook-card-body">${issueHtml}</div>` : ""}
@@ -704,8 +745,11 @@ function createNotebookCard(
     const body = card.querySelector(".notebook-card-body")!;
 
     header.addEventListener("click", (e) => {
-      // Don't toggle when clicking the notebook link
-      if ((e.target as HTMLElement).closest(".notebook-link")) return;
+      // Don't toggle when clicking the notebook link or fix button
+      if (
+        (e.target as HTMLElement).closest(".notebook-link, .notebook-card-fix")
+      )
+        return;
       chevron.classList.toggle("open");
       body.classList.toggle("open");
     });
@@ -1027,6 +1071,7 @@ async function scanRepo() {
 
   const { owner, repo } = parsed;
   const token = tokenInput.value.trim() || undefined;
+  isPrivateRepo = checkPrivate.checked;
 
   enterScanMode();
   const signal = abortController!.signal;
@@ -1098,6 +1143,7 @@ async function handleFiles(files: FileList | File[]) {
     return;
   }
 
+  isPrivateRepo = false;
   enterScanMode();
   const signal = abortController!.signal;
   showProgress(true);

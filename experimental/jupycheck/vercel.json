@@ -3,5 +3,11 @@
   "installCommand": "npm install && ln -sf $PWD/node_modules ../../node_modules",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../../packages/core"
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../../packages/core",
+  "rewrites": [
+    {
+      "source": "/api/marketplace-badge",
+      "destination": "https://marketplace.orbrx.io/api/badge/jupyterlab-a11y-checker?metric=downloads"
+    }
+  ]
 }

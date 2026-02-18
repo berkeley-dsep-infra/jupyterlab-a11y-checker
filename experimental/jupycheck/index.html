@@ -101,26 +101,36 @@
         gap: 0.5rem;
       }
 
-      .star-cta {
-        font-size: 0.72rem;
-        color: #be185d;
-        font-weight: 500;
-        padding: 0.25rem 0.6rem;
-        border: 1.5px solid #be185d;
-        border-radius: 20px;
-        background: rgba(190, 24, 93, 0.06);
-        white-space: nowrap;
-        letter-spacing: 0.01em;
-      }
-
-      .marketplace-badge {
+      .marketplace-link {
         display: flex;
         align-items: center;
+        gap: 0.35rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 0.35rem 0.7rem;
+        border-radius: 8px;
+        border: 2px solid var(--text-primary);
+        box-shadow: 2px 2px 0 0 #000;
+        transition: all 0.1s;
       }
 
-      .marketplace-badge img {
-        display: block;
-        border-radius: 4px;
+      .marketplace-link:hover {
+        background: var(--accent-light);
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 0 #000;
+      }
+
+      .download-count {
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .download-count:empty {
+        display: none;
       }
 
       .github-link {
@@ -1281,16 +1291,18 @@
           <span class="star-count" id="starCount"></span>
         </a>
         <a
-          class="marketplace-badge"
+          class="marketplace-link"
           href="https://marketplace.orbrx.io/extensions/jupyterlab-a11y-checker"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img
-            src="https://marketplace.orbrx.io/api/badge/jupyterlab-a11y-checker?metric=downloads&leftColor=%23555&rightColor=%23F37620&style=flat"
-            alt="Marketplace downloads"
-            height="20"
-          />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Downloads
+          <span class="download-count" id="downloadCount"></span>
         </a>
       </div>
     </header>

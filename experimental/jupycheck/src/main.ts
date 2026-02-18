@@ -1265,3 +1265,17 @@ document.querySelectorAll(".example-link").forEach((link) => {
     }
   } catch {}
 })();
+
+(async () => {
+  try {
+    const res = await fetch("/api/marketplace-badge");
+    if (res.ok) {
+      const svg = await res.text();
+      const match = svg.match(/aria-label="downloads:\s*([^"]+)"/);
+      if (match) {
+        const el = document.getElementById("downloadCount");
+        if (el) el.textContent = match[1].trim();
+      }
+    }
+  } catch {}
+})();

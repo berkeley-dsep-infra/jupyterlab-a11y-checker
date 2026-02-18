@@ -4,6 +4,14 @@ import path from "path";
 export default defineConfig({
   server: {
     port: 3002,
+    proxy: {
+      "/api/marketplace-badge": {
+        target:
+          "https://marketplace.orbrx.io/api/badge/jupyterlab-a11y-checker?metric=downloads",
+        changeOrigin: true,
+        rewrite: () => "",
+      },
+    },
   },
   resolve: {
     alias: {

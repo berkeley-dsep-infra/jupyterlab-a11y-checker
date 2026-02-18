@@ -4,6 +4,7 @@
   "jupyter-config-data": {
     "appName": "JupyterLab A11y Checker Demo",
     "contentsStorageName": "a11y-checker-contents-v2",
+    "enableMemoryStorage": true,
     "contentsStorageDrivers": ["memoryStorageDriver"],
     "disabledExtensions": [],
     "settingsOverrides": {

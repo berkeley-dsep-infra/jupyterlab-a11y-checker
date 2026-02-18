@@ -156,11 +156,20 @@ async function fetchNotebookContent(
   token?: string,
   signal?: AbortSignal,
 ): Promise<any> {
-  const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `token ${token}`;
+  if (token) {
+    // Use GitHub Contents API for authenticated requests (raw.githubusercontent.com rejects CORS preflight with auth headers)
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+    const res = await fetch(apiUrl, {
+      headers: githubHeaders(token),
+      signal,
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${path} (${res.status})`);
+    const data = await res.json();
+    return JSON.parse(atob(data.content));
+  }
 
-  const res = await fetch(rawUrl, { headers, signal });
+  const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
+  const res = await fetch(rawUrl, { signal });
   if (!res.ok) throw new Error(`Failed to fetch ${path} (${res.status})`);
   return await res.json();
 }

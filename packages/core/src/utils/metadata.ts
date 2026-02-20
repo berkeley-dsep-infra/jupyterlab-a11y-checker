@@ -159,11 +159,11 @@ export const issueToDescription = new Map<string, IIssueInformation>([
   [
     "color-insufficient-cc-normal",
     {
-      title: "Insufficient Color Contrast",
+      title: "Insufficient Color Contrast (Normal Text)",
       description:
-        "Ensure that a text in an image has sufficient color contrast.",
+        "Ensure that normal text in an image has sufficient color contrast.",
       detailedDescription:
-        "Note: This check uses OCR to detect text in images and may produce inaccurate results for complex backgrounds, angled text, or non-standard fonts. Please verify manually. Text must have sufficient contrast with its background to be readable. For normal text, the contrast ratio should be at least 4.5:1. This ensures that users with visual impairments can read the content",
+        "Text must have sufficient contrast with its background to be readable. For normal text, the contrast ratio should be at least 4.5:1. This ensures that users with visual impairments can read the content.",
       descriptionUrl:
         "https://dequeuniversity.com/rules/axe/3.5/color-contrast",
       severity: "violation",
@@ -172,11 +172,11 @@ export const issueToDescription = new Map<string, IIssueInformation>([
   [
     "color-insufficient-cc-large",
     {
-      title: "Insufficient Color Contrast",
+      title: "Insufficient Color Contrast (Large Text)",
       description:
-        "Ensure that a large text in an image has sufficient color contrast.",
+        "Ensure that large text in an image has sufficient color contrast.",
       detailedDescription:
-        "Note: This check uses OCR to detect text in images and may produce inaccurate results for complex backgrounds, angled text, or non-standard fonts. Please verify manually. Large text must have sufficient contrast with its background to be readable. For large text (18pt or 14pt bold), the contrast ratio should be at least 3:1. This ensures that users with visual impairments can read the content",
+        "Large text must have sufficient contrast with its background to be readable. For large text (18pt or 14pt bold), the contrast ratio should be at least 3:1. This ensures that users with visual impairments can read the content.",
       descriptionUrl:
         "https://dequeuniversity.com/rules/axe/3.5/color-contrast",
       severity: "violation",

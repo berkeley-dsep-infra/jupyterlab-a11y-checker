@@ -1,6 +1,10 @@
 import Tesseract from "tesseract.js";
 import { ICellIssue, IImageProcessor, IGeneralCell } from "../../types.js";
-import { findImgTags, extractImageUrl } from "../../utils/image-utils.js";
+import {
+  findImgTags,
+  findMarkdownImages,
+  extractImageUrl,
+} from "../../utils/image-utils.js";
 
 async function getTextInImage(
   imagePath: string,
@@ -77,15 +81,17 @@ export async function detectImageIssuesInCell(
   const missingAlt: Array<{ matchStr: string; start: number; end: number }> =
     [];
 
-  // 1. Markdown images without alt text: ![](...) — safe regex (single quantifier)
-  const mdSyntaxMissingAltRegex = /!\[\]\([^)]+\)/g;
-  let mdMatch: RegExpExecArray | null;
-  while ((mdMatch = mdSyntaxMissingAltRegex.exec(rawMarkdown)) !== null) {
-    missingAlt.push({
-      matchStr: mdMatch[0],
-      start: mdMatch.index,
-      end: mdMatch.index + mdMatch[0].length,
-    });
+  // 1. Markdown images without alt text: ![](...) — indexOf-based (ReDoS-safe)
+  for (const img of findMarkdownImages(rawMarkdown)) {
+    // Filter for empty alt text: match is ![](url), alt is between "![" and "]("
+    const altText = img.match.slice(2, img.match.indexOf("]("));
+    if (altText.trim() === "") {
+      missingAlt.push({
+        matchStr: img.match,
+        start: img.start,
+        end: img.end,
+      });
+    }
   }
 
   // 2. HTML <img> tags: use indexOf scanning instead of dangerous regexes

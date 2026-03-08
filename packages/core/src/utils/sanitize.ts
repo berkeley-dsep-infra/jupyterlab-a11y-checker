@@ -10,12 +10,36 @@ export function stripHtmlTags(input: string): string {
   let prev = input;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const next = prev.replace(/<[^>]*>/g, "");
+    const next = stripTagsOnce(prev);
     if (next === prev) {
       return next;
     }
     prev = next;
   }
+}
+
+/**
+ * Single-pass indexOf-based tag removal. Safe against ReDoS.
+ */
+function stripTagsOnce(str: string): string {
+  let result = "";
+  let searchFrom = 0;
+  while (searchFrom < str.length) {
+    const openIdx = str.indexOf("<", searchFrom);
+    if (openIdx === -1) {
+      result += str.slice(searchFrom);
+      break;
+    }
+    result += str.slice(searchFrom, openIdx);
+    const closeIdx = str.indexOf(">", openIdx + 1);
+    if (closeIdx === -1) {
+      // No closing '>' — keep the rest as-is
+      result += str.slice(openIdx);
+      break;
+    }
+    searchFrom = closeIdx + 1;
+  }
+  return result;
 }
 
 /**
